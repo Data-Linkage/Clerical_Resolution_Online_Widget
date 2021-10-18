@@ -1,7 +1,7 @@
 ![Picture1](https://user-images.githubusercontent.com/92172466/137725825-73024b39-a64d-4496-8c42-256d323831d6.png)
 
 # CROW: Clerical Resolution Online Widget
-This repository contains CROW, the Clerical Resolution Online Widget, an open-source project designed to help data linkers with their clerical matching needs once they have linked data together!
+This repository contains the CROW, the Clerical Resolution Online Widget, an open-source project designed to help data linkers with their clerical matching needs once they have linked data together!
 
 The CROW reads record pair data from a CSV file, presents it in an easy to read and compare format and has tools that can help the clerical matcher with decisions. 
 
