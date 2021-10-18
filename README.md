@@ -13,7 +13,8 @@ The aims of the CROW are to:
 * Be easy to use both for the clerical matcher when reviewing record pairs and the clerical coordinator setting up the project. 
 * Be open and transparent, so the community can use the software without restrictions. 
 
-<img width="1000" alt="mainWindow" src="https://user-images.githubusercontent.com/92172466/137741759-7c18515d-06c6-4ac5-8d7c-198544b0b9b7.PNG">
+![mainWindow3](https://user-images.githubusercontent.com/92172466/137745866-7445c4f5-2fc2-44c9-b628-a805d69f27ad.PNG)
+The above image contains FAKE data.
 
 ## Installation and Use
 The CROW is a piece of software that runs in Python, it uses Pandas to read and update the record pair data and it uses tkinter to display and let users interact with the record pair data. 
