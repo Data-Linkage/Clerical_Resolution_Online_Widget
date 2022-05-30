@@ -1,0 +1,3 @@
+# The data included in this folder is fake
+
+The `tv_characters.csv` dataset is laid out in the format needed by the cluster version of CROW, whereas the `clerical_example_data.csv` dataset is laid out in the format used by the pairwise linkage version of CROW. 
