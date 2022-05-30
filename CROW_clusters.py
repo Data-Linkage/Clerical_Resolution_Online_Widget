@@ -534,6 +534,9 @@ class ClericalApp:
         #get the number of decisions made in current cluster        
         num_decisions= self.current_num_cluster_decisions()
         
+        if self.cluster_index > (self.num_clusters-1):
+            self.matchdone.destroy()
+        
         #update cluster_index IF there are no descisions in current cluster
         if num_decisions ==0: 
             self.cluster_index-=1
