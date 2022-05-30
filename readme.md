@@ -16,10 +16,19 @@ The CROW is a piece of software that runs in Python, it uses Pandas to read and 
 
 There are two versions of CROW hosted in this repository - `CROW_clusters.py` and `CROW_pairwise.py`. These are versions suited to clustered and pairwise linkage outputs, please pick the version best suited to your linkage outputs.
 
-To install and use the CROW simply pull this repository into your current working environment, adapt the sections in the [config file](http://gitlab-01-01/Data_Linkage/Clerical_Resolution_Online_Widget/tree/master/Instructions), test that the [CROW_master.py](http://gitlab-01-01/Data_Linkage/Clerical_Resolution_Online_Widget/blob/master/CROW_master.py) works by running it in a Python IDE of your choice, then you are all set. 
+### Pairwise 
+To install and use the pairwise version simply pull this repository into your current working environment, adapt the sections in the [config pairwise](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/Config_pairwise.ini), test that the [CROW_pairwise.py](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/CROW_pairwise.py) works by running it in a Python IDE of your choice, then you are all set. 
+
+### Clusters
+To install and use the cluster version, simply pull this repository into your current working environment, adapt the sections in the [config clusters](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/Config_pairwise.ini), test that the [CROW_clusters.py](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/CROW_clusters.py) works by running it in a Python IDE of your choice, then you are all set. 
+
 
 ## Documentation
-The most up to date documentation can be found in the [instructions folder](http://gitlab-01-01/Data_Linkage/Clerical_Resolution_Online_Widget/tree/master/Instructions). Here you will be able to find instructions for setting the CROW up for your project and instructions you can give to your clerical matchers on how to run the CROW once it is set up. 
+### Pairwise
+The most up to date documentation can be found in the [instructions folder](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/tree/main/Instructions). Here you will be able to find instructions for setting the CROW up for your project and instructions you can give to your clerical matchers on how to run the CROW once it is set up. 
+
+### Clusters
+N.B. at this stage documentation is still to be added. 
 
 ## Videos 
 TBC 
