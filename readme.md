@@ -28,7 +28,7 @@ To install and use the cluster version, simply pull this repository into your cu
 The most up to date documentation can be found in the [instructions folder](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/tree/main/Instructions). Here you will be able to find instructions for setting the CROW up for your project and instructions you can give to your clerical matchers on how to run the CROW once it is set up. 
 
 ### Clusters
-N.B. at this stage documentation is still to be added. 
+Documentation TBC
 
 ## Videos 
 TBC 
