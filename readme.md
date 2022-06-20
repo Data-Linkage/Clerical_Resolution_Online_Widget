@@ -20,7 +20,7 @@ There are two versions of CROW hosted in this repository - `CROW_clusters.py` an
 To install and use the pairwise version simply pull this repository into your current working environment, adapt the sections in the [config pairwise](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/Config_pairwise.ini), test that the [CROW_pairwise.py](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/CROW_pairwise.py) works by running it in a Python IDE of your choice, then you are all set. 
 
 ### Clusters
-To install and use the cluster version, simply pull this repository into your current working environment, adapt the sections in the [config clusters](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/Config_pairwise.ini), test that the [CROW_clusters.py](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/CROW_clusters.py) works by running it in a Python IDE of your choice, then you are all set. 
+To install and use the cluster version, simply pull this repository into your current working environment, adapt the sections in the [config clusters](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/Config_clusters.ini), test that the [CROW_clusters.py](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/CROW_clusters.py) works by running it in a Python IDE of your choice, then you are all set. 
 
 
 ## Documentation
