@@ -21,7 +21,7 @@ Please get in contact using the below details if you have any questions:
 
 Hannah O'Dair -- Hannah.O'Dair@ons.gov.uk -- Co-Lead Developer
 
-Anthony G Edwards -- Anthony.G.Edwards@ons.gov.uk -- Co-Lead Developed
+Anthony G Edwards -- Anthony.G.Edwards@ons.gov.uk -- Co-Lead Developer
 
 Craig Scott -- Craig.Scott@ons.gov.uk -- Creator 
 You can also contact the linkage hub at: 
@@ -58,7 +58,7 @@ class IntroWindow:
         self.files_info = files_info 
         
         # initialise the frame 
-        self.content = ttk.Frame(root)
+        self.content = ttk.Frame(root) 
         self.frame = ttk.Frame(self.content, borderwidth=5, relief='ridge', width=500, height=300)
         self.content.grid(column=0, row=0)
         self.frame.grid(column=0, row=0, columnspan=5, rowspan=5)
@@ -92,7 +92,7 @@ class ClericalApp:
     ClericalApp class function - opens a window and allows users to clerically review records. 
     
     '''    
-
+                            
     def __init__(self, root, working_file, filename_done, filename_old, config): 
 
         
@@ -101,12 +101,17 @@ class ClericalApp:
         
         # Create the separate frames 
         # 1 - Tool Frame 
-        toolFrame = ttk.LabelFrame(root, text='Tools:')
-        toolFrame.grid(row=0, column=0, columnspan=1, sticky = 'ew', padx=10, pady=10)
+        self.toolFrame = ttk.LabelFrame(root, text='Tools:')
+        self.toolFrame.grid(row=0, column=0, columnspan=1, sticky = 'ew', padx=10, pady=10)
         
         # 2 - Record Frame
-        recordFrame = ttk.LabelFrame(root, text='Current Record')
-        recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+        self.recordFrame = ttk.LabelFrame(root, text='Current Record')
+        self.recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+ 
+        # 2 - Record Frame
+        self.buttonFrame = ttk.LabelFrame(root)
+        self.buttonFrame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
+        
         
         # initalise the file name variables
         self.filename_done = filename_done
@@ -118,55 +123,36 @@ class ClericalApp:
         # create protocol for if user presses the 'X' (top right) 
         root.protocol("WM_DELETE_WINDOW", self.on_exit)
     
-        # create a match column if one doesn't exist
-        # replace any missing values (NA) with blank spaces
+        # if match column exists in clerical file
         if {'Match'}.issubset(working_file.columns):
             
-            # convert all columns apart from Match and Comments (if specified) to string
-            for col_header in working_file.columns:
-                
-                if (col_header == 'Match') or (col_header == 'Comments'):
-                    pass
-                else:
-                    # convert to string
-                    working_file[col_header] = working_file[col_header].astype(str)
-                    # remove nan values 
-                    for i in range(len(working_file)):
-                        
-                        if working_file[col_header][i] == 'nan':
-                            
-                            working_file.at[i,col_header] = ''
-                        
-                    
-            working_file.fillna('', inplace=True)
-            
-            # variable indicates whether user has returned to this file or not
+            # variable indicates whether user has returned to this file (1) or not (0)
             self.matching_previously_began = 1
+        
         else:
-            working_file['Match'] = ''            
-            # Create the comment box column if column header is specified
-            if int(config['custom_settings']['commentbox']):
-                working_file['Comments'] = ''
-
-            # convert all columns apart from Match and Comments (if specified) to string
-            for col_header in working_file.columns:
-                
-                if (col_header == 'Match') or (col_header == 'Comments'):
-                    pass
-                else:
-                    # convert to string
-                    working_file[col_header] = working_file[col_header].astype(str)
-                    # remove nan values 
-                    for i in range(len(working_file)):
-                        
-                        if working_file[col_header][i] == 'nan':
-                            
-                            working_file.at[i,col_header] = ''          
             
-            working_file.fillna('', inplace=True)
+            # create a match column and fill with blanks
+            working_file['Match'] = ''    
             
             self.matching_previously_began = 0
-        
+            
+        # convert all columns apart from Match and Comments (if specified) to string
+        for col_header in working_file.columns:
+            
+            if (col_header == 'Match') or (col_header == 'Comments'):
+                pass
+            else:
+                # convert to string
+                working_file[col_header] = working_file[col_header].astype(str)
+                # remove nan values 
+                for i in range(len(working_file)):
+                    
+                    if working_file[col_header][i] == 'nan':
+                        
+                        working_file.at[i,col_header] = ''
+                        
+        working_file.fillna('', inplace=True)
+                
         # count how many records are in the CM file
         self.num_records = len(working_file)
         
@@ -199,27 +185,25 @@ class ClericalApp:
         self.text_bold_boolean = 0
         self.text_bold = ''
         
-        # show or hide differences boolean
-        #self.show_hide_diff = 0
-       # self.difference_col_label_names = {}
-
-        # Create the record_index matches
-        try:
-            self.counter_matches = ttk.Label(recordFrame, text=f'{self.cluster_index+1} / {self.num_clusters} Clusters', font='Helvetica 9')
-            self.counter_matches.grid(row=0, column=len(config.options('column_headers_and_order')), columnspan=1, padx=10, sticky="e") 
-
-        except: 
-            
-            TypeError
-            messagebox.showinfo(title = "Matching completed", message = "Please select a different file to clerically match")
-            
-            # close down the application
-            root.destroy()
+        self.s = ttk.Style()
+        self.s.configure('.', font= ('Helvetica', f'{self.text_size}'))
         
+        # SHOW/HIDE DIFFERENCES CLASS VARAIBLES
+        #toggle on and off
+        self.show_hide_diff = 0
+        #a container to hold the names of all their tags
+        self.tags_container = {}
+        #a dicstionary containing column headers as keys and corresponding items of the first row as values
+        self.comparison_values={}
+        #A list of all the columns that need comparing. 
+        self.columns_to_compare=[]
+       
         # Create empty lists of labels 
         self.non_iterated_labels = []
         self.iterated_labels = []
-               
+        
+        #create an empty list which will contain the name of all the checkbutton variables as a string
+        self.check_to_append = []
         # ---------------------
         # Create dataset name widgets and separators between records
         row_adder = 0
@@ -227,101 +211,10 @@ class ClericalApp:
     
         # ---------------------
   
-        # Create column header labels and place all them on row 1, column n+2 (where n == the enumerate of the list)
-        for n, column_title in enumerate(config.options('column_headers_and_order')):
-            
-            # Remove spaces from the user input and split them into different components
+        self.draw_recordframe(config, working_file)
+        self.draw_buttonFrame()
+        self.draw_toolFrame()   
 
-            col_header = config['column_headers_and_order'][column_title].replace(' ','').split(',')
-            
-            exec(f'self.{column_title} = ttk.Label(recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
-
-            exec(f'self.{column_title}.grid(row=1,column=n+1,columnspan=1, sticky = W, padx=10, pady=3)')
-            
-            # Add the executed self.labels for the column headers to the non_iterated_labels list
-            self.non_iterated_labels.append(column_title)
-            
-        # ---------------------
-        #create an empty list which will contain the name of all the checkbutton variables as a string
-        self.check_to_append = []
-
-        #iterate over column info and order. 
-        for n, columnfile_title in enumerate(config.options('columnfile_info_and_order')):
-            for v, display_i in enumerate(self.display_indexes):
-            
-                col_header = config['columnfile_info_and_order'][columnfile_title].replace(' ','').split(',')
-            
-                # create a text label
-                exec(f'self.{col_header[0]}row{v} = Text(recordFrame,height=1,relief="flat",bg="gray93")')
-                
-                # Enter in the text from the df
-                exec(f'self.{col_header[0]}row{v}.insert("1.0",working_file["{col_header[0]}"][{display_i}])')
-                
-                # configure Text so that it is a specified width, font and cant be interacted with
-                exec(f'self.{col_header[0]}row{v}.config(width=len(working_file["{col_header[0]}"][{display_i}])+10,font=f"Helvetica {self.text_size}",state=DISABLED)')
-                
-                #grid the text label to the widget. 
-                exec(f'self.{col_header[0]}row{v}.grid(row={v+2}, column={n+1},columnspan=1,padx=10, pady=3,sticky="w")')
-                
-                #create a checkbutton and append it to the list of checkbutton variables. 
-                exec(f'self.check_{v}= IntVar()')
-                exec(f'self.checkbutton{v}=Checkbutton(recordFrame,variable=self.check_{v})')
-                exec(f'self.checkbutton{v}.deselect()')
-                exec(f'self.checkbutton{v}.grid(row=v+2, column=0)')
-                self.check_to_append.append(f'self.check_{v}')
-      
-                
-        # Match/Non-Match buttons
-
-        self.match_button = ttk.Button(recordFrame, text='Match', command=lambda: self.update_index(1))
-        self.match_button.grid(row=self.len_current_cluster, column=1, columnspan=1, padx=10, pady=10)
-        self.non_match_button = ttk.Button(recordFrame, text='No more matches', command=lambda: self.update_index(0))
-        self.non_match_button.grid(row=self.len_current_cluster, column=2, columnspan=1, padx=10, pady=10)
-        self.back_button=ttk.Button(recordFrame, text='Back', command= lambda: self.go_back())
-        self.back_button.grid(row=self.len_current_cluster, column=3, columnspan=1, padx=10, pady=10)
-        #self.clear_matches=ttk.Button(recordFrame, text= 'Clear Matches', command=lambda: self.clear_current_cluster())
-        #self.clear_matches.grid(row=self.len_current_cluster, column=4, columnspan=1, padx=10, pady=10)
-        
-
-        if self.cluster_index==0 and self.current_num_cluster_decisions()==0: 
-            self.back_button.config(state= DISABLED)
-        
-        
-        # Add in the comment widget based on config option
-        if int(config['custom_settings']['commentbox']):
-            
-            # Get the position info from button 1
-            info_button = self.match_button.grid_info()
-            
-            self.comment_label = ttk.Label(recordFrame,text='Comment:', font='Helvetica 10 bold')
-            self.comment_label.grid(row = info_button['row']+1, column =0, columnspan=1, sticky='e')
-            
-            self.comment_entry = ttk.Entry(recordFrame)
-            self.comment_entry.grid(row = info_button['row']+1, column =1, columnspan=3, sticky='sew', padx=5, pady=5)
-            for row in self.display_indexes: 
-                self.comment_entry.insert(0, working_file['Comments'][row])
-        
-        # =====  toolFrame         
-        
-        # Create labels for tools bar
-        self.separator_tf_1 = ttk.Separator(toolFrame, orient='vertical')
-        self.separator_tf_1.grid(row=0, column=3, rowspan=1, sticky='ns', padx=10, pady=5)
-        self.separator_tf_2 = ttk.Separator(toolFrame, orient='vertical') 
-        self.separator_tf_2.grid(row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
-        
-  
-        self.text_smaller_button = Button(toolFrame, text='🗚-', height=1, width=3, command=lambda: self.change_text_size(0))
-        self.text_smaller_button.grid(row=0, column=4, sticky='e', pady=5)
-        self.text_bigger_button = Button(toolFrame, text='🗚+', height=1, width=3, command=lambda: self.change_text_size(1))
-        self.text_bigger_button.grid(row=0, column=5, sticky='w', pady=5, padx=2)  
-        # Make text bld button
-        self.bold_button = Button(toolFrame,text='B', font='Helvetica 9 bold', height=1, width=3, command=lambda:self.make_text_bold())
-        self.bold_button.grid(row=0, column=6, sticky='w', pady=5)
-        # Save and close button
-        self.save_button = ttk.Button(toolFrame, text='Save and Close 🖫', command=lambda: self.save_and_close())
-        self.save_button.grid(row=0, column=8, columnspan=1, sticky='e', padx=5, pady=5)
-        
-   
     def get_starting_cluster_id(self):
          """
         A function that generates the cluster id number of the first cluster that does not have an answer in the match field. 
@@ -337,10 +230,139 @@ class ClericalApp:
              else:
                  pass
     
-    def update_gui(self):
+    def draw_buttonFrame(self):
+        # =====  buttonFrame - for match/non-match/back buttons        
+
+        self.match_button = Button(self.buttonFrame, text='Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(1))
+        self.match_button.grid(row=self.len_current_cluster, column=1, columnspan=1, padx=10, pady=10)
+        self.non_match_button = Button(self.buttonFrame, text='No more matches', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(0))
+        self.non_match_button.grid(row=self.len_current_cluster, column=2, columnspan=1, padx=10, pady=10)
+        self.back_button=Button(self.buttonFrame, text='Back', font=f'Helvetica {self.text_size}', command= lambda: self.go_back())
+        self.back_button.grid(row=self.len_current_cluster, column=3, columnspan=1, padx=10, pady=10)   
+
+        # disable back button if no previous clusters exist
+        if self.cluster_index==0 and self.current_num_cluster_decisions()==0: 
+            self.back_button.config(state= DISABLED)
+        
+        # Add in the comment widget based on config option
+        if int(config['custom_settings']['commentbox']):
+            
+            # create comments column if one doesn't exist
+            if 'Comments' not in working_file:
+                working_file['Comments'] = ''
+
+            # Get the position info from button 1
+            info_button = self.match_button.grid_info()
+            
+            self.comment_label = ttk.Label(self.buttonFrame,text='Comment:', font=f'Helvetica {self.text_size} bold')
+            self.comment_label.grid(row = info_button['row']+1, column =0, columnspan=1, sticky='e')
+            
+            self.comment_entry = ttk.Combobox(self.buttonFrame)
+            self.comment_entry.grid(row = info_button['row']+1, column =1, columnspan=3, sticky='sew', padx=5, pady=5)
+            
+            if (config['custom_settings']['comment_values']) is not None:
+                self.comment_entry['values'] = (config['custom_settings']['comment_values']).split(",")
+
+                
+    def draw_toolFrame(self):
+        # =====  toolFrame         
+        
+        # Create labels for tools bar
+        self.separator_tf_1 = ttk.Separator(self.toolFrame, orient='vertical')
+        self.separator_tf_1.grid(row=0, column=3, rowspan=1, sticky='ns', padx=10, pady=5)
+        self.separator_tf_2 = ttk.Separator(self.toolFrame, orient='vertical') 
+        self.separator_tf_2.grid(row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
+
+        self.text_smaller_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='ᴀA-', height=1, width=3, command=lambda: self.change_text_size(0))
+        self.text_smaller_button.grid(row=0, column=4, sticky='e', pady=5)
+        self.text_bigger_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='ᴀA+', height=1, width=3, command=lambda: self.change_text_size(1))
+        self.text_bigger_button.grid(row=0, column=5, sticky='w', pady=5, padx=2)  
+        
+        # Make text bld button
+        self.bold_button = Button(self.toolFrame,text='B', font=f'Helvetica {self.text_size} bold', height=1, width=3, command=lambda:self.make_text_bold(config, working_file))
+        self.bold_button.grid(row=0, column=6, sticky='w', pady=5)
+        
+        # Save and close button
+        self.save_button = Button(self.toolFrame, text='Save and Close 🖫', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
+        self.save_button.grid(row=0, column=8, columnspan=1, sticky='e', padx=5, pady=5)
+        
+        # highlighter
+        self.highlighter_button= Checkbutton(self.toolFrame, indicatoron = 0, selectcolor = "white", text= 'show/hide differences', font=f'Helvetica {self.text_size}', command= lambda: self.show_hide_differences(self.show_hide_diff))
+        self.highlighter_button.grid(row=0, column=9, columnspan=1,sticky='e', padx=5, pady=5)
+
+    def draw_recordframe(self, config, working_file):
+
+        # try to calculate and display remaining # clusters for matching
+        try:
+            self.counter_matches = ttk.Label(self.recordFrame, text=f'{self.cluster_index+1} / {self.num_clusters} Clusters', font=f'Helvetica {self.text_size}')
+            self.counter_matches.grid(row=0, column=len(config.options('column_headers_and_order')), columnspan=1, padx=10, sticky="e") 
+
+        # except when matching is completed
+        except TypeError: 
+            
+            messagebox.showinfo(title = "Matching completed", message = "Please select a different file to clerically match")
+            
+            # close down the application
+            root.destroy()
+            
+        # Create column header labels and place all them on row 1, column n+2 (where n == the enumerate of the list)
+        for n, column_title in enumerate(config.options('column_headers_and_order')):
+            
+            # Remove spaces from the user input and split them into different components
+    
+            col_header = config['column_headers_and_order'][column_title].replace(' ','').split(',')
+            
+            exec(f'self.{column_title} = ttk.Label(self.recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
+    
+            exec(f'self.{column_title}.grid(row=1,column=n+1,columnspan=1, sticky = W, padx=10, pady=3)')
+            
+            # Add the executed self.labels for the column headers to the non_iterated_labels list
+            self.non_iterated_labels.append(column_title)
+              
+        #iterate over column info and order. 
+        for n, columnfile_title in enumerate(config.options('columnfile_info_and_order')):
+            
+            for v, display_i in enumerate(self.display_indexes):
+            
+                col_header = config['columnfile_info_and_order'][columnfile_title].replace(' ','').split(',')
+            
+                # create a text label
+                exec(f'self.{col_header[0]}row{v} = Text(self.recordFrame,height=1,relief="flat",bg="gray93")')
+                
+                # Enter in the text from the df
+                exec(f'self.{col_header[0]}row{v}.insert("1.0",working_file["{col_header[0]}"][{display_i}])')
+                
+                # configure Text so that it is a specified width, font and cant be interacted with
+                exec(f'self.{col_header[0]}row{v}.config(width=len(working_file["{col_header[0]}"][{display_i}])+10,font=f"Helvetica {self.text_size} {self.text_bold}",state=DISABLED)')
+                
+                #grid the text label to the widget. 
+                exec(f'self.{col_header[0]}row{v}.grid(row={v+2}, column={n+1},columnspan=1,padx=10, pady=3,sticky="w")')
+                
+                #create a checkbutton and append it to the list of checkbutton variables. 
+                exec(f'self.check_{v}= IntVar()')
+                exec(f'self.checkbutton{v}=Checkbutton(self.recordFrame,variable=self.check_{v})')
+                exec(f'self.checkbutton{v}.deselect()')
+                exec(f'self.checkbutton{v}.grid(row=v+2, column=0)')
+                self.check_to_append.append(f'self.check_{v}')
+                
+                if col_header[0] not in self.columns_to_compare:
+                    if  columnfile_title != 'datasource':
+                        self.columns_to_compare.append(col_header[0])
+                
+                # if match column not populated yet, keep checkbutton clickable
+                if working_file.loc[display_i, 'Match'] == "":
+                    exec(f'self.checkbutton{v}.config(state=NORMAL)')
+               
+                # else make it unclickable
+                else:
+                    exec(f'self.checkbutton{v}.config(state=DISABLED)')
+
+                    
+    def update_gui(self, config, working_file):
         '''
         A simple function that updates the different GUI labels based on the
-        records. 
+        records. This function is called whenever the app is interacted with,
+        i.e. when pressing match/non-match/back buttons.
         
         Parameters
         ----------
@@ -351,51 +373,80 @@ class ClericalApp:
         None.
 
         '''
-        self.counter_matches.config(text=f'{self.cluster_index+1} / {self.num_clusters} Clusters', font=f'Helvetica {self.text_size}')
-       # self.datasource_label.config(font=f'Helvetica {self.text_size} bold')
         
-        for non_iter_columns in self.non_iterated_labels:
+        # # if commentbox specified in config
+        # if int(config['custom_settings']['commentbox']):
             
-            exec(f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")')
-                       
+        #     # create list to append to
+        #     matched_record_indices = []
+            
+        #     # for each record id that is not an empty string in checkboxes selected
+        #     for matched_record_id in self.match_string.split(","):
+                
+        #         if matched_record_id != '':
+                    
+        #             # get the index corresponding with each record ID and append to list
+        #             matched_record_index = working_file[working_file[config['record_id_col']['record_id']] == matched_record_id].index.tolist()
+        #             matched_record_indices.append(matched_record_index)
+            
+        #     # at each row index of the checkbox selected, append the contents of the comment box
+        #     for row in matched_record_indices:
+        #         working_file.at[row, 'Comments'] = self.comment_entry.get()
+                
+        # clear recordframe
+        for widget in self.recordFrame.winfo_children():
+            
+            widget.destroy()
         
-        display_indexes = working_file.index[working_file['cluster_sequential_number']==self.cluster_index].to_list()
-        
-             
+        for widget in self.toolFrame.winfo_children():
+            
+            widget.destroy()
+                        
+        for widget in self.buttonFrame.winfo_children():
+            
+            widget.destroy()
+            
+        # redraw everything in recordFrame
+        self.draw_recordframe(config, working_file)       
+        self.draw_buttonFrame()
+        self.draw_toolFrame()
+       
+        # clear commentbox entry
         if int(config['custom_settings']['commentbox']):
             self.comment_entry.delete(0, END)
-            for i in self.display_indexes:
-                self.comment_entry.insert(0, working_file['Comments'][i])
-  
-        #update the text widgets and deselect the checkbuttons
-        for n, iter_columns in enumerate(config.options('columnfile_info_and_order')):
-            col_header = config['columnfile_info_and_order'][iter_columns].replace(' ','').split(',')
-            for v, display_i in enumerate(display_indexes):
             
-                exec(f'self.{col_header[0]}row{v}.config(state=NORMAL)')
-            
-                exec(f'self.{col_header[0]}row{v}.delete("1.0","end")')
-            
-                exec(f'self.{col_header[0]}row{v}.insert("1.0",working_file["{col_header[0]}"][{display_i}])')
-            
-                exec(f'self.{col_header[0]}row{v}.config(width = len(working_file["{col_header[0]}"][{display_i}])+10, font=f"Helvetica {self.text_size} {self.text_bold}", state=DISABLED)')
-            
-                exec(f'self.checkbutton{v}.deselect()')
-
-                if working_file.loc[display_i, 'Match'] == "":
-                    
-                    exec(f'self.checkbutton{v}.config(state=NORMAL)')
-                    
-                else:
-                                        
-                    exec(f'self.checkbutton{v}.config(state=DISABLED)')
-   
-
+        # disable back button if no previous clusters exist
         if self.cluster_index==0 and self.current_num_cluster_decisions()==0: 
             self.back_button.config(state= DISABLED)
         else:
             self.back_button.config(state= 'normal')
-                
+        
+        self.tags_container = {}
+        self.comparison_values={}
+        
+        if self.show_hide_diff==1:
+            self.show_hide_differences(0)
+    
+    def make_text_bold(self, config, working_file):   
+        '''
+        Makes the text bold or not
+
+        Returns
+        -------
+        None.
+
+        '''
+        if not self.text_bold_boolean:
+            self.text_bold_boolean = 1
+            self.text_bold = 'bold'
+
+        else:
+            self.text_bold_boolean = 0
+            self.text_bold = ''
+        
+        # update the gui
+        self.update_gui(config, working_file)
+                  
     def get_matches(self):
         """
         A function that generates a string based on the matches identified in a cluster. 
@@ -461,7 +512,7 @@ class ClericalApp:
         '''
         # create a list of checkboxes ticked by the user
         checkboxes_selected = self.match_string.split(",")
-                    
+                                  
         # if match button pressed
         if event == 1:
             
@@ -492,6 +543,13 @@ class ClericalApp:
                         except ValueError:
                             
                             pass
+                        
+                        # if commentbox specified in config
+                        if int(config['custom_settings']['commentbox']):
+                            
+                            # at each row index of the checkbox selected, append the contents of the comment box
+                            working_file.loc[i, 'Comments'] = self.comment_entry.get()
+
                     # append those not selected by checkbutton to list of those not yet matched
                     else:
                         
@@ -504,6 +562,7 @@ class ClericalApp:
     
                 # for this remaining record, mark as a non-match
                 for i in self.not_matched_yet:
+
                                  
                         working_file.loc[i, 'Match'] = "No match in cluster"
         
@@ -515,12 +574,12 @@ class ClericalApp:
                     if working_file.loc[i, 'Match'] == "":
                         
                         working_file.loc[i, 'Match'] = "No match in cluster"
- 
-        if int(config['custom_settings']['commentbox']):
-            for a in self.display_indexes:
-                working_file.at[a, 'Comments'] = self.comment_entry.get()
-                
-    
+                        
+                        # if commentbox specified in config
+                        if int(config['custom_settings']['commentbox']):
+                    
+                            working_file.loc[i, 'Comments'] = self.comment_entry.get()
+                           
 
     def go_back(self): 
         '''
@@ -533,9 +592,6 @@ class ClericalApp:
         '''
         #get the number of decisions made in current cluster        
         num_decisions= self.current_num_cluster_decisions()
-        
-        if self.cluster_index > (self.num_clusters-1):
-            self.matchdone.destroy()
         
         #update cluster_index IF there are no descisions in current cluster
         if num_decisions ==0: 
@@ -553,17 +609,18 @@ class ClericalApp:
         #clear list of not matched yet
         self.not_matched_yet.clear()
         
+        
         #spdate the gui 
-        self.update_gui()
+        self.update_gui(config, working_file)
 
         
         #configure match_buttons to normal 
         self.match_button.config(state = 'normal')
         self.non_match_button.config(state  = 'normal')
-        
-        
-        
-        
+        try: 
+            self.matchdone.destroy()
+        except AttributeError: 
+            pass
         
     def check_matching_done(self): 
         '''
@@ -587,12 +644,12 @@ class ClericalApp:
             self.matchdone = ttk.Label(root, text='Matching Finished. Press save and close.',foreground='red')
             self.matchdone.grid(row=1, column=0, columnspan=1)
             
+            
             return 1
         else: 
             
             return 0
-        
-            
+                  
     def save_and_close(self):
         '''
         This function saves the working_file dataframe and closes the GUI
@@ -620,8 +677,121 @@ class ClericalApp:
         
         # close down the app
         root.destroy()
+                                                                                         
+    def show_hide_differences(self, toggle):
+        """
         
-    
+
+        Parameters
+        ----------
+        toggle : TYPE
+            A variable to indicate if the show-hide-differences is already on. 
+
+        Returns
+        -------
+        None.
+
+        """
+        if toggle == 0:
+            
+            # make show show diff variable 1 so that next time this function is 
+            # called it will remove tags
+            self.show_hide_diff = 1
+            
+            #For the first row in the cluster: for each column to compare; 
+            #add col and value to self.comparisso_values
+            for col in self.columns_to_compare:
+                self.comparison_values[col]=working_file.loc[self.display_indexes[0],col]
+                
+                #create a dictionary for the current comparison
+                current_comparison={}
+                
+                #for each comparison row
+                for n,current_comparison_row in enumerate(self.display_indexes[1:]):
+                    
+                    #create column:value pair 
+                    current_comparison[col]=working_file.loc[current_comparison_row, col]
+                         # For the values in datarows that need to be highlighted 
+              
+                    # some empty variables to control the flow of the difference indicator
+                    #a list of list to hold start and end of difference value:
+                    char_consistent = []
+                    
+                    #a list to hold the start and end value of differences for the current itteration:
+                    container = []
+                    string_start = 1
+                    string_end = 0
+                    count= 0
+                    
+                    #zip together comparison values and current comparison and compare each zipped item
+                    for char_comparison, char_highlight in zip(self.comparison_values[col],current_comparison[col]):
+                        
+                        # if the comparison char is not the same as the highlighter char
+                        if char_comparison != char_highlight:
+                            
+                            # if this is the first diff append count to container
+                            if string_start: 
+                                # start the container values
+                                container.append(count)
+                                
+                                string_start = 0
+                            
+                            # if we are at the end of string comparison    
+                            if count == min(len(self.comparison_values[col]),len(current_comparison[col]))-1: 
+                                    
+                                container.append(count+1)
+                                # pass this start and end values to the overall container    
+                                char_consistent.append(container)
+                                
+                        elif char_comparison==char_highlight: 
+                            if string_end == string_start:
+                                # add it to the container to complete the char number 
+                                #differences
+                                container.append(count)
+                                
+                                #restart this variable
+                                string_start = 1
+                                
+                                # pass this start and end values to the overall container                                    
+                                char_consistent.append(container)
+                                
+                                container = []
+                        #increase the count
+                        count += 1
+                    
+                        
+                          
+                    # for each tag number in char consistent create the tag and save the tag name information 
+                    for tag_adder in range(len(char_consistent)):
+                        
+                            if col in self.tags_container:
+                                
+                                temp_val=f'{col}_diff{str(tag_adder)}'
+                                if temp_val not in self.tags_container[col]:
+                                    self.tags_container[col].append(f'{col}_diff{str(tag_adder)}')
+                            
+                            else:
+                 
+                                self.tags_container[col] = [f'{col}_diff{str(tag_adder)}']
+        
+                            exec(f'self.{col}row{n+1}.tag_add(f"{col}_diff{str(tag_adder)}",f"1.{char_consistent[tag_adder][0]}", f"1.{char_consistent[tag_adder][-1]}")')
+                               
+                            exec(f'self.{col}row{n+1}.tag_config(f"{col}_diff{str(tag_adder)}",background="yellow",foreground = "black")')
+
+        else:
+             # reset this variable
+             self.show_hide_diff = 1
+             
+             # for all variable labels with differences - remove the tag labels
+             for n in range(0,len(self.display_indexes)-1):
+                 
+                 #for columns in self.columns_to_compare:    
+                for col, value in self.tags_container.items():
+                    for item in value:
+                        exec(f"self.{col}row{n+1}.tag_remove('{item}','1.0','end')")
+                      
+             self.show_hide_diff=0
+            
     def update_index(self, event):
         '''
         This function updates the overall index variable which cycles through 
@@ -639,56 +809,45 @@ class ClericalApp:
         None.
 
          '''
-                     
+  
         #Update the list of matching record IDs
         self.get_matches()
        
         #update the underlying dataframe with matching record IDs
         self.update_df(event)
         
+        # Update the GUI labels
+        self.update_gui(config, working_file)
+
+        #reset match string so different pairings can be made in that cluster
+        self.match_string = ''
+        
+        # clear the list of records in cluster remaining unmatched
+        self.not_matched_yet.clear()
             
-        # if all records in cluster haven't had a matching decision made on them yet AND the match button has been clicked
+        # if all records in cluster haven't had a matching decision made on them yet and the match button has been clicked
+        # i.e. not the non-match button, so pairings can still be made within current cluster
         if len(self.display_indexes) >  self.current_num_cluster_decisions() and event == 1:
-        
-            #reset match string so different pairings can be made in that cluster
-            self.match_string = ''
-
-            # Update the GUI labels
-            self.update_gui()
-                        
-            # clear the list of records in cluster remaining unmatched
-            self.not_matched_yet.clear()
-            
-        
+            pass
+    
+        # if no more pairs can be made in cluster after clicking match OR no more matches button is clicked
         else:
-        
-            #reset match string so different pairings can be made in that cluster
-            self.match_string = ''
-
-            # Update the GUI labels
-            self.update_gui()
-                        
-            # clear the list of records in cluster remaining unmatched
-            self.not_matched_yet.clear()
             
             #update the cluster_index and display indexes to referece the new cluster
             self.cluster_index +=1
             self.display_indexes= working_file.index[working_file['cluster_sequential_number']==self.cluster_index].to_list()
             self.len_current_cluster= len(self.display_indexes)
             
-            #reset match string
-            self.match_string = ''
-            
             stp_gui = self.check_matching_done()
-            
+            self.tags_container = {}
+        
             # Check if reached the end of the script
             if stp_gui:
                 pass
                 # could add in additional functionality here to do with saving the working_file file
             else: 
-                # Update the GUI labels
-                self.update_gui()
-        
+                # Update the GUI
+                self.update_gui(config, working_file)
 
     def change_text_size(self,size_change):
         '''
@@ -714,7 +873,7 @@ class ClericalApp:
             self.text_size -= 1
 
         # update the gui
-        self.update_gui()
+        self.update_gui(config, working_file)
         
     def on_exit(self):
         '''
@@ -732,7 +891,7 @@ class ClericalApp:
             
             # close down the application
             root.destroy()
-
+            
 if __name__ == "__main__":
     
     # ------
@@ -834,9 +993,7 @@ if __name__ == "__main__":
     
     
     # ------ Run the Clerical Matching Application
-    
 
-    # ---- run the clerical matching app
     root = Tk()
     mainWindow = ClericalApp(root, working_file, filepath_done, renamed_file, config)
     root.mainloop()
