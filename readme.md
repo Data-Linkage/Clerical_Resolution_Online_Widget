@@ -29,7 +29,7 @@ To get the outputs from cluster version of CROW into a pairwise linked format, p
 The most up to date documentation can be found in the [instructions folder](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/tree/main/Instructions). Here you will be able to find instructions for setting the CROW up for your project and instructions you can give to your clerical matchers on how to run the CROW once it is set up. 
 
 ### Clusters
-Documentation TBC
+Please see the [instructions for using the pre-release version of the cluster version of CROW](https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget/blob/main/Instructions/Cluster%20Version%3B%20Pre-release%20Instructions.docx).
 
 ## Videos 
 TBC 
