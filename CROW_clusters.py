@@ -52,6 +52,7 @@ class IntroWindow:
         # Initialise the gui paramaters 
         root.geometry('400x225')
         root.title('Clerical Matching')
+        root.eval("tk::PlaceWindow . center")
         
         # initialise some variables
         self.init_dir = init_dir 
@@ -98,6 +99,7 @@ class ClericalApp:
         
         # Create a title
         root.title('Clerical Matching')
+        root.eval("tk::PlaceWindow . center")
         
         # Create the separate frames 
         # 1 - Tool Frame 
