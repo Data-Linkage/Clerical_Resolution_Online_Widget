@@ -26,19 +26,22 @@ def CROW_output_updater(output_df, ID_column, Source_column, df1_name, df2_name)
     Example
     -------
     
-    > CROW_output_updater(output_df = matches, ID_column = 'Record_1D', Source_column = 'Source_Dataset', df1_name = 'CEN', df2_name = 'PES')
+    > CROW_output_updater(output_df = matches, ID_column = 'Record_1D', Source_column = 'Source_Dataset', df1_name = 'CENSUS_HH', df2_name = 'PES_HH')
     
     >   puid_CEN	puid_PES
-    0	A2	        ABC1
-    1	A3	        ABC1
-    2	ABC1	    A2
-    3	A3	        A2
-    4	ABC1	    A3
-    5	A2	        A3
-    6	AC12	    A9
-    7	C11	        ABC10
-    8	ABC10	    C11
-    9	A9	        AC12
+    0	B01	        A01_NAME
+    1	B02	        A02_REL
+    2	B03 	    A03_SEX
+    3	B04_DOB     A04_DOB
+    4	B04_Y	    A04_YYYY
+    5	B04_M       A04_MM
+    6	B04_D	    A04_DD
+    7	B05	        A04_AGE
+    8	B14  	    A05_RELIG
+    9	B18	        A06_MSTATUS
+    10  D01         A07_SCH
+    11  D03_L       A08_L
+    12  D03_G       A08_G
     '''
 
     # CROW Output
