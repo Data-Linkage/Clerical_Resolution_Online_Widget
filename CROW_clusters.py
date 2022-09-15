@@ -36,6 +36,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter import filedialog as fd
 import os
+import sys
 import getpass
 import pandas as pd
 import configparser 
@@ -276,10 +277,10 @@ class ClericalApp:
         # =====  toolFrame         
         
 
-        self.text_smaller_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='ᴀA-', height=1, width=3, command=lambda: self.change_text_size(0))
+        self.text_smaller_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='A-', height=1, width=3, command=lambda: self.change_text_size(0))
         self.text_smaller_button.pack(side=LEFT, padx=5)
 
-        self.text_bigger_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='ᴀA+', height=1, width=3, command=lambda: self.change_text_size(1))
+        self.text_bigger_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='A+', height=1, width=3, command=lambda: self.change_text_size(1))
         self.text_bigger_button.pack(side= LEFT, padx=5)  
 
         
@@ -289,7 +290,7 @@ class ClericalApp:
  
         
         # Save and close button
-        self.save_button = Button(self.toolFrame, text='Save and Close 🖫', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
+        self.save_button = Button(self.toolFrame, text='Save and Close', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
         self.save_button.pack(side=RIGHT, padx=5)
   
         
@@ -679,19 +680,24 @@ class ClericalApp:
         None.
 
         '''
-        # Check whether matching has now finished (i.e. they have completed all records)
-        if self.cluster_index == (self.num_clusters): 
-            # if matching is now complete rename the file 
-         os.rename(self.filename_old, self.filename_done)
-         working_file.to_csv(self.filename_done, index=False)
-
-
-        else:
-            # If not it yet finshed save it using the old file name
-            working_file.to_csv(self.filename_old, index=False)
-        
-        # close down the app
-        root.destroy()
+        try:
+            # Check whether matching has now finished (i.e. they have completed all records)
+            if self.cluster_index == (self.num_clusters): 
+                # if matching is now complete rename the file 
+             os.rename(self.filename_old, self.filename_done)
+             working_file.to_csv(self.filename_done, index=False)
+    
+    
+            else:
+                # If not it yet finshed save it using the old file name
+                working_file.to_csv(self.filename_old, index=False)
+            
+            # close down the app
+            root.destroy()
+        except PermissionError:
+            messagebox.showwarning(message = "This clerical sample is open in another program. To save, please close the other program.")
+            
+            print("\nThis clerical sample is open in another program. To save, please close the other program.")
                                                                                          
     def show_hide_differences(self, toggle):
         """
@@ -946,60 +952,70 @@ if __name__ == "__main__":
     
     # ------- Create filepath variables, load in the selected data and specify column variables
     
-    # Check if the user running it has selected this file before (this means they have done some of the matching already and are coming back to it)
-    if 'inProgress' in intro.fileselect.split('/')[-1]:
-        
-        # If it is the same user
-        if (user in intro.fileselect.split('/')[-1]):
-        
-            # Dont rename the file 
-            renamed_file =  intro.fileselect
+    try:
+        # Check if the user running it has selected this file before (this means they have done some of the matching already and are coming back to it)
+        if 'inProgress' in intro.fileselect.split('/')[-1]:
+            
+            # If it is the same user
+            if (user in intro.fileselect.split('/')[-1]):
+            
+                # Dont rename the file 
+                renamed_file =  intro.fileselect
+                
+                # create the filepath name for when the file is finished
+                filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
+                
+            else:
+    
+                # Rename the file to contain the additional user
+                renamed_file =  f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0][0:-11]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"           
+                os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
+                
+                # create the filepath name for when the file is finished
+                filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
+                            
+        # If a user is picking this file again and its done
+        elif 'DONE' in intro.fileselect.split('/')[-1]:
+            
+            # If it is the same user
+            if (user in intro.fileselect.split('/')[-1]):
+                # dont change filepath done - keep it as it is
+                filepath_done = intro.fileselect
+            
+                # Rename the file 
+                renamed_file =  f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1][0:-9]}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
+                os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
+            else:
+                # If it is a different user
+                # Rename the file to include the additional user
+                renamed_file =  f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0][0:-5]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
+                os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
+                
+                # create the filepath done
+                filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
+                
+                
+        else:
+            # Resave this file with the user ID at the end so no one else selects it 
+            # rename it with '_inProgress' and their entered initials
+            renamed_file = f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
+            os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
             
             # create the filepath name for when the file is finished
             filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
             
-        else:
-
-            # Rename the file to contain the additional user
-            renamed_file =  f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0][0:-11]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"           
-            os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
-            
-            # create the filepath name for when the file is finished
-            filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
-                        
-    # If a user is picking this file again and its done
-    elif 'DONE' in intro.fileselect.split('/')[-1]:
+    except PermissionError:
+        messagebox.showwarning(message = "This clerical sample is open in another program. Please close this and restart CROW.")
         
-        # If it is the same user
-        if (user in intro.fileselect.split('/')[-1]):
-            # dont change filepath done - keep it as it is
-            filepath_done = intro.fileselect
-        
-            # Rename the file 
-            renamed_file =  f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1][0:-9]}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
-            os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
-        else:
-            # If it is a different user
-            # Rename the file to include the additional user
-            renamed_file =  f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0][0:-5]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
-            os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
-            
-            # create the filepath done
-            filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
-            
-            
-    else:
-        # Resave this file with the user ID at the end so no one else selects it 
-        # rename it with '_inProgress' and their entered initials
-        renamed_file = f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
-        os.rename(rf'{intro.fileselect}',rf'{renamed_file}')
-        
-        # create the filepath name for when the file is finished
-        filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
-
         
     # ---- load in the required csv file as a pandas dataframe (can also do this for excel docs...)
-    working_file = pd.read_csv(renamed_file)
+    try:
+        working_file = pd.read_csv(renamed_file)
+        
+    except FileNotFoundError or NameError:
+        
+        sys.exit("\n\nThis clerical sample is open in another program. Please close this and restart CROW.")
+        
                                     
     # END OF STEP 2
                                     
