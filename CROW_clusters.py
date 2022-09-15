@@ -277,10 +277,10 @@ class ClericalApp:
         # =====  toolFrame         
         
 
-        self.text_smaller_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='ᴀA-', height=1, width=3, command=lambda: self.change_text_size(0))
+        self.text_smaller_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='A-', height=1, width=3, command=lambda: self.change_text_size(0))
         self.text_smaller_button.pack(side=LEFT, padx=5)
 
-        self.text_bigger_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='ᴀA+', height=1, width=3, command=lambda: self.change_text_size(1))
+        self.text_bigger_button = Button(self.toolFrame, font=f'Helvetica {self.text_size}', text='A+', height=1, width=3, command=lambda: self.change_text_size(1))
         self.text_bigger_button.pack(side= LEFT, padx=5)  
 
         
@@ -290,7 +290,7 @@ class ClericalApp:
  
         
         # Save and close button
-        self.save_button = Button(self.toolFrame, text='Save and Close 🖫', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
+        self.save_button = Button(self.toolFrame, text='Save and Close', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
         self.save_button.pack(side=RIGHT, padx=5)
   
         
