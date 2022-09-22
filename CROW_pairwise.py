@@ -106,6 +106,10 @@ class ClericalApp:
         recordFrame = ttk.LabelFrame(root, text='Current Record')
         recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
         
+        #3 -Button Frame 
+        buttonFrame=ttk.LabelFrame(root)
+        buttonFrame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
+        
         # initalise the file name variables
         self.filename_done = filename_done
 
@@ -320,10 +324,10 @@ class ClericalApp:
         # =====  recordFrame 
         
         # Match/Non-Match buttons
-        self.match_button = ttk.Button(recordFrame, text='Match', command=lambda: self.update_index(1))
-        self.match_button.grid(row=len(config.options('dataset_names'))*3, column=1, columnspan=1, padx=10, pady=10)
-        self.non_match_button = ttk.Button(recordFrame, text='Non-Match', command=lambda: self.update_index(0))
-        self.non_match_button.grid(row=len(config.options('dataset_names'))*3, column=2, columnspan=1, padx=10, pady=10)
+        self.match_button = Button(buttonFrame, text='Match', command=lambda: self.update_index(1), bg='DarkSeaGreen1')
+        self.match_button.grid(row=0, column=0, columnspan=1, padx=15, pady=10)
+        self.non_match_button = Button(buttonFrame, text='Non-Match', command=lambda: self.update_index(0), bg='light salmon')
+        self.non_match_button.grid(row=0, column=1, columnspan=1, padx=15, pady=10)
         
         # Add in the comment widget based on config option
         if int(config['custom_settings']['commentbox']):
@@ -331,10 +335,10 @@ class ClericalApp:
             # Get the position info from button 1
             info_button = self.match_button.grid_info()
             
-            self.comment_label = ttk.Label(recordFrame,text='Comment:', font='Helvetica 10 bold')
+            self.comment_label = ttk.Label(buttonFrame,text='Comment:', font='Helvetica 10 bold')
             self.comment_label.grid(row = info_button['row']+1, column =0, columnspan=1, sticky='e')
             
-            self.comment_entry = ttk.Entry(recordFrame)
+            self.comment_entry = ttk.Entry(buttonFrame)
             self.comment_entry.grid(row = info_button['row']+1, column =1, columnspan=3, sticky='sew', padx=5, pady=5)
             self.comment_entry.insert(0, working_file['Comments'][self.record_index])
         
@@ -347,8 +351,8 @@ class ClericalApp:
         self.separator_tf_2.grid(row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
         
         # Back button
-        self.back_button = ttk.Button(toolFrame, text='Back 🢤', command=lambda: self.go_back())
-        self.back_button.grid(row=0, column=1, columnspan=1, padx=5, pady=5)
+        self.back_button = ttk.Button(buttonFrame, text='Back 🢤', command=lambda: self.go_back())
+        self.back_button.grid(row=0, column=2, columnspan=1, padx=15, pady=10)
         # Show hide differences
         self.showhidediff = ttk.Button(toolFrame, text='Show/Hide Differences', command=lambda: self.show_hide_differences())
         self.showhidediff.grid(row=0, column=2, columnspan=1, padx=5, pady=5)
