@@ -463,6 +463,8 @@ class ClericalApp:
                         exec(f'self.{vals}.tag_add(f"{vals}_diff{str(tag_adder)}",f"1.{char_consistent[tag_adder][0]}", f"1.{char_consistent[tag_adder][-1]}")')
                                
                         exec(f'self.{vals}.tag_config(f"{vals}_diff{str(tag_adder)}",background="yellow",foreground = "black")')
+                        
+
                             
                         
                             
@@ -582,9 +584,12 @@ class ClericalApp:
                 self.show_hide_diff = 0
             
                 self.show_hide_differences()
-            
-        if self.check_matching_done()==1: 
-            messagebox.showinfo('Matching Finished','Press save and close or use the back button to return to the previous record')
+            if self.record_index==0: 
+                self.back_button.config(state= DISABLED)
+            else:
+                self.back_button.config(state= 'normal')
+        elif self.check_matching_done()==1: 
+            messagebox.showinfo('Matching Finished','Maching Finished Press save and close or use the back button to return to the previous record')
             
         
             
