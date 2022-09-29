@@ -584,7 +584,6 @@ class ClericalApp:
                 self.show_hide_differences()
             
         if self.check_matching_done()==1: 
-            print('print_hello +'f'{self.check_matching_done()}')
             messagebox.showinfo('Matching Finished','Press save and close or use the back button to return to the previous record')
             
         
