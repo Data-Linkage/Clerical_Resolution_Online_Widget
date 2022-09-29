@@ -307,6 +307,15 @@ class ClericalApp:
             ii = 0
             
             self.iterated_labels.append(col_header[0])
+        
+        if not self.show_hide_diff:
+            self.show_hide_diff = 1
+        
+            self.show_hide_differences()
+        else: 
+            self.show_hide_diff = 0
+            
+            self.show_hide_differences()
             
  
  
@@ -325,15 +334,22 @@ class ClericalApp:
         # Add in the comment widget based on config option
         if int(config['custom_settings']['commentbox']):
             
+            # create comments column if one doesn't exist
+            if 'Comments' not in working_file:
+                working_file['Comments'] = ''
+
             # Get the position info from button 1
             info_button = self.match_button.grid_info()
             
-            self.comment_label = ttk.Label(self.buttonFrame,text='Comment:', font='Helvetica 10 bold')
+            self.comment_label = ttk.Label(self.buttonFrame,text='Comment:', font=f'Helvetica {self.text_size} bold')
             self.comment_label.grid(row = info_button['row']+1, column =0, columnspan=1, sticky='e')
             
-            self.comment_entry = ttk.Entry(self.buttonFrame)
+            self.comment_entry = ttk.Combobox(self.buttonFrame)
             self.comment_entry.grid(row = info_button['row']+1, column =1, columnspan=3, sticky='sew', padx=5, pady=5)
-            self.comment_entry.insert(0, working_file['Comments'][self.record_index])
+            
+            if (config['custom_settings']['comment_values']) is not None:
+                self.comment_entry['values'] = (config['custom_settings']['comment_values']).split(",")
+
         
         # =====  toolFrame         
     def draw_tool_frame(self):
@@ -478,22 +494,7 @@ class ClericalApp:
             self.text_bold_boolean = 0
             self.text_bold = ''
 
-        # clear recordframe
-        for widget in self.recordFrame.winfo_children():
-            
-            widget.destroy()
-        
-        for widget in self.toolFrame.winfo_children():
-            
-            widget.destroy()
-                        
-        for widget in self.buttonFrame.winfo_children():
-            
-            widget.destroy()
-            
-        self.draw_button_frame()
-        self.draw_record_frame()
-        self.draw_tool_frame()
+        self.update_gui()
  
     def get_starting_index(self):
 
@@ -553,37 +554,42 @@ class ClericalApp:
         -------
         None.
         '''
-        self.counter_matches.config(text=f'{self.record_index+1} / {self.num_records} Records', font=f'Helvetica {self.text_size}')
-        self.datasource_label.config(font=f'Helvetica {self.text_size} bold')
-        
+        if self.check_matching_done()==0:
         # configure the non-iterable labels
-        for non_iter_columns in self.non_iterated_labels:
+            for non_iter_columns in self.non_iterated_labels:
             
-            exec(f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")')
+                exec(f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")')
+        
+            for widget in self.recordFrame.winfo_children():
+            
+                widget.destroy()
+        
+            for widget in self.toolFrame.winfo_children():
+            
+                widget.destroy()
+                        
+            for widget in self.buttonFrame.winfo_children():
+            
+                widget.destroy()
+            self.draw_record_frame()
+            self.draw_button_frame()
+            self.draw_tool_frame()
+            if not self.show_hide_diff:
+                self.show_hide_diff = 1
+        
+                self.show_hide_differences()
+            else: 
+                self.show_hide_diff = 0
+            
+                self.show_hide_differences()
+            
+        if self.check_matching_done()==1: 
+            print('print_hello +'f'{self.check_matching_done()}')
+            messagebox.showinfo('Matching Finished','Press save and close or use the back button to return to the previous record')
+            
+        
+            
 
-        # configure the non-iterable labels
-        for iter_columns in self.iterated_labels:
-            
-            exec(f'self.{iter_columns}.config(state=NORMAL)')
-            
-            exec(f'self.{iter_columns}.delete("1.0","end")')
-            
-            exec(f'self.{iter_columns}.insert("1.0",working_file["{iter_columns}"][self.record_index])')
-            
-            exec(f'self.{iter_columns}.config(width = len(working_file["{iter_columns}"][self.record_index])+ 10, font=f"Helvetica {self.text_size} {self.text_bold}", state=DISABLED)')
-        
-        if int(config['custom_settings']['commentbox']):
-            self.comment_entry.delete(0, END)
-            self.comment_entry.insert(0, working_file['Comments'][self.record_index])
-            
-        if not self.show_hide_diff:
-            self.show_hide_diff = 1
-        
-            self.show_hide_differences()
-        else: 
-            self.show_hide_diff = 0
-            
-            self.show_hide_differences()
     
     def update_df(self, match_res):
         '''
@@ -777,22 +783,7 @@ class ClericalApp:
              # # if commentbox specified in config
 
         # clear recordframe
-        for widget in self.recordFrame.winfo_children():
-            
-            widget.destroy()
-        
-        for widget in self.toolFrame.winfo_children():
-            
-            widget.destroy()
-                        
-        for widget in self.buttonFrame.winfo_children():
-            
-            widget.destroy()
-            
-        # redraw everything in recordFrame
-        self.draw_record_frame()       
-        self.draw_button_frame()
-        self.draw_tool_frame()
+        self.update_gui()
 
         
     def on_exit(self):
@@ -924,4 +915,3 @@ if __name__ == "__main__":
     root.mainloop()
 
     print("\n Number of records matched:", str(len(working_file[working_file.Match != ""]))) 
-    
