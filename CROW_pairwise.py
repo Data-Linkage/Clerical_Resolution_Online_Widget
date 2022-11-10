@@ -361,21 +361,27 @@ class ClericalApp:
         self.separator_tf_2.grid(row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
         
         # Back button
-        self.back_button = Button(self.buttonFrame, text='Back 🢤', font =f'Helvetica {self.text_size}', command=lambda: self.go_back())
+        back_symbol = u"\u23CE"
+        self.back_button = Button(self.buttonFrame, text=f'Back {back_symbol}', font =f'Helvetica {self.text_size}', command=lambda: self.go_back())
         self.back_button.grid(row=0, column=2, columnspan=1, padx=15, pady=10)
         # Show hide differences
         self.showhidediff = Button(self.toolFrame, text='Show/Hide Differences',font =f'Helvetica {self.text_size}', command=lambda: self.show_hide_differences())
         self.showhidediff.grid(row=0, column=2, columnspan=1, padx=5, pady=5)
         # Change text size buttons
-        self.text_smaller_button = Button(self.toolFrame, text='🗚-', font =f'Helvetica {self.text_size}',height=1, width=3, command=lambda: self.change_text_size(0))
+        increase_text_size_symbol = u"\U0001F5DA"
+        decrease_text_size_symbol = u"\U0001F5DB"
+        
+        self.text_smaller_button = Button(self.toolFrame, text=f'{decrease_text_size_symbol}-', font =f'Helvetica {self.text_size + 3}',height=1, width=3, command=lambda: self.change_text_size(0))
         self.text_smaller_button.grid(row=0, column=4, sticky='e', pady=5)
-        self.text_bigger_button = Button(self.toolFrame, text='🗚+', height=1, width=3, font =f'Helvetica {self.text_size}', command=lambda: self.change_text_size(1))
+        self.text_bigger_button = Button(self.toolFrame, text=f'{increase_text_size_symbol}+', height=1, width=3, font =f'Helvetica {self.text_size + 3}', command=lambda: self.change_text_size(1))
         self.text_bigger_button.grid(row=0, column=5, sticky='w', pady=5, padx=2)  
         # Make text bld button
-        self.bold_button = Button(self.toolFrame,text='B', font =f'Helvetica {self.text_size}', height=1, width=3, command=lambda:self.make_text_bold())
+        bold_symbol = u"\U0001D5D5"
+        self.bold_button = Button(self.toolFrame,text=f'{bold_symbol}', font =f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda:self.make_text_bold())
         self.bold_button.grid(row=0, column=6, sticky='w', pady=5)
         # Save and close button
-        self.save_button = Button(self.toolFrame, text='Save and Close 🖫', font =f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
+        save_symbol = 	u"\U0001F4BE"
+        self.save_button = Button(self.toolFrame, text=f'Save and Close {save_symbol}', font =f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
         self.save_button.grid(row=0, column=8, columnspan=1, sticky='e', padx=5, pady=5)
         
 
