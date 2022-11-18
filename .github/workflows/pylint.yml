@@ -20,4 +20,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint -d R0801 --fail-under=7.52 $(git ls-files '*.py')
+        pylint -d R0801,E0401 --fail-under=7.52 $(git ls-files '*.py')
