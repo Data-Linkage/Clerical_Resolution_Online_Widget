@@ -22,8 +22,8 @@ import os
 import sys
 import getpass
 import configparser
-import tkinter as tk
-from tkinter import ttk
+import tkinter
+from tkinter import ttk, filedialog
 import pandas as pd
 
 class IntroWindow:
@@ -44,19 +44,19 @@ class IntroWindow:
         self.files_info = files_info
 
         # initialise the frame
-        self.content = tk.ttk.Frame(root)
-        self.frame = tk.ttk.Frame(self.content, borderwidth=5,
+        self.content = ttk.Frame(root)
+        self.frame = ttk.Frame(self.content, borderwidth=5,
                                relief='ridge', width=500, height=300)
         self.content.grid(column=0, row=0)
         self.frame.grid(column=0, row=0, columnspan=5, rowspan=5)
 
         # create some widgets and place them on the gui
-        self.intro_text = tk.ttk.Label(
+        self.intro_text = ttk.Label(
             self.content, text='Welcome to the Clerical Matching Application. \nPlease click "Choose File" to select your file \nand begin matching.', font='Helvetica 10')
         self.intro_text.grid(row=1, column=0, columnspan=4)
 
         # create the button
-        self.choose_file_button = tk.ttk.Button(
+        self.choose_file_button = ttk.Button(
             self.content, text='Choose File', command=lambda: self.open_dirfinder())
         self.choose_file_button.grid(
             row=2, column=1, columnspan=1, sticky='new')
@@ -69,7 +69,7 @@ class IntroWindow:
         None.
         '''
         # Open up a window that allows the user to choose a matching file
-        self.fileselect = tk.filedialog.askopenfilename(
+        self.fileselect = filedialog.askopenfilename(
             initialdir=self.init_dir, title="Please select a file:", filetypes=self.files_info)
 
         # close down intro_window
@@ -89,16 +89,16 @@ class ClericalApp:
 
         # Create the separate frames
         # 1 - Tool Frame
-        self.toolFrame = tk.ttk.LabelFrame(root, text='Tools:')
+        self.toolFrame = ttk.LabelFrame(root, text='Tools:')
         self.toolFrame.grid(row=0, column=0, columnspan=1,
                             sticky='ew', padx=10, pady=10)
 
         # 2 - Record Frame
-        self.recordFrame = tk.ttk.LabelFrame(root, text='Current Record')
+        self.recordFrame = ttk.LabelFrame(root, text='Current Record')
         self.recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
 
         # 3 -Button Frame
-        self.buttonFrame = tk.ttk.LabelFrame(root)
+        self.buttonFrame = ttk.LabelFrame(root)
         self.buttonFrame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
 
         # initalise the file name variables
@@ -182,7 +182,7 @@ class ClericalApp:
         self.difference_col_label_names = {}
 
         # Create the record_index matches
-        self.counter_matches = tk.ttk.Label(self.recordFrame, text=f'{self.record_index+1} / {self.num_records} Records', font='Helvetica 9')
+        self.counter_matches = ttk.Label(self.recordFrame, text=f'{self.record_index+1} / {self.num_records} Records', font='Helvetica 9')
         self.counter_matches.grid(row=0, column=len(config.options(
             'column_headers_and_order')), columnspan=1, padx=10, sticky="e")
 
@@ -202,11 +202,11 @@ class ClericalApp:
 
         for iterator, name_of_dataset in enumerate(config.options('dataset_names')):
 
-            exec(f'self.{name_of_dataset} = tk.ttk.Label(self.recordFrame,text=config["dataset_names"]["{name_of_dataset}"]+":",font=f"Helvetica {self.text_size} bold")')
+            exec(f'self.{name_of_dataset} = ttk.Label(self.recordFrame,text=config["dataset_names"]["{name_of_dataset}"]+":",font=f"Helvetica {self.text_size} bold")')
 
             exec(f'self.{name_of_dataset}.grid(row=3+{row_adder}, column=0, columnspan=1, padx=10, pady=3, sticky = "w")')
 
-            exec(f'self.separator{iterator} = tk.ttk.Separator(self.recordFrame,orient="horizontal")')
+            exec(f'self.separator{iterator} = ttk.Separator(self.recordFrame,orient="horizontal")')
 
             exec(f'self.separator{iterator}.grid(row={separator_adder},column=0,columnspan=len(config.options("column_headers_and_order"))+2, sticky = "ew")')
 
@@ -219,7 +219,7 @@ class ClericalApp:
 
         # ---------------------
         # Create column header widgets
-        self.datasource_label = tk.ttk.Label(self.recordFrame, text='Datasource', font=f'Helvetica {self.text_size} bold')
+        self.datasource_label = ttk.Label(self.recordFrame, text='Datasource', font=f'Helvetica {self.text_size} bold')
         self.datasource_label.grid(
             row=1, column=0, columnspan=1, padx=10, pady=3)
 
@@ -231,9 +231,9 @@ class ClericalApp:
             col_header = config['column_headers_and_order'][column_title].replace(
                 ' ', '').split(',')
 
-            exec(f'self.{column_title} = tk.ttk.Label(self.recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
+            exec(f'self.{column_title} = ttk.Label(self.recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
 
-            exec(f'self.{column_title}.grid(row=1,column=col_header[1],columnspan=1,sticky=tk.W, padx=10, pady=3)')
+            exec(f'self.{column_title}.grid(row=1,column=col_header[1],columnspan=1,sticky=tkinter.W, padx=10, pady=3)')
 
             # Add the executed self.labels for the column headers to the non_iterated_labels list
             self.non_iterated_labels.append(column_title)
@@ -278,11 +278,11 @@ class ClericalApp:
                 ' ', '').split(',')
 
             # create a text label
-            exec(f'self.{col_header[0]} = Text(self.recordFrame,height=1,relief="flat",bg="gray93")')
+            exec(f'self.{col_header[0]} = tkinter.Text(self.recordFrame,height=1,relief="flat",bg="gray93")')
             # Enter in the text from the df
             exec(f'self.{col_header[0]}.insert("1.0",working_file["{col_header[0]}"][self.record_index])')
             # configure Text so that it is a specified width, font and cant be interacted with
-            exec(f'self.{col_header[0]}.config(width=len(working_file["{col_header[0]}"][self.record_index])+10,font=f"Helvetica {self.text_size} {self.text_bold}",state=tk.DISABLED)')
+            exec(f'self.{col_header[0]}.config(width=len(working_file["{col_header[0]}"][self.record_index])+10,font=f"Helvetica {self.text_size} {self.text_bold}",state=tkinter.DISABLED)')
 
             # cycle through each dataset name to know which row to put the label on
             for name in name_of_datasets:
@@ -340,9 +340,9 @@ class ClericalApp:
     def draw_button_frame(self):
 
         # Match/Non-Match buttons
-        self.match_button = tk.Button(self.buttonFrame, text='Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(1), bg='DarkSeaGreen1')
+        self.match_button = tkinter.Button(self.buttonFrame, text='Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(1), bg='DarkSeaGreen1')
         self.match_button.grid(row=0, column=0, columnspan=1, padx=15, pady=10)
-        self.non_match_button = tk.Button(self.buttonFrame, text='Non-Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(0), bg='light salmon')
+        self.non_match_button = tkinter.Button(self.buttonFrame, text='Non-Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(0), bg='light salmon')
         self.non_match_button.grid(
             row=0, column=1, columnspan=1, padx=15, pady=10)
 
@@ -356,11 +356,11 @@ class ClericalApp:
             # Get the position info from button 1
             info_button = self.match_button.grid_info()
 
-            self.comment_label = tk.ttk.Label(self.buttonFrame, text='Comment:', font=f'Helvetica {self.text_size} bold')
+            self.comment_label = ttk.Label(self.buttonFrame, text='Comment:', font=f'Helvetica {self.text_size} bold')
             self.comment_label.grid(
                 row=info_button['row']+1, column=0, columnspan=1, sticky='e')
 
-            self.comment_entry = tk.ttk.Combobox(self.buttonFrame)
+            self.comment_entry = ttk.Combobox(self.buttonFrame)
             self.comment_entry.grid(
                 row=info_button['row']+1, column=1, columnspan=3, sticky='sew', padx=5, pady=5)
 
@@ -373,36 +373,36 @@ class ClericalApp:
     def draw_tool_frame(self):
 
         # Create labels for tools bar
-        self.separator_tf_1 = tk.ttk.Separator(self.toolFrame, orient='vertical')
+        self.separator_tf_1 = ttk.Separator(self.toolFrame, orient='vertical')
         self.separator_tf_1.grid(
             row=0, column=3, rowspan=1, sticky='ns', padx=10, pady=5)
-        self.separator_tf_2 = tk.ttk.Separator(self.toolFrame, orient='vertical')
+        self.separator_tf_2 = ttk.Separator(self.toolFrame, orient='vertical')
         self.separator_tf_2.grid(
             row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
 
         # Back button
         back_symbol = u"\u23CE"
-        self.back_button = tk.Button(self.buttonFrame, text=f'Back {back_symbol}', font=f'Helvetica {self.text_size}', command=lambda: self.go_back())
+        self.back_button = tkinter.Button(self.buttonFrame, text=f'Back {back_symbol}', font=f'Helvetica {self.text_size}', command=lambda: self.go_back())
         self.back_button.grid(row=0, column=2, columnspan=1, padx=15, pady=10)
         # Show hide differences
-        self.showhidediff = tk.Button(self.toolFrame, text='Show/Hide Differences', font=f'Helvetica {self.text_size}', command=lambda: self.show_hide_differences())
+        self.showhidediff = tkinter.Button(self.toolFrame, text='Show/Hide Differences', font=f'Helvetica {self.text_size}', command=lambda: self.show_hide_differences())
         self.showhidediff.grid(row=0, column=2, columnspan=1, padx=5, pady=5)
         # Change text size buttons
         increase_text_size_symbol = u"\U0001F5DA"
         decrease_text_size_symbol = u"\U0001F5DB"
 
-        self.text_smaller_button = tk.Button(self.toolFrame, text=f'{decrease_text_size_symbol}-', font=f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda: self.change_text_size(0))
+        self.text_smaller_button = tkinter.Button(self.toolFrame, text=f'{decrease_text_size_symbol}-', font=f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda: self.change_text_size(0))
         self.text_smaller_button.grid(row=0, column=4, sticky='e', pady=5)
-        self.text_bigger_button = tk.Button(self.toolFrame, text=f'{increase_text_size_symbol}+', height=1, width=3, font=f'Helvetica {self.text_size + 3}', command=lambda: self.change_text_size(1))
+        self.text_bigger_button = tkinter.Button(self.toolFrame, text=f'{increase_text_size_symbol}+', height=1, width=3, font=f'Helvetica {self.text_size + 3}', command=lambda: self.change_text_size(1))
         self.text_bigger_button.grid(
             row=0, column=5, sticky='w', pady=5, padx=2)
         # Make text bld button
         bold_symbol = u"\U0001D5D5"
-        self.bold_button = tk.Button(self.toolFrame, text=f'{bold_symbol}', font=f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda: self.make_text_bold())
+        self.bold_button = tkinter.Button(self.toolFrame, text=f'{bold_symbol}', font=f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda: self.make_text_bold())
         self.bold_button.grid(row=0, column=6, sticky='w', pady=5)
         # Save and close button
         save_symbol = u"\U0001F4BE"
-        self.save_button = tk.Button(self.toolFrame, text=f'Save and Close {save_symbol}', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
+        self.save_button = tkinter.Button(self.toolFrame, text=f'Save and Close {save_symbol}', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
         self.save_button.grid(row=0, column=8, columnspan=1,
                               sticky='e', padx=5, pady=5)
 
@@ -600,11 +600,11 @@ class ClericalApp:
 
                 self.show_hide_differences()
             if self.record_index == 0:
-                self.back_button.config(state=tk.DISABLED)
+                self.back_button.config(state=tkinter.DISABLED)
             else:
                 self.back_button.config(state='normal')
         elif self.check_matching_done() == 1:
-            tk.messagebox.showinfo(
+            tkinter.messagebox.showinfo(
                 'Matching Finished', 'Maching Finished Press save and close or use the back button to return to the previous record')
 
     def update_df(self, match_res):
@@ -666,10 +666,10 @@ class ClericalApp:
         # Query whether the current record matches the total number of records (end of the terminal)
         if self.record_index > (self.num_records-1):
             # disable the match and Non-match buttons
-            self.match_button.configure(state=tk.DISABLED)
-            self.non_match_button.configure(state=tk.DISABLED)
+            self.match_button.configure(state=tkinter.DISABLED)
+            self.non_match_button.configure(state=tkinter.DISABLED)
             # present a message on the screen infomring the user that matching is finished
-            self.matchdone = tk.ttk.Label(
+            self.matchdone = ttk.Label(
                 root, text='Matching Finished. Press save and close.', foreground='red')
             self.matchdone.grid(row=1, column=0, columnspan=1)
 
@@ -805,7 +805,7 @@ class ClericalApp:
 
         '''
         # if they click yes
-        if tk.messagebox.askyesno("Exit", "Are you sure you want to exit WITHOUT saving?"):
+        if tkinter.messagebox.askyesno("Exit", "Are you sure you want to exit WITHOUT saving?"):
 
             # check if this is the first time they are accessing it
             if (self.matching_previously_began == False) & (self.checkpointcounter == 0):
@@ -841,7 +841,7 @@ if __name__ == "__main__":
 
     # ===================== Open Intro GUI
     # Open a file pen dialog box, allow user to choose file, then grab user credentials
-    root = tk.Tk()
+    root = tkinter.Tk()
     # Run the Intro GUI
     intro = IntroWindow(root, initdir, filetypes)
 
@@ -917,7 +917,7 @@ if __name__ == "__main__":
     # ------ Run the Clerical Matching Application
 
     # ---- run the clerical matching app
-    root = tk.Tk()
+    root = tkinter.Tk()
     mainWindow = ClericalApp(
         root, working_file, filepath_done, renamed_file, config)
     root.mainloop()
