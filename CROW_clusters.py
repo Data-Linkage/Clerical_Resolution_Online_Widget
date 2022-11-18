@@ -35,7 +35,8 @@ import os
 import sys
 import getpass
 import configparser
-import tkinter as tk
+import tkinter
+from tkinter import ttk, filedialog
 import pandas as pd
 
 class IntroWindow:
@@ -57,19 +58,19 @@ class IntroWindow:
         self.files_info = files_info
 
         # initialise the frame
-        self.content = tk.ttk.Frame(root)
-        self.frame = tk.ttk.Frame(self.content, borderwidth=5, relief='ridge',
+        self.content = ttk.Frame(root)
+        self.frame = ttk.Frame(self.content, borderwidth=5, relief='ridge',
                                width=500, height=300)
         self.content.grid(column=0, row=0)
         self.frame.grid(column=0, row=0, columnspan=5, rowspan=5)
 
         # create some widgets and place them on the gui
-        self.intro_text = tk.ttk.Label(self.content, text=(
+        self.intro_text = ttk.Label(self.content, text=(
             'Welcome to the Clerical Matching Application. \nPlease click "Choose File" to select your file \nand begin matching.'), font='Helvetica 10')
         self.intro_text.grid(row=1, column=0, columnspan=4)
 
         # create the button
-        self.choose_file_button = tk.ttk.Button(
+        self.choose_file_button = ttk.Button(
             self.content, text='Choose File', command=lambda: self.open_dirfinder())
         self.choose_file_button.grid(
             row=2, column=1, columnspan=1, sticky='new')
@@ -84,7 +85,7 @@ class IntroWindow:
 
         '''
         # Open up a window that allows the user to choose a matching file
-        self.fileselect = tk.filedialog.askopenfilename(
+        self.fileselect = filedialog.askopenfilename(
             initialdir=self.init_dir, title="Please select a file:", filetypes=self.files_info)
 
         # close down intro_window
@@ -105,16 +106,16 @@ class ClericalApp:
 
         # Create the separate frames
         # 1 - Tool Frame
-        self.tool_frame = tk.ttk.LabelFrame(root, text='Tools:')
+        self.tool_frame = ttk.LabelFrame(root, text='Tools:')
         self.tool_frame.grid(row=0, column=0, columnspan=1, sticky='ew',
                             padx=10, pady=10)
 
         # 2 - Record Frame
-        self.record_frame = tk.ttk.LabelFrame(root, text='Current Record')
+        self.record_frame = ttk.LabelFrame(root, text='Current Record')
         self.record_frame.grid(row=1, column=0, columnspan=1, padx=10, pady=3)
 
         # 2 - Button Frame
-        self.button_frame = tk.ttk.LabelFrame(root)
+        self.button_frame = ttk.LabelFrame(root)
         self.button_frame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
 
         # initalise the file name variables
@@ -195,7 +196,7 @@ class ClericalApp:
         self.text_bold_boolean = 0
         self.text_bold = ''
 
-        self.s = tk.ttk.Style()
+        self.s = ttk.Style()
         self.s.configure('.', font=('Helvetica', f'{self.text_size}'))
 
         # SHOW/HIDE DIFFERENCES CLASS VARAIBLES
@@ -231,20 +232,20 @@ class ClericalApp:
     def draw_button_frame(self):
         # =====  button_frame - for match/non-match/back buttons
 
-        self.match_button = tk.Button(self.button_frame, text='Match',
+        self.match_button = tkinter.Button(self.button_frame, text='Match',
                                    font=f'Helvetica {self.text_size}',
                                    command=lambda: self.update_index(1),
                                    bg='DarkSeaGreen1')
         self.match_button.grid(row=self.len_current_cluster,
                                column=1, columnspan=1, padx=10, pady=10)
-        self.non_match_button = tk.Button(self.button_frame,
+        self.non_match_button = tkinter.Button(self.button_frame,
                                        text='No more matches',
                                        font=f'Helvetica {self.text_size}',
                                        command=lambda: self.update_index(0),
                                        bg='light salmon')
         self.non_match_button.grid(
             row=self.len_current_cluster, column=2, columnspan=1, padx=10, pady=10)
-        self.back_button = tk.Button(self.button_frame, text='Back',
+        self.back_button = tkinter.Button(self.button_frame, text='Back',
                                   font=f'Helvetica {self.text_size}',
                                   command=lambda: self.go_back())
         self.back_button.grid(row=self.len_current_cluster,
@@ -252,7 +253,7 @@ class ClericalApp:
 
         # disable back button if no previous clusters exist
         if self.cluster_index == 0 and self.current_num_cluster_decisions() == 0:
-            self.back_button.config(state=tk.DISABLED)
+            self.back_button.config(state=tkinter.DISABLED)
 
         # Add in the comment widget based on config option
         if int(config['custom_settings']['commentbox']):
@@ -264,12 +265,12 @@ class ClericalApp:
             # Get the position info from button 1
             info_button = self.match_button.grid_info()
 
-            self.comment_label = tk.ttk.Label(self.button_frame, text='Comment:',
+            self.comment_label = ttk.Label(self.button_frame, text='Comment:',
                                            font=f'Helvetica {self.text_size} bold')
             self.comment_label.grid(
                 row=info_button['row']+1, column=0, columnspan=1, sticky='e')
 
-            self.comment_entry = tk.ttk.Combobox(self.button_frame)
+            self.comment_entry = ttk.Combobox(self.button_frame)
             self.comment_entry.grid(
                 row=info_button['row']+1, column=1, columnspan=3, sticky='sew', padx=5, pady=5)
 
@@ -280,40 +281,40 @@ class ClericalApp:
     def draw_tool_frame(self):
         # =====  tool_frame
 
-        self.text_smaller_button = tk.Button(self.tool_frame, font=f'Helvetica {self.text_size}',
+        self.text_smaller_button = tkinter.Button(self.tool_frame, font=f'Helvetica {self.text_size}',
                                           text='A-', height=1, width=3,
                                           command=lambda: self.change_text_size(0))
-        self.text_smaller_button.pack(side=tk.LEFT, padx=5)
+        self.text_smaller_button.pack(side=tkinter.LEFT, padx=5)
 
-        self.text_bigger_button = tk.Button(self.tool_frame, font=f'Helvetica {self.text_size}',
+        self.text_bigger_button = tkinter.Button(self.tool_frame, font=f'Helvetica {self.text_size}',
                                             text='A+', height=1, width=3,
                                             command=lambda: self.change_text_size(1))
-        self.text_bigger_button.pack(side=tk.LEFT, padx=5)
+        self.text_bigger_button.pack(side=tkinter.LEFT, padx=5)
 
         # Make text bld button
-        self.bold_button = tk.Button(self.tool_frame, text='B',
+        self.bold_button = tkinter.Button(self.tool_frame, text='B',
                                      font=f'Helvetica {self.text_size} bold', height=1, width=3,
                                      command=lambda: self.make_text_bold(config, working_file))
-        self.bold_button.pack(side=tk.LEFT, padx=5)
+        self.bold_button.pack(side=tkinter.LEFT, padx=5)
 
         # Save and close button
-        self.save_button = tk.Button(self.tool_frame, text='Save and Close',
+        self.save_button = tkinter.Button(self.tool_frame, text='Save and Close',
                                      font=f'Helvetica {self.text_size}',
                                      command=lambda: self.save_and_close())
-        self.save_button.pack(side=tk.RIGHT, padx=5)
+        self.save_button.pack(side=tkinter.RIGHT, padx=5)
 
         # highlighter
-        self.highlighter_button = tk.Checkbutton(self.tool_frame, indicatoron=0,
+        self.highlighter_button = tkinter.Checkbutton(self.tool_frame, indicatoron=0,
                                                  selectcolor="white", text='show/hide differences',
                                                  font=f'Helvetica {self.text_size}',
                                                  command=lambda: self.show_hide_differences(self.show_hide_diff))
-        self.highlighter_button.pack(side=tk.LEFT, padx=5)
+        self.highlighter_button.pack(side=tkinter.LEFT, padx=5)
 
     def draw_recordframe(self, config, working_file):
 
         # try to calculate and display remaining # clusters for matching
         try:
-            self.counter_matches = tk.ttk.Label(self.record_frame,
+            self.counter_matches = ttk.Label(self.record_frame,
                                                text=f'{self.cluster_index+1} / {self.num_clusters} Clusters',
                                                font=f'Helvetica {self.text_size}')
             self.counter_matches.grid(row=0, 
@@ -323,7 +324,7 @@ class ClericalApp:
         # except when matching is completed
         except TypeError:
 
-            tk.messagebox.showinfo(title="Matching completed",
+            tkinter.messagebox.showinfo(title="Matching completed",
                                    message="Please select a different file to clerically match")
 
             # close down the application
@@ -337,10 +338,10 @@ class ClericalApp:
             col_header = config['column_headers_and_order'][column_title].replace(
                 ' ', '').split(',')
 
-            exec(f'self.{column_title} = tk.ttk.Label(self.record_frame,text="{col_header[0]}",\
+            exec(f'self.{column_title} = ttk.Label(self.record_frame,text="{col_header[0]}",\
                                                       font=f"Helvetica {self.text_size} bold")')
 
-            exec(f'self.{column_title}.grid(row=1,column=n+1,columnspan=1, sticky = tk.W,\
+            exec(f'self.{column_title}.grid(row=1,column=n+1,columnspan=1, sticky = tkinter.W,\
                                             padx=10, pady=3)')
 
             # Add the executed self.labels for the column headers to the non_iterated_labels list
@@ -354,9 +355,9 @@ class ClericalApp:
             sep_row = 4
 
             # create a style for header separator
-            styl = tk.ttk.Style()
+            styl = ttk.Style()
             styl.configure('grey.TSeparator', background='Wheat4')
-            header_separator = tk.ttk.Separator(
+            header_separator = ttk.Separator(
                 self.record_frame,  orient='horizontal', styl='grey.TSeparator')
             if self.text_size != 10:
                 text_size_multiplier = (1+((self.text_size-10)/10))
@@ -374,7 +375,7 @@ class ClericalApp:
                     ' ', '').split(',')
 
                 # create a text label
-                exec(f'self.{col_header[0]}row{v} = tk.Text(self.record_frame,\
+                exec(f'self.{col_header[0]}row{v} = tkinter.Text(self.record_frame,\
                                                             height=1,relief="flat",bg="gray93")')
 
                 # Enter in the text from the df
@@ -383,20 +384,20 @@ class ClericalApp:
                 # configure Text so that it is a specified width, font and cant be interacted with
                 exec(f'self.{col_header[0]}row{v}.config(width=len(working_file["{col_header[0]}"][{display_i}])+10,\
                                                          font=f"Helvetica {self.text_size} {self.text_bold}",\
-                                                         state=tk.DISABLED)')
+                                                         state=tkinter.DISABLED)')
 
                 # grid the text label to the widget.
                 exec(f'self.{col_header[0]}row{v}.grid(row={row_num}, column={n+1},columnspan=1,\
                                                        padx=10, pady=3,sticky="w")')
 
                 # create a checkbutton and append it to the list of checkbutton variables.
-                exec(f'self.check_{v}= tk.IntVar()')
-                exec(f'self.checkbutton{v}=tk.Checkbutton(self.record_frame,\
+                exec(f'self.check_{v}= tkinter.IntVar()')
+                exec(f'self.checkbutton{v}=tkinter.Checkbutton(self.record_frame,\
                                                           variable=self.check_{v})')
                 exec(f'self.checkbutton{v}.deselect()')
                 exec(f'self.checkbutton{v}.grid(row={row_num}, column=0)')
 
-                exec(f"rf_separator{v}=tk.ttk.Separator(self.record_frame, orient='horizontal')")
+                exec(f"rf_separator{v}=ttk.Separator(self.record_frame, orient='horizontal')")
                 exec(f"rf_separator{v}.grid(row={sep_row}, column=0,\
                                             columnspan={num_match_cols}+1, sticky='ns',\
                                             ipadx=80*({num_match_cols+1})*{text_size_multiplier},\
@@ -407,11 +408,11 @@ class ClericalApp:
 
                 # if match column not populated yet, keep checkbutton clickable
                 if working_file.loc[display_i, 'Match'] == "":
-                    exec(f'self.checkbutton{v}.config(state=tk.NORMAL)')
+                    exec(f'self.checkbutton{v}.config(state=tkinter.NORMAL)')
 
                 # else make it unclickable
                 else:
-                    exec(f'self.checkbutton{v}.config(state=tk.DISABLED)')
+                    exec(f'self.checkbutton{v}.config(state=tkinter.DISABLED)')
 
                 row_num += 2
                 sep_row += 2
@@ -454,11 +455,11 @@ class ClericalApp:
 
         # clear commentbox entry
         if int(config['custom_settings']['commentbox']):
-            self.comment_entry.delete(0, tk.END)
+            self.comment_entry.delete(0, tkinter.END)
 
         # disable back button if no previous clusters exist
         if self.cluster_index == 0 and self.current_num_cluster_decisions() == 0:
-            self.back_button.config(state=tk.DISABLED)
+            self.back_button.config(state=tkinter.DISABLED)
         else:
             self.back_button.config(state='normal')
 
@@ -564,7 +565,7 @@ class ClericalApp:
                 # if 1 or 0 records are selected, present user with warning
                 if len(checkboxes_selected) <= 2:
 
-                    tk.messagebox.showwarning(
+                    tkinter.messagebox.showwarning(
                         message="Two or more records must be selected to make a match")
 
                     break
@@ -682,10 +683,10 @@ class ClericalApp:
         # Query whether the current record matches the total number of records
         if self.cluster_index > (self.num_clusters-1):
             # disable the match and Non-match buttons
-            self.match_button.configure(state=tk.DISABLED)
-            self.non_match_button.configure(state=tk.DISABLED)
+            self.match_button.configure(state=tkinter.DISABLED)
+            self.non_match_button.configure(state=tkinter.DISABLED)
             # inform the user that matching is finished
-            self.matchdone = tk.ttk.Label(
+            self.matchdone = ttk.Label(
                 root, text='Matching Finished. Press save and close.', foreground='red')
             self.matchdone.grid(row=1, column=0, columnspan=1)
 
@@ -722,7 +723,7 @@ class ClericalApp:
             # close down the app
             root.destroy()
         except PermissionError:
-            tk.messagebox.showwarning(
+            tkinter.messagebox.showwarning(
                 message="This clerical sample is already open in another program. Please close that program.")
 
             print(
@@ -935,7 +936,7 @@ class ClericalApp:
         '''
         # if they click yes
 
-        if tk.messagebox.askyesno("Exit", "Are you sure you want to exit WITHOUT saving?"):
+        if tkinter.messagebox.askyesno("Exit", "Are you sure you want to exit WITHOUT saving?"):
 
             # check if this is the first time they are accessing it
             if not self.matching_previously_began & self.checkpointcounter == 0:
@@ -971,7 +972,7 @@ if __name__ == "__main__":
 
     # ===================== Open Intro GUI
     # Open a file pen dialog box, allow user to choose file, then grab user credentials
-    root = tk.Tk()
+    root = tkinter.Tk()
     # Run the Intro GUI
     intro = IntroWindow(root, initdir, filetypes)
 
@@ -1036,7 +1037,7 @@ if __name__ == "__main__":
             filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
 
     except PermissionError:
-        tk.messagebox.showwarning(
+        tkinter.messagebox.showwarning(
             message="This clerical sample is open in another program. Please close this and restart CROW.")
 
     # ---- load in the required csv file as a pandas dataframe (can also do this for excel docs...)
@@ -1053,7 +1054,7 @@ if __name__ == "__main__":
     # Step 3:
     # Run the Clerical Matching Application
 
-    root = tk.Tk()
+    root = tkinter.Tk()
     mainWindow = ClericalApp(
         root, working_file, filepath_done, renamed_file, config)
     root.mainloop()
