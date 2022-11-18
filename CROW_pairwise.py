@@ -1,16 +1,16 @@
 """
 Welcome to CROW, the Clerical Resolution Online Widget, an open source project
 designed to help researchers, analysts and statiticians with their clerical
-matching needs once they have linked data together. 
-This is the master CROW python script that can easily be adapted to your linkage 
-project using the Config.ini file. To make the CROW work please edit the Config 
-file, its easier to read and will save you time! 
+matching needs once they have linked data together.
+This is the master CROW python script that can easily be adapted to your linkage
+project using the Config.ini file. To make the CROW work please edit the Config
+file, its easier to read and will save you time!
 Once you have adapted the Config file and have tested it. Put this master CROW
-python script along with your adapted config file in a shared common area 
+python script along with your adapted config file in a shared common area
 so the rest of your clerical matchers can access it. DONT forget to save this
-file as read-only. And then you are done! 
-More detail on these steps can be found on the Data Integration Sharepoint, 
-including video documentation. 
+file as read-only. And then you are done!
+More detail on these steps can be found on the Data Integration Sharepoint,
+including video documentation.
 Script was orginally created on Wed May 26 2021
 Please get in contact using the below details if you have any questions:
 Craig Scott -- Craig.Scott@ons.gov.uk -- Creator and Lead Developer
@@ -19,7 +19,6 @@ _________
 We would like to acknowledge and thank David Cobbledick and Andrew Sutton for reviewing this code.
 """
 import os
-import sys
 import getpass
 import configparser
 import tkinter
@@ -28,7 +27,7 @@ import pandas as pd
 
 class IntroWindow:
     '''
-    intro_window class function - opens a window that prompts the user to 
+    intro_window class function - opens a window that prompts the user to
     choose their matching file.
 
     '''
@@ -63,7 +62,7 @@ class IntroWindow:
 
     def open_dirfinder(self):
         '''
-        Opens a file select window, allows user to choose a file. Ends the GUI. 
+        Opens a file select window, allows user to choose a file. Ends the GUI.
         Returns
         -------
         None.
@@ -78,7 +77,7 @@ class IntroWindow:
 
 class ClericalApp:
     '''
-    ClericalApp class function - opens a window and allows users to clerically review records. 
+    ClericalApp class function - opens a window and allows users to clerically review records.
 
     '''
 
@@ -89,17 +88,17 @@ class ClericalApp:
 
         # Create the separate frames
         # 1 - Tool Frame
-        self.toolFrame = ttk.LabelFrame(root, text='Tools:')
-        self.toolFrame.grid(row=0, column=0, columnspan=1,
+        self.tool_frame = ttk.LabelFrame(root, text='Tools:')
+        self.tool_frame.grid(row=0, column=0, columnspan=1,
                             sticky='ew', padx=10, pady=10)
 
         # 2 - Record Frame
-        self.recordFrame = ttk.LabelFrame(root, text='Current Record')
-        self.recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+        self.record_frame = ttk.LabelFrame(root, text='Current Record')
+        self.record_frame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
 
         # 3 -Button Frame
-        self.buttonFrame = ttk.LabelFrame(root)
-        self.buttonFrame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
+        self.button_frame = ttk.LabelFrame(root)
+        self.button_frame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
 
         # initalise the file name variables
         self.filename_done = filename_done
@@ -116,7 +115,7 @@ class ClericalApp:
             # convert all columns apart from Match and Comments (if specified) to string
             for col_header in working_file.columns:
 
-                if (col_header == 'Match') or (col_header == 'Comments'):
+                if col_header in ('Match', 'Comments'):
                     pass
                 else:
                     # convert to string
@@ -142,7 +141,7 @@ class ClericalApp:
             # convert all columns apart from Match and Comments (if specified) to string
             for col_header in working_file.columns:
 
-                if (col_header == 'Match') or (col_header == 'Comments'):
+                if col_header in ('Match', 'Comments'):
                     pass
                 else:
                     # convert to string
@@ -182,9 +181,11 @@ class ClericalApp:
         self.difference_col_label_names = {}
 
         # Create the record_index matches
-        self.counter_matches = ttk.Label(self.recordFrame, text=f'{self.record_index+1} / {self.num_records} Records', font='Helvetica 9')
-        self.counter_matches.grid(row=0, column=len(config.options(
-            'column_headers_and_order')), columnspan=1, padx=10, sticky="e")
+        self.counter_matches = ttk.Label(self.record_frame,
+                                         text=f'{self.record_index+1} / {self.num_records} Records',
+                                         font='Helvetica 9')
+        self.counter_matches.grid(row=0, column=len(config.options('column_headers_and_order')),
+                                  columnspan=1, padx=10, sticky="e")
 
         # Create empty lists of labels
         self.non_iterated_labels = []
@@ -202,13 +203,18 @@ class ClericalApp:
 
         for iterator, name_of_dataset in enumerate(config.options('dataset_names')):
 
-            exec(f'self.{name_of_dataset} = ttk.Label(self.recordFrame,text=config["dataset_names"]["{name_of_dataset}"]+":",font=f"Helvetica {self.text_size} bold")')
+            exec(f'self.{name_of_dataset} = ttk.Label(self.record_frame,\
+                                                      text=config["dataset_names"]["{name_of_dataset}"]+":",\
+                                                      font=f"Helvetica {self.text_size} bold")')
 
-            exec(f'self.{name_of_dataset}.grid(row=3+{row_adder}, column=0, columnspan=1, padx=10, pady=3, sticky = "w")')
+            exec(f'self.{name_of_dataset}.grid(row=3+{row_adder}, column=0, columnspan=1,\
+                                               padx=10, pady=3, sticky = "w")')
 
-            exec(f'self.separator{iterator} = ttk.Separator(self.recordFrame,orient="horizontal")')
+            exec(f'self.separator{iterator} = ttk.Separator(self.record_frame,orient="horizontal")')
 
-            exec(f'self.separator{iterator}.grid(row={separator_adder},column=0,columnspan=len(config.options("column_headers_and_order"))+2, sticky = "ew")')
+            exec(f'self.separator{iterator}.grid(row={separator_adder},column=0,\
+                                                columnspan=len(config.options("column_headers_and_order"))+2,\
+                                                sticky = "ew")')
 
             # Update row_adder and separator_adder variables
             row_adder += 2
@@ -219,7 +225,8 @@ class ClericalApp:
 
         # ---------------------
         # Create column header widgets
-        self.datasource_label = ttk.Label(self.recordFrame, text='Datasource', font=f'Helvetica {self.text_size} bold')
+        self.datasource_label = ttk.Label(self.record_frame, text='Datasource',
+                                          font=f'Helvetica {self.text_size} bold')
         self.datasource_label.grid(
             row=1, column=0, columnspan=1, padx=10, pady=3)
 
@@ -231,9 +238,11 @@ class ClericalApp:
             col_header = config['column_headers_and_order'][column_title].replace(
                 ' ', '').split(',')
 
-            exec(f'self.{column_title} = ttk.Label(self.recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
+            exec(f'self.{column_title} = ttk.Label(self.record_frame,text="{col_header[0]}",\
+                                                   font=f"Helvetica {self.text_size} bold")')
 
-            exec(f'self.{column_title}.grid(row=1,column=col_header[1],columnspan=1,sticky=tkinter.W, padx=10, pady=3)')
+            exec(f'self.{column_title}.grid(row=1,column=col_header[1],\
+                                            columnspan=1,sticky=tkinter.W, padx=10, pady=3)')
 
             # Add the executed self.labels for the column headers to the non_iterated_labels list
             self.non_iterated_labels.append(column_title)
@@ -245,7 +254,7 @@ class ClericalApp:
         row_adder = 1
         dataset_row_num = []
 
-        for ii in range(len(config.options('dataset_names'))):
+        for i in range(len(config.options('dataset_names'))):
             row_adder += 2
             dataset_row_num.append(row_adder)
 
@@ -268,8 +277,8 @@ class ClericalApp:
         self.datarow_to_compare = {}
         self.datarows_to_highlight = {}
 
-        # Step 3 - Create each row label and position them in the recordFrame
-        ii = 0
+        # Step 3 - Create each row label and position them in the record_frame
+        i = 0
 
         for columnfile_title in config.options('columnfile_info_and_order'):
 
@@ -278,9 +287,11 @@ class ClericalApp:
                 ' ', '').split(',')
 
             # create a text label
-            exec(f'self.{col_header[0]} = tkinter.Text(self.recordFrame,height=1,relief="flat",bg="gray93")')
+            exec(f'self.{col_header[0]} = tkinter.Text(self.record_frame,height=1,\
+                                                       relief="flat",bg="gray93")')
             # Enter in the text from the df
-            exec(f'self.{col_header[0]}.insert("1.0",working_file["{col_header[0]}"][self.record_index])')
+            exec(f'self.{col_header[0]}.insert("1.0",\
+                                               working_file["{col_header[0]}"][self.record_index])')
             # configure Text so that it is a specified width, font and cant be interacted with
             exec(f'self.{col_header[0]}.config(width=len(working_file["{col_header[0]}"][self.record_index])+10,font=f"Helvetica {self.text_size} {self.text_bold}",state=tkinter.DISABLED)')
 
@@ -291,7 +302,8 @@ class ClericalApp:
                     # Colheader has matched
 
                     # position it on the screen
-                    exec(f'self.{col_header[0]}.grid(row=dataset_row_num[ii],column=col_header[2],columnspan=1,padx=10, pady=3,sticky="w")')
+                    exec(f'self.{col_header[0]}.grid(row=dataset_row_num[i],column=col_header[2],\
+                                                     columnspan=1,padx=10, pady=3,sticky="w")')
 
                     # check whether it is a dataset row to highlight or not
                     if col_header[1] in dataset_names_to_highlight:
@@ -316,10 +328,10 @@ class ClericalApp:
                 else:
                     # Colheader has not matched
                     # Increase to the next row
-                    ii += 1
+                    i += 1
 
             # Reset the iterator variable
-            ii = 0
+            i = 0
 
             self.iterated_labels.append(col_header[0])
 
@@ -335,14 +347,20 @@ class ClericalApp:
         # ---------------------
         # Sort out the buttons by frame
 
-        # =====  recordFrame
+        # =====  record_frame
 
     def draw_button_frame(self):
 
         # Match/Non-Match buttons
-        self.match_button = tkinter.Button(self.buttonFrame, text='Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(1), bg='DarkSeaGreen1')
+        self.match_button = tkinter.Button(self.button_frame, text='Match',
+                                           font=f'Helvetica {self.text_size}',
+                                           command=lambda: self.update_index(1),
+                                           bg='DarkSeaGreen1')
         self.match_button.grid(row=0, column=0, columnspan=1, padx=15, pady=10)
-        self.non_match_button = tkinter.Button(self.buttonFrame, text='Non-Match', font=f'Helvetica {self.text_size}', command=lambda: self.update_index(0), bg='light salmon')
+        self.non_match_button = tkinter.Button(self.button_frame, text='Non-Match',
+                                               font=f'Helvetica {self.text_size}',
+                                               command=lambda: self.update_index(0),
+                                               bg='light salmon')
         self.non_match_button.grid(
             row=0, column=1, columnspan=1, padx=15, pady=10)
 
@@ -356,11 +374,12 @@ class ClericalApp:
             # Get the position info from button 1
             info_button = self.match_button.grid_info()
 
-            self.comment_label = ttk.Label(self.buttonFrame, text='Comment:', font=f'Helvetica {self.text_size} bold')
+            self.comment_label = ttk.Label(self.button_frame, text='Comment:',
+                                           font=f'Helvetica {self.text_size} bold')
             self.comment_label.grid(
                 row=info_button['row']+1, column=0, columnspan=1, sticky='e')
 
-            self.comment_entry = ttk.Combobox(self.buttonFrame)
+            self.comment_entry = ttk.Combobox(self.button_frame)
             self.comment_entry.grid(
                 row=info_button['row']+1, column=1, columnspan=3, sticky='sew', padx=5, pady=5)
 
@@ -368,41 +387,58 @@ class ClericalApp:
                 self.comment_entry['values'] = (
                     config['custom_settings']['comment_values']).split(",")
 
-        # =====  toolFrame
+        # =====  tool_frame
 
     def draw_tool_frame(self):
 
         # Create labels for tools bar
-        self.separator_tf_1 = ttk.Separator(self.toolFrame, orient='vertical')
+        self.separator_tf_1 = ttk.Separator(self.tool_frame, orient='vertical')
         self.separator_tf_1.grid(
             row=0, column=3, rowspan=1, sticky='ns', padx=10, pady=5)
-        self.separator_tf_2 = ttk.Separator(self.toolFrame, orient='vertical')
+        self.separator_tf_2 = ttk.Separator(self.tool_frame, orient='vertical')
         self.separator_tf_2.grid(
             row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
 
         # Back button
         back_symbol = u"\u23CE"
-        self.back_button = tkinter.Button(self.buttonFrame, text=f'Back {back_symbol}', font=f'Helvetica {self.text_size}', command=lambda: self.go_back())
+        self.back_button = tkinter.Button(self.button_frame, text=f'Back {back_symbol}',
+                                          font=f'Helvetica {self.text_size}',
+                                          command=lambda: self.go_back())
         self.back_button.grid(row=0, column=2, columnspan=1, padx=15, pady=10)
         # Show hide differences
-        self.showhidediff = tkinter.Button(self.toolFrame, text='Show/Hide Differences', font=f'Helvetica {self.text_size}', command=lambda: self.show_hide_differences())
+        self.showhidediff = tkinter.Button(self.tool_frame, text='Show/Hide Differences',
+                                           font=f'Helvetica {self.text_size}',
+                                           command=lambda: self.show_hide_differences())
         self.showhidediff.grid(row=0, column=2, columnspan=1, padx=5, pady=5)
         # Change text size buttons
         increase_text_size_symbol = u"\U0001F5DA"
         decrease_text_size_symbol = u"\U0001F5DB"
 
-        self.text_smaller_button = tkinter.Button(self.toolFrame, text=f'{decrease_text_size_symbol}-', font=f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda: self.change_text_size(0))
+        self.text_smaller_button = tkinter.Button(self.tool_frame,
+                                                  text=f'{decrease_text_size_symbol}-',
+                                                  font=f'Helvetica {self.text_size + 3}',
+                                                  height=1, width=3,
+                                                  command=lambda: self.change_text_size(0))
         self.text_smaller_button.grid(row=0, column=4, sticky='e', pady=5)
-        self.text_bigger_button = tkinter.Button(self.toolFrame, text=f'{increase_text_size_symbol}+', height=1, width=3, font=f'Helvetica {self.text_size + 3}', command=lambda: self.change_text_size(1))
+        self.text_bigger_button = tkinter.Button(self.tool_frame,
+                                                 text=f'{increase_text_size_symbol}+',
+                                                 height=1, width=3,
+                                                 font=f'Helvetica {self.text_size + 3}',
+                                                 command=lambda: self.change_text_size(1))
         self.text_bigger_button.grid(
             row=0, column=5, sticky='w', pady=5, padx=2)
         # Make text bld button
         bold_symbol = u"\U0001D5D5"
-        self.bold_button = tkinter.Button(self.toolFrame, text=f'{bold_symbol}', font=f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda: self.make_text_bold())
+        self.bold_button = tkinter.Button(self.tool_frame, text=f'{bold_symbol}',
+                                          font=f'Helvetica {self.text_size + 3}',
+                                          height=1, width=3
+                                          , command=lambda: self.make_text_bold())
         self.bold_button.grid(row=0, column=6, sticky='w', pady=5)
         # Save and close button
         save_symbol = u"\U0001F4BE"
-        self.save_button = tkinter.Button(self.toolFrame, text=f'Save and Close {save_symbol}', font=f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
+        self.save_button = tkinter.Button(self.tool_frame, text=f'Save and Close {save_symbol}',
+                                          font=f'Helvetica {self.text_size}',
+                                          command=lambda: self.save_and_close())
         self.save_button.grid(row=0, column=8, columnspan=1,
                               sticky='e', padx=5, pady=5)
 
@@ -471,11 +507,12 @@ class ClericalApp:
                     # if length of the comparator is less highlighter make it yellow as well
                     if len(working_file[self.datarow_to_compare[key][0]][self.record_index]) < len(working_file[f"{vals}"][self.record_index]):
 
-                        char_consistent.append([len(working_file[self.datarow_to_compare[key][0]][self.record_index]), len(working_file[f"{vals}"][self.record_index])])
+                        char_consistent.append([len(working_file[self.datarow_to_compare[key][0]][self.record_index]),
+                                                len(working_file[f"{vals}"][self.record_index])])
 
                         count = 0
 
-                    # for each tag number in char consistent create the tag and save the tag name information
+                    # for each tag number create the tag and save the tag name information
                     for tag_adder in range(len(char_consistent)):
 
                         if vals in self.difference_col_label_names:
@@ -486,9 +523,12 @@ class ClericalApp:
 
                             self.difference_col_label_names[vals] = [f'{vals}_diff{str(tag_adder)}']
 
-                        exec(f'self.{vals}.tag_add(f"{vals}_diff{str(tag_adder)}",f"1.{char_consistent[tag_adder][0]}", f"1.{char_consistent[tag_adder][-1]}")')
+                        exec(f'self.{vals}.tag_add(f"{vals}_diff{str(tag_adder)}",\
+                                                  f"1.{char_consistent[tag_adder][0]}",\
+                                                  f"1.{char_consistent[tag_adder][-1]}")')
 
-                        exec(f'self.{vals}.tag_config(f"{vals}_diff{str(tag_adder)}",background="yellow",foreground = "black")')
+                        exec(f'self.{vals}.tag_config(f"{vals}_diff{str(tag_adder)}",\
+                                                      background="yellow",foreground = "black")')
 
         else:
             # reset this variable
@@ -518,8 +558,8 @@ class ClericalApp:
         self.update_gui()
 
     def get_starting_index(self):
-        ''' 
-        This function finds the first row in column index [-1] that has a value not equal to zero or 1
+        '''
+        This function finds the first row in column index that != 0 or 1
         and returns the index number
 
         Parameters
@@ -528,7 +568,7 @@ class ClericalApp:
 
         Returns
         -------
-        i : int 
+        i : int
             index number that relates to the next record to be matched
 
         '''
@@ -561,7 +601,7 @@ class ClericalApp:
     def update_gui(self):
         '''
         A simple function that updates the different GUI labels based on the
-        records. 
+        records.
 
         Parameters
         ----------
@@ -577,15 +617,15 @@ class ClericalApp:
 
                 exec(f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")')
 
-            for widget in self.recordFrame.winfo_children():
+            for widget in self.record_frame.winfo_children():
 
                 widget.destroy()
 
-            for widget in self.toolFrame.winfo_children():
+            for widget in self.tool_frame.winfo_children():
 
                 widget.destroy()
 
-            for widget in self.buttonFrame.winfo_children():
+            for widget in self.button_frame.winfo_children():
 
                 widget.destroy()
             self.draw_record_frame()
@@ -605,7 +645,8 @@ class ClericalApp:
                 self.back_button.config(state='normal')
         elif self.check_matching_done() == 1:
             tkinter.messagebox.showinfo(
-                'Matching Finished', 'Maching Finished Press save and close or use the back button to return to the previous record')
+                'Matching Finished',
+                'Press save and close or use the back button to return to the previous record')
 
     def update_df(self, match_res):
         '''
@@ -628,14 +669,13 @@ class ClericalApp:
 
     def save_at_checkpoint(self):
         '''
-        This function saves the data every at an interval defined in the congig file (num_records_checkpoint).
-        This back up the data to that point.
+        This function saves the data at an interval defined in the config file
+        (num_records_checkpoint).
         Returns
         -------
         None.
         '''
 
-        # check whether the record_index is a multiple of recods_per_checkpoint & record_index is less than total num records
         if (self.record_index % self.records_per_checkpoint == 0) & (self.record_index < self.num_records):
             # checkpoint it by saving it
             working_file.to_csv(self.filename_old, index=False)
@@ -654,16 +694,16 @@ class ClericalApp:
 
     def check_matching_done(self):
         '''
-        This function checks if the number of iterations is greater than the number of 
-        rows; and breaks the loop if so. 
+        This function checks if the number of iterations is greater than the number of
+        rows; and breaks the loop if so.
         Returns
         -------
         Boolean value, this dictates whether to stop displaying any more records
-        and close the app or continue updating the app 
+        and close the app or continue updating the app
         1 = Stop The GUI
         0 = Continue updating the GUI
         '''
-        # Query whether the current record matches the total number of records (end of the terminal)
+        # Query whether the current record matches the total number of records
         if self.record_index > (self.num_records-1):
             # disable the match and Non-match buttons
             self.match_button.configure(state=tkinter.DISABLED)
@@ -707,10 +747,10 @@ class ClericalApp:
 
     def update_index(self, event):
         '''
-        This function updates the overall index variable which cycles through 
+        This function updates the overall index variable which cycles through
         the Clerical Matching (CM) file. Additional functonality is directing
-        to other functions to update the CM file and finally updating the GUI 
-        the next record to be clerically matched. 
+        to other functions to update the CM file and finally updating the GUI
+        the next record to be clerically matched.
 
         Parameters
         ----------
@@ -741,7 +781,7 @@ class ClericalApp:
 
     def go_back(self):
         '''
-        This function allows users to go back through records and change any of their matching decisions
+        This function allows users to go back to previous records
 
         Parameters
         ----------
@@ -776,13 +816,13 @@ class ClericalApp:
 
     def change_text_size(self, size_change):
         '''
-        This function will increase or decrease the size of the text. It then 
+        This function will increase or decrease the size of the text. It then
         updates the GUI.
         It also changes the size of the window to fit the text.
         Parameters
         ----------
         size_change : int - boolean
-            Will change the text size based on argument passed. 
+            Will change the text size based on argument passed.
         Returns
         -------
         None.
@@ -795,20 +835,20 @@ class ClericalApp:
             self.text_size -= 1
             # # if commentbox specified in config
 
-        # clear recordframe
+        # clear record_frame
         self.update_gui()
 
     def on_exit(self):
         '''
         When you click to exit, this function is called, which creates a message
-        box that questions whether the user wants to Exit without saving 
+        box that questions whether the user wants to Exit without saving
 
         '''
         # if they click yes
         if tkinter.messagebox.askyesno("Exit", "Are you sure you want to exit WITHOUT saving?"):
 
             # check if this is the first time they are accessing it
-            if (self.matching_previously_began == False) & (self.checkpointcounter == 0):
+            if not self.matching_previously_began & self.checkpointcounter != 0:
                 # then rename the file removing their intial and 'inProgress' tag
                 os.rename(self.filename_old, '_'.join(
                     self.filename_old.split('_')[0:-2]) + '.csv')
@@ -855,11 +895,11 @@ if __name__ == "__main__":
 
     # ------- Create filepath variables, load in the selected data and specify column variables
 
-    # Check if the user running it has selected this file before (this means they have done some of the matching already and are coming back to it)
+    # Check if the user running it has matched records in this file before
     if 'inProgress' in intro.fileselect.split('/')[-1]:
 
         # If it is the same user
-        if (user in intro.fileselect.split('/')[-1]):
+        if user in intro.fileselect.split('/')[-1]:
 
             # Dont rename the file
             renamed_file = intro.fileselect
@@ -880,7 +920,7 @@ if __name__ == "__main__":
     elif 'DONE' in intro.fileselect.split('/')[-1]:
 
         # If it is the same user
-        if (user in intro.fileselect.split('/')[-1]):
+        if user in intro.fileselect.split('/')[-1]:
             # dont change filepath done - keep it as it is
             filepath_done = intro.fileselect
 

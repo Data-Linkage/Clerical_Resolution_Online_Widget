@@ -196,8 +196,8 @@ class ClericalApp:
         self.text_bold_boolean = 0
         self.text_bold = ''
 
-        self.s = ttk.Style()
-        self.s.configure('.', font=('Helvetica', f'{self.text_size}'))
+        self.style = ttk.Style()
+        self.style.configure('.', font=('Helvetica', f'{self.text_size}'))
 
         # SHOW/HIDE DIFFERENCES CLASS VARAIBLES
         # toggle on and off
@@ -220,14 +220,14 @@ class ClericalApp:
         self.draw_tool_frame()
 
     def get_starting_cluster_id(self):
-      """
-      returns the cluster id of the first cluster that does not have a value in the match field.
-      """
-      for i in working_file.index:
-          if working_file.loc[i, 'Match'] == '':
-              return working_file.loc[i, 'cluster_sequential_number']
-          else:
-              pass
+        """
+        returns the cluster id of the first cluster that does not have a value in the match field.
+        """
+        for i in working_file.index:
+            if working_file.loc[i, 'Match'] == '':
+                return working_file.loc[i, 'cluster_sequential_number']
+            else:
+                pass
 
     def draw_button_frame(self):
         # =====  button_frame - for match/non-match/back buttons
@@ -317,7 +317,7 @@ class ClericalApp:
             self.counter_matches = ttk.Label(self.record_frame,
                                                text=f'{self.cluster_index+1} / {self.num_clusters} Clusters',
                                                font=f'Helvetica {self.text_size}')
-            self.counter_matches.grid(row=0, 
+            self.counter_matches.grid(row=0,
                                       column=len(config.options('column_headers_and_order')),
                                       columnspan=1, padx=10, sticky="e")
 
@@ -364,7 +364,7 @@ class ClericalApp:
 
             elif self.text_size == 10:
                 text_size_multiplier = 1
-####################################################################################################
+
                 # grid separator
             header_separator.grid(row=2, column=0, columnspan=num_match_cols+1, sticky='ns',
                                   ipadx=80*(num_match_cols+1)*text_size_multiplier, ipady=1)
