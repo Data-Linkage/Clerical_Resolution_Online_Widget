@@ -2,31 +2,21 @@
 Welcome to CROW, the Clerical Resolution Online Widget, an open source project
 designed to help researchers, analysts and statiticians with their clerical
 matching needs once they have linked data together. 
-
 This is the master CROW python script that can easily be adapted to your linkage 
 project using the Config.ini file. To make the CROW work please edit the Config 
 file, its easier to read and will save you time! 
-
 Once you have adapted the Config file and have tested it. Put this master CROW
 python script along with your adapted config file in a shared common area 
 so the rest of your clerical matchers can access it. DONT forget to save this
 file as read-only. And then you are done! 
-
 More detail on these steps can be found on the Data Integration Sharepoint, 
 including video documentation. 
-
 Script was orginally created on Wed May 26 2021
-
 Please get in contact using the below details if you have any questions:
-
-
 Craig Scott -- Craig.Scott@ons.gov.uk -- Creator and Lead Developer
-
 Hannah O'Dair -- Hannah.O'Dair@ons.gov.uk -- Co-Lead Developer
-
 _________
 We would like to acknowledge and thank David Cobbledick and Andrew Sutton for reviewing this code.
-
 """
 from tkinter import *
 from tkinter import messagebox
@@ -72,11 +62,9 @@ class IntroWindow:
     def open_dirfinder(self):
         '''
         Opens a file select window, allows user to choose a file. Ends the GUI. 
-
         Returns
         -------
         None.
-
         '''
         # Open up a window that allows the user to choose a matching file
         self.fileselect = fd.askopenfilename(initialdir=self.init_dir, title="Please select a file:", filetypes=self.files_info)
@@ -99,12 +87,16 @@ class ClericalApp:
         
         # Create the separate frames 
         # 1 - Tool Frame 
-        toolFrame = ttk.LabelFrame(root, text='Tools:')
-        toolFrame.grid(row=0, column=0, columnspan=1, sticky = 'ew', padx=10, pady=10)
+        self.toolFrame = ttk.LabelFrame(root, text='Tools:')
+        self.toolFrame.grid(row=0, column=0, columnspan=1, sticky = 'ew', padx=10, pady=10)
         
         # 2 - Record Frame
-        recordFrame = ttk.LabelFrame(root, text='Current Record')
-        recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+        self.recordFrame = ttk.LabelFrame(root, text='Current Record')
+        self.recordFrame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+        
+        #3 -Button Frame 
+        self.buttonFrame=ttk.LabelFrame(root)
+        self.buttonFrame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
         
         # initalise the file name variables
         self.filename_done = filename_done
@@ -185,25 +177,29 @@ class ClericalApp:
         self.difference_col_label_names = {}
 
         # Create the record_index matches
-        self.counter_matches = ttk.Label(recordFrame, text=f'{self.record_index+1} / {self.num_records} Records', font='Helvetica 9')
+        self.counter_matches = ttk.Label(self.recordFrame, text=f'{self.record_index+1} / {self.num_records} Records', font='Helvetica 9')
         self.counter_matches.grid(row=0, column=len(config.options('column_headers_and_order')), columnspan=1, padx=10, sticky="e") 
         
         # Create empty lists of labels 
         self.non_iterated_labels = []
         self.iterated_labels = []
         
+        self.draw_button_frame()
+        self.draw_record_frame()
+        self.draw_tool_frame()
         # ---------------------
-        # Create dataset name widgets and separators between records
+        # Create dataset name widgets and separators between 
+    def draw_record_frame(self):
         row_adder = 0
         separator_adder = 2
         
         for iterator, name_of_dataset in enumerate(config.options('dataset_names')):
             
-            exec(f'self.{name_of_dataset} = ttk.Label(recordFrame,text=config["dataset_names"]["{name_of_dataset}"]+":",font=f"Helvetica {self.text_size} bold")')
+            exec(f'self.{name_of_dataset} = ttk.Label(self.recordFrame,text=config["dataset_names"]["{name_of_dataset}"]+":",font=f"Helvetica {self.text_size} bold")')
             
             exec(f'self.{name_of_dataset}.grid(row=3+{row_adder}, column=0, columnspan=1, padx=10, pady=3, sticky = "w")')
             
-            exec(f'self.separator{iterator} = ttk.Separator(recordFrame,orient="horizontal")')
+            exec(f'self.separator{iterator} = ttk.Separator(self.recordFrame,orient="horizontal")')
             
             exec(f'self.separator{iterator}.grid(row={separator_adder},column=0,columnspan=len(config.options("column_headers_and_order"))+2, sticky = "ew")')
             
@@ -216,7 +212,7 @@ class ClericalApp:
 
         # ---------------------
         # Create column header widgets           
-        self.datasource_label = ttk.Label(recordFrame,text='Datasource', font=f'Helvetica {self.text_size} bold')
+        self.datasource_label = ttk.Label(self.recordFrame,text='Datasource', font=f'Helvetica {self.text_size} bold')
         self.datasource_label.grid(row=1, column=0, columnspan =1, padx=10, pady=3)
 
         # Create column header labels and place all them on row 1
@@ -226,7 +222,7 @@ class ClericalApp:
 
             col_header = config['column_headers_and_order'][column_title].replace(' ','').split(',')
             
-            exec(f'self.{column_title} = ttk.Label(recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
+            exec(f'self.{column_title} = ttk.Label(self.recordFrame,text="{col_header[0]}",font=f"Helvetica {self.text_size} bold")')
 
             exec(f'self.{column_title}.grid(row=1,column=col_header[1],columnspan=1,sticky=W, padx=10, pady=3)')
             
@@ -270,11 +266,11 @@ class ClericalApp:
             col_header = config['columnfile_info_and_order'][columnfile_title].replace(' ','').split(',')
             
             # create a text label
-            exec(f'self.{col_header[0]} = Text(recordFrame,height=1,relief="flat",bg="gray93")')
+            exec(f'self.{col_header[0]} = Text(self.recordFrame,height=1,relief="flat",bg="gray93")')
             # Enter in the text from the df
             exec(f'self.{col_header[0]}.insert("1.0",working_file["{col_header[0]}"][self.record_index])')
             # configure Text so that it is a specified width, font and cant be interacted with
-            exec(f'self.{col_header[0]}.config(width=len(working_file["{col_header[0]}"][self.record_index])+10,font=f"Helvetica {self.text_size}",state=DISABLED)')
+            exec(f'self.{col_header[0]}.config(width=len(working_file["{col_header[0]}"][self.record_index])+10,font=f"Helvetica {self.text_size} {self.text_bold}",state=DISABLED)')
            
             # cycle through each dataset name to know which row to put the label on
             for name in name_of_datasets:
@@ -311,6 +307,15 @@ class ClericalApp:
             ii = 0
             
             self.iterated_labels.append(col_header[0])
+        
+        if not self.show_hide_diff:
+            self.show_hide_diff = 1
+        
+            self.show_hide_differences()
+        else: 
+            self.show_hide_diff = 0
+            
+            self.show_hide_differences()
             
  
  
@@ -318,50 +323,65 @@ class ClericalApp:
         # Sort out the buttons by frame
         
         # =====  recordFrame 
+    def draw_button_frame(self):
         
         # Match/Non-Match buttons
-        self.match_button = ttk.Button(recordFrame, text='Match', command=lambda: self.update_index(1))
-        self.match_button.grid(row=len(config.options('dataset_names'))*3, column=1, columnspan=1, padx=10, pady=10)
-        self.non_match_button = ttk.Button(recordFrame, text='Non-Match', command=lambda: self.update_index(0))
-        self.non_match_button.grid(row=len(config.options('dataset_names'))*3, column=2, columnspan=1, padx=10, pady=10)
+        self.match_button = Button(self.buttonFrame, text='Match', font =f'Helvetica {self.text_size}', command=lambda: self.update_index(1), bg='DarkSeaGreen1')
+        self.match_button.grid(row=0, column=0, columnspan=1, padx=15, pady=10)
+        self.non_match_button = Button(self.buttonFrame, text='Non-Match',font =f'Helvetica {self.text_size}', command=lambda: self.update_index(0), bg='light salmon')
+        self.non_match_button.grid(row=0, column=1, columnspan=1, padx=15, pady=10)
         
         # Add in the comment widget based on config option
         if int(config['custom_settings']['commentbox']):
             
+            # create comments column if one doesn't exist
+            if 'Comments' not in working_file:
+                working_file['Comments'] = ''
+
             # Get the position info from button 1
             info_button = self.match_button.grid_info()
             
-            self.comment_label = ttk.Label(recordFrame,text='Comment:', font='Helvetica 10 bold')
+            self.comment_label = ttk.Label(self.buttonFrame,text='Comment:', font=f'Helvetica {self.text_size} bold')
             self.comment_label.grid(row = info_button['row']+1, column =0, columnspan=1, sticky='e')
             
-            self.comment_entry = ttk.Entry(recordFrame)
+            self.comment_entry = ttk.Combobox(self.buttonFrame)
             self.comment_entry.grid(row = info_button['row']+1, column =1, columnspan=3, sticky='sew', padx=5, pady=5)
-            self.comment_entry.insert(0, working_file['Comments'][self.record_index])
+            
+            if (config['custom_settings']['comment_values']) is not None:
+                self.comment_entry['values'] = (config['custom_settings']['comment_values']).split(",")
+
         
         # =====  toolFrame         
+    def draw_tool_frame(self):
         
         # Create labels for tools bar
-        self.separator_tf_1 = ttk.Separator(toolFrame, orient='vertical')
+        self.separator_tf_1 = ttk.Separator(self.toolFrame, orient='vertical')
         self.separator_tf_1.grid(row=0, column=3, rowspan=1, sticky='ns', padx=10, pady=5)
-        self.separator_tf_2 = ttk.Separator(toolFrame, orient='vertical') 
+        self.separator_tf_2 = ttk.Separator(self.toolFrame, orient='vertical') 
         self.separator_tf_2.grid(row=0, column=7, rowspan=1, sticky='ns', padx=10, pady=5)
         
         # Back button
-        self.back_button = ttk.Button(toolFrame, text='Back 🢤', command=lambda: self.go_back())
-        self.back_button.grid(row=0, column=1, columnspan=1, padx=5, pady=5)
+        back_symbol = u"\u23CE"
+        self.back_button = Button(self.buttonFrame, text=f'Back {back_symbol}', font =f'Helvetica {self.text_size}', command=lambda: self.go_back())
+        self.back_button.grid(row=0, column=2, columnspan=1, padx=15, pady=10)
         # Show hide differences
-        self.showhidediff = ttk.Button(toolFrame, text='Show/Hide Differences', command=lambda: self.show_hide_differences())
+        self.showhidediff = Button(self.toolFrame, text='Show/Hide Differences',font =f'Helvetica {self.text_size}', command=lambda: self.show_hide_differences())
         self.showhidediff.grid(row=0, column=2, columnspan=1, padx=5, pady=5)
         # Change text size buttons
-        self.text_smaller_button = Button(toolFrame, text='🗚-', height=1, width=3, command=lambda: self.change_text_size(0))
+        increase_text_size_symbol = u"\U0001F5DA"
+        decrease_text_size_symbol = u"\U0001F5DB"
+        
+        self.text_smaller_button = Button(self.toolFrame, text=f'{decrease_text_size_symbol}-', font =f'Helvetica {self.text_size + 3}',height=1, width=3, command=lambda: self.change_text_size(0))
         self.text_smaller_button.grid(row=0, column=4, sticky='e', pady=5)
-        self.text_bigger_button = Button(toolFrame, text='🗚+', height=1, width=3, command=lambda: self.change_text_size(1))
+        self.text_bigger_button = Button(self.toolFrame, text=f'{increase_text_size_symbol}+', height=1, width=3, font =f'Helvetica {self.text_size + 3}', command=lambda: self.change_text_size(1))
         self.text_bigger_button.grid(row=0, column=5, sticky='w', pady=5, padx=2)  
         # Make text bld button
-        self.bold_button = Button(toolFrame,text='B', font='Helvetica 9 bold', height=1, width=3, command=lambda:self.make_text_bold())
+        bold_symbol = u"\U0001D5D5"
+        self.bold_button = Button(self.toolFrame,text=f'{bold_symbol}', font =f'Helvetica {self.text_size + 3}', height=1, width=3, command=lambda:self.make_text_bold())
         self.bold_button.grid(row=0, column=6, sticky='w', pady=5)
         # Save and close button
-        self.save_button = ttk.Button(toolFrame, text='Save and Close 🖫', command=lambda: self.save_and_close())
+        save_symbol = 	u"\U0001F4BE"
+        self.save_button = Button(self.toolFrame, text=f'Save and Close {save_symbol}', font =f'Helvetica {self.text_size}', command=lambda: self.save_and_close())
         self.save_button.grid(row=0, column=8, columnspan=1, sticky='e', padx=5, pady=5)
         
 
@@ -449,6 +469,8 @@ class ClericalApp:
                         exec(f'self.{vals}.tag_add(f"{vals}_diff{str(tag_adder)}",f"1.{char_consistent[tag_adder][0]}", f"1.{char_consistent[tag_adder][-1]}")')
                                
                         exec(f'self.{vals}.tag_config(f"{vals}_diff{str(tag_adder)}",background="yellow",foreground = "black")')
+                        
+
                             
                         
                             
@@ -468,11 +490,9 @@ class ClericalApp:
     def make_text_bold(self):   
         '''
         Makes the text bold or not
-
         Returns
         -------
         None.
-
         '''
         if not self.text_bold_boolean:
             self.text_bold_boolean = 1
@@ -481,8 +501,7 @@ class ClericalApp:
         else:
             self.text_bold_boolean = 0
             self.text_bold = ''
-        
-        # update the gui
+
         self.update_gui()
  
     def get_starting_index(self):
@@ -542,53 +561,56 @@ class ClericalApp:
         Returns
         -------
         None.
-
         '''
-        self.counter_matches.config(text=f'{self.record_index+1} / {self.num_records} Records', font=f'Helvetica {self.text_size}')
-        self.datasource_label.config(font=f'Helvetica {self.text_size} bold')
-        
+        if self.check_matching_done()==0:
         # configure the non-iterable labels
-        for non_iter_columns in self.non_iterated_labels:
+            for non_iter_columns in self.non_iterated_labels:
             
-            exec(f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")')
+                exec(f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")')
+        
+            for widget in self.recordFrame.winfo_children():
+            
+                widget.destroy()
+        
+            for widget in self.toolFrame.winfo_children():
+            
+                widget.destroy()
+                        
+            for widget in self.buttonFrame.winfo_children():
+            
+                widget.destroy()
+            self.draw_record_frame()
+            self.draw_button_frame()
+            self.draw_tool_frame()
+            if not self.show_hide_diff:
+                self.show_hide_diff = 1
+        
+                self.show_hide_differences()
+            else: 
+                self.show_hide_diff = 0
+            
+                self.show_hide_differences()
+            if self.record_index==0: 
+                self.back_button.config(state= DISABLED)
+            else:
+                self.back_button.config(state= 'normal')
+        elif self.check_matching_done()==1: 
+            messagebox.showinfo('Matching Finished','Maching Finished Press save and close or use the back button to return to the previous record')
+            
+        
+            
 
-        # configure the non-iterable labels
-        for iter_columns in self.iterated_labels:
-            
-            exec(f'self.{iter_columns}.config(state=NORMAL)')
-            
-            exec(f'self.{iter_columns}.delete("1.0","end")')
-            
-            exec(f'self.{iter_columns}.insert("1.0",working_file["{iter_columns}"][self.record_index])')
-            
-            exec(f'self.{iter_columns}.config(width = len(working_file["{iter_columns}"][self.record_index])+ 10, font=f"Helvetica {self.text_size} {self.text_bold}", state=DISABLED)')
-        
-        if int(config['custom_settings']['commentbox']):
-            self.comment_entry.delete(0, END)
-            self.comment_entry.insert(0, working_file['Comments'][self.record_index])
-            
-        if not self.show_hide_diff:
-            self.show_hide_diff = 1
-        
-            self.show_hide_differences()
-        else: 
-            self.show_hide_diff = 0
-            
-            self.show_hide_differences()
     
     def update_df(self, match_res):
         '''
         Updates the dataframe with the matching outcome. 1 == Match, 0 == Non-match
-
         Parameters
         ----------
         match_res : int - boolean.
             Adds a 1 or a 0 in the column
-
         Returns
         -------
         None.
-
         '''
         
         # update df
@@ -602,11 +624,9 @@ class ClericalApp:
         '''
         This function saves the data every at an interval defined in the congig file (num_records_checkpoint).
         This back up the data to that point.
-
         Returns
         -------
         None.
-
         '''
 
         # check whether the record_index is a multiple of recods_per_checkpoint & record_index is less than total num records
@@ -631,14 +651,12 @@ class ClericalApp:
         '''
         This function checks if the number of iterations is greater than the number of 
         rows; and breaks the loop if so. 
-
         Returns
         -------
         Boolean value, this dictates whether to stop displaying any more records
         and close the app or continue updating the app 
         1 = Stop The GUI
         0 = Continue updating the GUI
-
         '''
         # Query whether the current record matches the total number of records (end of the terminal)
         if self.record_index > (self.num_records-1): 
@@ -657,16 +675,13 @@ class ClericalApp:
     def save_and_close(self):
         '''
         This function saves the working_file dataframe and closes the GUI
-
         Parameters
         ----------
         filepath : string type
             This should be the exact directory that will be saved.
-
         Returns
         -------
         None.
-
         '''
         # Check whether matching has now finished (i.e. they have completed all records)
         if self.record_index == (self.num_records): 
@@ -696,11 +711,9 @@ class ClericalApp:
         ----------
         event : int - boolean
             This determines where to add a 1 or a 0 to the df
-
         Returns
         -------
         None.
-
         ''' 
         # Update the Match Column with the Matchers Choice
         self.update_df(event)
@@ -729,7 +742,6 @@ class ClericalApp:
         Parameters
         ----------
         None
-
         Returns
         -------
         None.
@@ -764,16 +776,13 @@ class ClericalApp:
         This function will increase or decrease the size of the text. It then 
         updates the GUI.
         It also changes the size of the window to fit the text.
-
         Parameters
         ----------
         size_change : int - boolean
             Will change the text size based on argument passed. 
-
         Returns
         -------
         None.
-
         '''
         # depending on the argument passed - increase or decrease the text size/geometry paramaters
         if size_change:
@@ -781,9 +790,11 @@ class ClericalApp:
 
         else:
             self.text_size -= 1
+             # # if commentbox specified in config
 
-        # update the gui
+        # clear recordframe
         self.update_gui()
+
         
     def on_exit(self):
         '''
@@ -913,5 +924,4 @@ if __name__ == "__main__":
     mainWindow = ClericalApp(root, working_file, filepath_done, renamed_file, config)
     root.mainloop()
 
-    print("\n Number of records matched:", str(len(working_file[working_file.Match != ""])))
-    
+    print("\n Number of records matched:", str(len(working_file[working_file.Match != ""]))) 
