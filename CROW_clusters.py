@@ -219,14 +219,14 @@ class ClericalApp:
         self.draw_tool_frame()
 
     def get_starting_cluster_id(self):
-       """
-       returns the cluster id of the first cluster that does not have a value in the match field.
-       """
-        for i in working_file.index:
-            if working_file.loc[i, 'Match'] == '':
-                return working_file.loc[i, 'cluster_sequential_number']
-            else:
-                pass
+      """
+      returns the cluster id of the first cluster that does not have a value in the match field.
+      """
+      for i in working_file.index:
+          if working_file.loc[i, 'Match'] == '':
+              return working_file.loc[i, 'cluster_sequential_number']
+          else:
+              pass
 
     def draw_button_frame(self):
         # =====  button_frame - for match/non-match/back buttons
