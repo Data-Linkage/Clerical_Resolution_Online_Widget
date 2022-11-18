@@ -25,7 +25,7 @@ Anthony G Edwards -- Anthony.G.Edwards@ons.gov.uk -- Co-Lead Developer
 
 Craig Scott -- Craig.Scott@ons.gov.uk -- Creator
 You can also contact the linkage hub at:
-    
+
 linkage.hub@ons.gov.uk
 
 We would like to acknowledge and thank David Cobbledick and Andrew Sutton for
@@ -35,8 +35,8 @@ import os
 import sys
 import getpass
 import configparser
-import pandas as pd
 import tkinter as tk
+import pandas as pd
 
 class IntroWindow:
     '''
@@ -219,13 +219,8 @@ class ClericalApp:
         self.draw_tool_frame()
 
     def get_starting_cluster_id(self):
-        """
-       generates the cluster id number of the first cluster that does not have a value in the match field.
-
-       Returns
-       -------
-       starting_cluster_id: the sequential cluster id of the first record with an empty 'Match' column
-
+       """
+       returns the cluster id of the first cluster that does not have a value in the match field.
        """
         for i in working_file.index:
             if working_file.loc[i, 'Match'] == '':
@@ -291,23 +286,27 @@ class ClericalApp:
         self.text_smaller_button.pack(side=tk.LEFT, padx=5)
 
         self.text_bigger_button = tk.Button(self.tool_frame, font=f'Helvetica {self.text_size}',
-                                         text='A+', height=1, width=3, command=lambda: self.change_text_size(1))
+                                            text='A+', height=1, width=3,
+                                            command=lambda: self.change_text_size(1))
         self.text_bigger_button.pack(side=tk.LEFT, padx=5)
 
         # Make text bld button
-        self.bold_button = tk.Button(self.tool_frame, text='B', font=f'Helvetica {self.text_size} bold',
-                                  height=1, width=3, command=lambda: self.make_text_bold(config, working_file))
+        self.bold_button = tk.Button(self.tool_frame, text='B',
+                                     font=f'Helvetica {self.text_size} bold', height=1, width=3,
+                                     command=lambda: self.make_text_bold(config, working_file))
         self.bold_button.pack(side=tk.LEFT, padx=5)
 
         # Save and close button
-        self.save_button = tk.Button(self.tool_frame, text='Save and Close', font=f'Helvetica {self.text_size}',
-                                  command=lambda: self.save_and_close())
+        self.save_button = tk.Button(self.tool_frame, text='Save and Close',
+                                     font=f'Helvetica {self.text_size}',
+                                     command=lambda: self.save_and_close())
         self.save_button.pack(side=tk.RIGHT, padx=5)
 
         # highlighter
-        self.highlighter_button = tk.Checkbutton(self.tool_frame, indicatoron=0, selectcolor="white",
-                                              text='show/hide differences', font=f'Helvetica {self.text_size}',
-                                              command=lambda: self.show_hide_differences(self.show_hide_diff))
+        self.highlighter_button = tk.Checkbutton(self.tool_frame, indicatoron=0,
+                                                 selectcolor="white", text='show/hide differences',
+                                                 font=f'Helvetica {self.text_size}',
+                                                 command=lambda: self.show_hide_differences(self.show_hide_diff))
         self.highlighter_button.pack(side=tk.LEFT, padx=5)
 
     def draw_recordframe(self, config, working_file):
@@ -315,21 +314,22 @@ class ClericalApp:
         # try to calculate and display remaining # clusters for matching
         try:
             self.counter_matches = tk.ttk.Label(self.record_frame,
-                                             text=f'{self.cluster_index+1} / {self.num_clusters} Clusters',
-                                             font=f'Helvetica {self.text_size}')
-            self.counter_matches.grid(row=0, column=len(config.options(
-                'column_headers_and_order')), columnspan=1, padx=10, sticky="e")
+                                               text=f'{self.cluster_index+1} / {self.num_clusters} Clusters',
+                                               font=f'Helvetica {self.text_size}')
+            self.counter_matches.grid(row=0, 
+                                      column=len(config.options('column_headers_and_order')),
+                                      columnspan=1, padx=10, sticky="e")
 
         # except when matching is completed
         except TypeError:
 
             tk.messagebox.showinfo(title="Matching completed",
-                                message="Please select a different file to clerically match")
+                                   message="Please select a different file to clerically match")
 
             # close down the application
             root.destroy()
         num_match_cols = 0
-        # Create column header labels and place all them on row 1, column n+2 (where n == the enumerate of the list)
+        # Create column header labels and place all them on row 1, column n+1
         for n, column_title in enumerate(config.options('column_headers_and_order')):
 
             # Remove spaces from the user input and split them into different components
@@ -338,9 +338,10 @@ class ClericalApp:
                 ' ', '').split(',')
 
             exec(f'self.{column_title} = tk.ttk.Label(self.record_frame,text="{col_header[0]}",\
-                 font=f"Helvetica {self.text_size} bold")')
+                                                      font=f"Helvetica {self.text_size} bold")')
 
-            exec(f'self.{column_title}.grid(row=1,column=n+1,columnspan=1, sticky = tk.W, padx=10, pady=3)')
+            exec(f'self.{column_title}.grid(row=1,column=n+1,columnspan=1, sticky = tk.W,\
+                                            padx=10, pady=3)')
 
             # Add the executed self.labels for the column headers to the non_iterated_labels list
             self.non_iterated_labels.append(column_title)
@@ -362,10 +363,10 @@ class ClericalApp:
 
             elif self.text_size == 10:
                 text_size_multiplier = 1
-
+####################################################################################################
                 # grid separator
-            header_separator.grid(row=2, column=0, columnspan=num_match_cols+1,
-                                  sticky='ns', ipadx=80*(num_match_cols+1)*text_size_multiplier, ipady=1)
+            header_separator.grid(row=2, column=0, columnspan=num_match_cols+1, sticky='ns',
+                                  ipadx=80*(num_match_cols+1)*text_size_multiplier, ipady=1)
 
             for v, display_i in enumerate(self.display_indexes):
 
@@ -373,27 +374,33 @@ class ClericalApp:
                     ' ', '').split(',')
 
                 # create a text label
-                exec(f'self.{col_header[0]}row{v} = tk.Text(self.record_frame,height=1,relief="flat",bg="gray93")')
+                exec(f'self.{col_header[0]}row{v} = tk.Text(self.record_frame,\
+                                                            height=1,relief="flat",bg="gray93")')
 
                 # Enter in the text from the df
                 exec(f'self.{col_header[0]}row{v}.insert("1.0",working_file["{col_header[0]}"][{display_i}])')
 
                 # configure Text so that it is a specified width, font and cant be interacted with
                 exec(f'self.{col_header[0]}row{v}.config(width=len(working_file["{col_header[0]}"][{display_i}])+10,\
-                     font=f"Helvetica {self.text_size} {self.text_bold}",state=tk.DISABLED)')
+                                                         font=f"Helvetica {self.text_size} {self.text_bold}",\
+                                                         state=tk.DISABLED)')
 
                 # grid the text label to the widget.
-                exec(f'self.{col_header[0]}row{v}.grid(row={row_num}, column={n+1},columnspan=1,padx=10, pady=3,sticky="w")')
+                exec(f'self.{col_header[0]}row{v}.grid(row={row_num}, column={n+1},columnspan=1,\
+                                                       padx=10, pady=3,sticky="w")')
 
                 # create a checkbutton and append it to the list of checkbutton variables.
                 exec(f'self.check_{v}= tk.IntVar()')
-                exec(f'self.checkbutton{v}=tk.Checkbutton(self.record_frame,variable=self.check_{v})')
+                exec(f'self.checkbutton{v}=tk.Checkbutton(self.record_frame,\
+                                                          variable=self.check_{v})')
                 exec(f'self.checkbutton{v}.deselect()')
                 exec(f'self.checkbutton{v}.grid(row={row_num}, column=0)')
 
-                exec(f"rf_separator{v}=tk.ttk.Separator(self.record_frame,  orient='horizontal')")
-                exec(f"rf_separator{v}.grid(row={sep_row}, column=0, columnspan={num_match_cols}+1,\
-                     sticky='ns', ipadx=80*({num_match_cols+1})*{text_size_multiplier}, ipady=1)")
+                exec(f"rf_separator{v}=tk.ttk.Separator(self.record_frame, orient='horizontal')")
+                exec(f"rf_separator{v}.grid(row={sep_row}, column=0,\
+                                            columnspan={num_match_cols}+1, sticky='ns',\
+                                            ipadx=80*({num_match_cols+1})*{text_size_multiplier},\
+                                            ipady=1)")
 
                 if col_header[0] not in self.columns_to_compare:
                     self.columns_to_compare.append(col_header[0])
@@ -820,7 +827,8 @@ class ClericalApp:
                                                           f"1.{char_consistent[tag_adder][-1]}")')
 
                         exec(f'self.{col}row{n+1}.tag_config(f"{col}_diff{str(tag_adder)}",\
-                                                             background="yellow",foreground = "black")')
+                                                             background="yellow",\
+                                                             foreground = "black")')
 
         else:
             # reset this variable
