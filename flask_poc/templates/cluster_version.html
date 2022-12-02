@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<h1> CROW</h1>
+<h1> </h1>
+<img src="images/CROW.png" alt="CROW" />
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+{% endfor %}
+
+<form action='#' method='POST'>
+    <input type="submit" name="NEXT" value="add one">
+</form>
+</body>
+</html>

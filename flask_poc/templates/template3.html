@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<h1> Hello World</h1>
+<h1> adding a new line </h1>
+ 
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+{% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+{% endfor %}
+
+<form action='#' method='POST'>
+  <div class="mb-3">
+    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="First Name" name="first_name">
+  </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+</body>
+</html>
