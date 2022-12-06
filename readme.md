@@ -16,6 +16,9 @@ The CROW is a piece of software that runs in Python, it uses Pandas to read and 
 
 There are two versions of CROW hosted in this repository - `CROW_clusters.py` and `CROW_pairwise.py`. These are versions suited to clustered and pairwise linkage outputs, please pick the version best suited to your linkage outputs.
 
+### Common problems
+Some users have experienced issues when using long numbers as record IDs, such as those created by the monotonically_increasing_id function in PySpark. To get around this, users could append a character to the start of their record IDs or use a function such as uuid1() from the `uuid` module in Python, or the uuid() function in PySpark.
+
 ### Pairwise 
 To install and use the pairwise version simply pull this repository into your current working environment, adapt the sections in the [config pairwise](http://gitlab-01-01/Data_Linkage/Clerical_Resolution_Online_Widget/-/blob/master/Config_pairwise.ini), test that the [CROW_pairwise.py](http://gitlab-01-01/Data_Linkage/Clerical_Resolution_Online_Widget/-/blob/master/CROW_pairwise.py) works by running it in a Python IDE of your choice, then you are all set. 
 
