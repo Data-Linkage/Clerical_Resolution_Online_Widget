@@ -1049,6 +1049,21 @@ if __name__ == "__main__":
         sys.exit(
             "\n\nThis clerical sample is open in another program. Please close this and restart CROW.")
 
+    # data validation step
+
+    record_id = config['record_id_col']['record_id']
+    
+    working_file['duplicated_record'] = np.where(working_file[record_id].duplicated(), 1, 0)
+    
+    duplicates = working_file[working_file['duplicated_record'] == 1][record_id].tolist()
+            
+    if len(working_file) != len(working_file[record_id].unique()):
+        raise ValueError(f"the record ID(s): {duplicates} is not unique!")
+        
+    del(record_id, duplicates)
+    
+    working_file = working_file.drop(columns = 'duplicated_record')
+    
     # END OF STEP 2
 
     # Step 3:
