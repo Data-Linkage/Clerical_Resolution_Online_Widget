@@ -38,6 +38,7 @@ import configparser
 import tkinter
 from tkinter import ttk, filedialog
 import pandas as pd
+import numpy as np
 
 class IntroWindow:
     '''
