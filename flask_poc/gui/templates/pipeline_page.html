@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>IDA User Interface</title>
+        <link rel="stylesheet" href="{{
+        url_for('static', filename='main.css')}}">
+        <meta charset="UTF-8">
+        <img src="{{url_for('static', filename='ons.png')}}"align='left'width=200 height=50>
+        <title>IDA User Interface</title>
+        <br>
+        <br>
+        <h1>IDA User Interface</h1>
+        <br>
+        <br>
+
+    </head>
+    <body>
+        <p>What project would you like to use?</p>
+      
+        <br>
+        <form action="/adapt_columns" method = "post"> 
+              <select action="/adapt_columns" method = "post", name = "form">  
+
+                  {% for i in list_of_filenames %}
+
+                       {{i}} <option value = "{{i}}" SELECTED >{{i}}</option>
+                       <br>
+                       <br>
+
+                  {% endfor %}
+              </select>
+              <br>
+              <br>
+              <br>
+              <br>
+              <input type='submit' value = 'submit'>
+
+       </form>
+    </body>  
+</html>

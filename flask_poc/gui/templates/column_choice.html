@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>IDA User Interface</title>
+        <link rel="stylesheet" href="{{
+        url_for('static', filename='main.css')}}">
+        <meta charset="UTF-8">
+        <img src="{{url_for('static', filename='ons.png')}}"align='left'width=200 height=50>
+        <title>IDA User Interface</title>
+        <br>
+        <br>
+        <h1>IDA User Interface</h1>
+        <br>
+        <br>
+
+    </head>
+    <body>
+        <p>Please tick what columns you would like to keep</p>
+      
+        <br>
+        <form action="/adapt_columns/change_csv" method = "post"> 
+              <p>DAP &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+                     &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IDS</p>
+              {% for i in version_control_cols %}
+                   {% if i[1] == "TRUE" %}
+                       <label class="checkbox-inline">
+                       "{{i[0]}}"<input type = 'checkbox' value = "{{i[0]}}" name = "dap" checked>
+                       </label>   
+                   {% elif i[1] == "FALSE" %}  
+                       <label class="checkbox-inline">
+                       "{{i[0]}}"<input type = 'checkbox' value = "{{i[0]}}" name = "dap" unchecked>
+                       </label>  
+                   {% endif %}
+                   {% if i[2] == "TRUE" %}
+                       <label class="checkbox-inline">
+                       <input type = 'checkbox' value = "{{i[0]}}" name = "ids" checked>
+                       </label>    
+                   {% elif i[2] == "FALSE" %}
+                       <label class="checkbox-inline">
+                       <input type = 'checkbox' value = "{{i[0]}}" name = "ids" unchecked>
+                       </label>   
+                   {% endif %}
+                   <br>
+                   <br>
+
+              {% endfor %}
+              <br>
+              <br>
+              <br>
+              <br>
+              <input type='submit' value = 'Save Changes'>
+
+       </form>
+    </body>  
+</html>

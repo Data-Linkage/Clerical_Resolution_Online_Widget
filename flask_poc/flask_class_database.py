@@ -1,4 +1,3 @@
-
 import pandas as pd
 import logging
 from flask import Flask, render_template, request, redirect, \
@@ -9,14 +8,15 @@ import sqlite3
 from sqlite3 import Error
 
 #
-os.chdir('/home/cdsw/FLOW_real')
-#create database 
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
+
+#create database
 
 dataframe=pd.read_csv('clusters_example_data.csv')
 dataframe['Match']=''
 #get column titles as separated
-#col_list=list(dataframe.columns.values).remove('Resident_ID')
-#cols=', '.join(['', list(dataframe.columns.values).remove('Resident_ID')]) + ',Resident_ID PRIMARY_KEY, Match'
+col_list=list(dataframe.columns.values).remove('Resident_ID')
+cols=', '.join(['', list(dataframe.columns.values).remove('Resident_ID')]) + ',Resident_ID PRIMARY_KEY, Match'
 #string df.to_sql('df', conn, if_exists='append', index = False)
 #cols= 'Resident_ID PRIMARY_KEY, Match, First_Name, Last_Name, Day_Of_Birth, Sex, Address'
 #data_pd=pd.read_csv('clusters_example_data.csv')
@@ -27,7 +27,7 @@ db=SQLAlchemy(app)
 
 class ClericalSample():
   def __init__(self): 
-    self.con=sqlite3.connect('/home/cdsw/FLOW_real/database.db')
+    self.con=sqlite3.connect('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc/database.db')
     self.cur=self.con.cursor()
     self.create_table()
   
