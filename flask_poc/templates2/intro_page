@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+  </head>
+    <h1>Welcome to CROW</h1>
+    <h2> An app to meet all your clerical needs <h2> 
+    <br>
+
+    <div class="file-upload-wrapper">
+              <input type="file" id="input-file-now" class="file-upload" name= "input_file" value='True' />
+    </div>
+
+  <body>
+    <form>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Dropdown button
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="/cluster2">Cluster Resolution</a></li>
+            <li><a class="dropdown-item" href="#">Pairwise Version/a></li>
+            <li><a class="dropdown-item" href="#">About</a></li>
+          </ul>
+        </div>
+      </form>
+  </body>
+</html>
