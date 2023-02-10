@@ -1,3 +1,5 @@
+#note file relates to templates 2 folder in git 
+
 import pandas as pd
 import logging
 from flask import Flask, render_template, request, redirect, \
@@ -54,8 +56,6 @@ def index():
       if request.form.get('back')=="back":
               session['index'] = int(session['index'])-1
 
-
-
       if request.form.get('save')=="save":
             table=utilities.pandas_to_spark(working_file)
             utilities.write_format(table,'hive' ,'crow', 'test2')
@@ -66,6 +66,10 @@ def index():
 
       return  render_template("cluster_version.html",tables=[df.to_html(classes='data')], titles=df.columns.values) 
 
+    
+@app.route('/about_page', methods=['GET','POST'])
+def about():
+    return render_template("about_page.html")
 
 #########################
 #########################
