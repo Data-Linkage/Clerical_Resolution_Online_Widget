@@ -10,6 +10,7 @@ os.chdir('/home/cdsw/FLOW_real2')
 from dlh_utils import sessions
 from dlh_utils import utilities
 
+
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
@@ -34,6 +35,8 @@ def intro():
 
 @app.route('/cluster2', methods=['GET','POST'])
 def index(): 
+      #set highlighter toggle to 0
+      session['highlighter']=False
       if 'index' not in session:
               session['index']=int(working_file['Cluster_Number'][0])
 
@@ -59,6 +62,9 @@ def index():
       if request.form.get('save')=="save":
             table=utilities.pandas_to_spark(working_file)
             utilities.write_format(table,'hive' ,'crow', 'test2')
+              
+              
+              
 
 
       df=working_file.loc[working_file['Cluster_Number']==session['index']]
