@@ -5,7 +5,7 @@ import logging
 from flask import Flask, render_template, request, redirect, \
 url_for, flash, make_response, session, jsonify
 import os
-os.chdir('/home/cdsw/FLOW_real2')
+os.chdir('/home/cdsw/gitconnected/Clerical_Resolution_Online_Widget')
 
 from dlh_utils import sessions
 from dlh_utils import utilities
