@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CROW clerical tool</title>
+  </head>
+    <h1>CROW</h1>
+    <br>
+  <body> 
+  <h2>Please upload the relevant files:</h2>  
+  <form method = "post">  
+            <p>Please choose a local file or HDFS file:</p>
+            <div class="input_file">
+                      <input type="file" id="input_file" class="input_file" name= "input_file" value='True' />
+            </div>
+            <br>
+            <button type='submit' id = 'hdfs' name = 'hdfs' value = 'hdfs'>HDFS</button> 
+
+            {% if button == 'hdfs'%}
+               <input type='text' name = 'hdfs_path'>
+            {% endif %} 
+          <br> 
+          <br>
+ 
+          <p>Please upload a config:</p>
+          <div class="file-upload-wrapper">
+                <input type="file" id="input-file-now" class="file-upload" name= "input_file" value='True' />
+          </div>
+          <p>&nbsp;</p>
+
+
+          <p>Once the above is complete, please choose a version:</p>
+          <div class="submit-toolbar">
+              <input type="submit" id="cluster" name="version" value="Cluster Version" formaction = '/cluster_version'>
+              <label for="cluster">Cluster Version</label>
+              <input type="submit" id="pairwise" name="version" value="Pairwise Version" formaction = '/pairwise'>
+              <label for="pairwise">Pairwise Version</label>
+
+          </div>
+          <p>&nbsp;</p>
+
+      
+  </body>
+  </form>            
+</html>

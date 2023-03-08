@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CROW clerical tool</title>
+  </head>
+    <h1>CROW</h1>
+    <br>
+  <body> 
+  <h2>Please choose a session to load:</h2>  
+      <form action="/cluster_version" method = "post"> 
+            <select action="/adapt_columns" method = "post", name = "form" >  
+                Please select a session... <option value = "default" SELECTED >Please select a session...</option>
+                {% for i in directory %}
+                     {{i}} <option value = "{{i}}" >{{i}}</option>
+                     <br>
+                     <br>
+                {% endfor %}
+            </select>
+            <br>
+            <br>
+            <br>
+            <br>
+            <div class="submit-toolbar">
+            <input type='submit' id = 'submit' value = 'submit'>
+            <label for="submit">Submit</label>
+            </div>  
+     </form>
+      
+  </body>
+          
+</html>

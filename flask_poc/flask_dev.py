@@ -1,4 +1,4 @@
-
+import subprocess
 import pandas as pd
 import logging
 from flask import Flask, render_template, request, redirect, \
@@ -293,10 +293,17 @@ working_file = pd.read_csv('/home/cdsw/Clerical_Resolution_Online_Widget/Data/cl
 @app.route('/', methods=['GET','POST'])
 def intro():
 #  session['input_df']=data_pd
-  return render_template("intro_page.html")
+  button = request.form.get("hdfs")
+  return render_template("intro_page.html", button = button)
 
 @app.route('/cluster_version', methods=["GET","POST"])
 def index():
+#    if button == 'hdfs':
+#       process = ['hadoop', 'fs', '-get' , f'{hdfs_path}']
+    
+    
+    
+    
     if 'index' not in session:
         session['index'] = 201 # setting session data
 
