@@ -52,10 +52,6 @@ def load_session():
     
     return render_template('load_session.html', directory=directory)
 
-
-
-
-
 @app.route('/cluster_version', methods=['GET','POST'])
 def index(): 
 #      working_file = request.files['input_file']
@@ -96,9 +92,6 @@ def index():
       if request.form.get('save')=="save":
             table=utilities.pandas_to_spark(working_file)
             utilities.write_format(table,'hive' ,'crow', 'test2')
-
-
-
       
       if 'index' not in working_file.columns:
           index = (list(range(max(working_file.count()))))
@@ -112,7 +105,7 @@ def index():
       
       columns = df.columns
       data = zip(df.values, df_index)
-      session['index'] = int(session['index'])+ 1
+
       return  render_template("cluster_version.html",
                               data = data,
                               columns=columns)
