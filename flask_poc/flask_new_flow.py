@@ -13,15 +13,16 @@ os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
-
 spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 
-file=spark.sql('SELECT * FROM crow.test2')
+file=spark.sql('SELECT * FROM crow.test3')
 #utilities.write_format(dataframe,'hive' ,'crow', 'test2')
 
 #extract list of cluster ids and separate out into dataframes
 
 working_file=file.toPandas()
+working_file = working_file.sort_values(by = 'Cluster_Number').reset_index()
+
 #working_file['Match']=''
 #####working poc#######
 #######################
@@ -59,12 +60,12 @@ def index():
 #      pd.read_csv('/tmp/working_file.csv')
 #      working_file['Match']=''
 #      
-      
+      print("first index!!:",working_file['Cluster_Number'][0])
       #set highlighter toggle to 0
       session['highlighter']=False
       if 'index' not in session:
-              working_file = working_file.sort_values(by = 'Cluster_Number').reset_index()
-              session['index']=int(working_file['Cluster_Number'][0])
+              print("index not in session!!!")
+              session['index']=int(working_file[working_file['Match'] == None]['Cluster_Number'][0])
 
       else: 
         pass
