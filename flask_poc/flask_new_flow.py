@@ -60,12 +60,10 @@ def index():
 #      pd.read_csv('/tmp/working_file.csv')
 #      working_file['Match']=''
 #      
-      print("first index!!:",working_file['Cluster_Number'][0])
       #set highlighter toggle to 0
       session['highlighter']=False
       if 'index' not in session:
-              print("index not in session!!!")
-              session['index']=int(working_file[working_file['Match'] == None]['Cluster_Number'][0])
+              session['index']=int(working_file['Cluster_Number'][0])
 
       else: 
         pass
