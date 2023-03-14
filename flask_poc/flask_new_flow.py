@@ -63,6 +63,7 @@ def index():
       #set highlighter toggle to 0
       session['highlighter']=False
       if 'index' not in session:
+              working_file = working_file.sort_values(by = 'Cluster_Number').reset_index()
               session['index']=int(working_file['Cluster_Number'][0])
 
       else: 
