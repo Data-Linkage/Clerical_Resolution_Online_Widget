@@ -5,9 +5,11 @@ import logging
 from flask import Flask, render_template, request, redirect, \
 url_for, flash, make_response, session, jsonify
 import os
-
+import difflib
 from dlh_utils import sessions
 from dlh_utils import utilities
+from markupsafe import Markup
+
 
 os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
 app=Flask(__name__)
@@ -21,7 +23,7 @@ file=spark.sql('SELECT * FROM crow.test3')
 #extract list of cluster ids and separate out into dataframes
 
 working_file=file.toPandas()
-working_file = working_file.sort_values(by = 'Cluster_Number').reset_index()
+working_file = working_file.sort_values(by = 'Cluster_Number').reset_index().astype(str)
 
 #working_file['Match']=''
 #####working poc#######
@@ -30,6 +32,25 @@ working_file = working_file.sort_values(by = 'Cluster_Number').reset_index()
 app= Flask(__name__)
 app.config['SECRET_KEY']='abcd'
 
+def show_diff(seqm):
+    """Unify operations between two compared strings
+seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
+    output= []
+    for opcode, a0, a1, b0, b1 in seqm.get_opcodes():
+        if opcode == 'equal':
+            output.append(seqm.a[a0:a1])
+        elif opcode == 'insert':
+            output.append(seqm.a[a0:a1])
+            #output.append("<mark>" + f"{seqm.b[b0:b1]}" + "</mark>")
+        elif opcode == 'delete':
+            output.append("<mark>" + f"{seqm.a[a0:a1]}" + "</mark>")
+        elif opcode == 'replace':
+            output.append("<mark>" + f"{seqm.a[a0:a1]}" + "</mark>")
+        else:
+            raise RuntimeError("unexpected opcode")
+    return ''.join(output)
+  
+  
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
@@ -99,16 +120,25 @@ def index():
       else:
           pass
 
-      df=working_file.loc[working_file['Cluster_Number']==session['index']]
-      df_index = list(df['index'].values)
+      df=working_file.loc[working_file['Cluster_Number']==str(session['index'])]
 
-      
+
+            
       columns = df.columns
-      data = zip(df.values, df_index)
+      data = df.values
+      count= df.count()
+      highlight = request.form.get("highlight_differences")
+      if highlight == "Highlight differences":
+          for column in range(len(columns)):
+              for value in range(max(count)):
+                  seqm = difflib.SequenceMatcher(None, data[value][column],data[0][column])
+                  
+                  data[value][column]= Markup(show_diff(seqm))
 
       return  render_template("cluster_version.html",
                               data = data,
-                              columns=columns)
+                              columns=columns,
+                              highlight=highlight)
 
 @app.route('/pairwise_version', methods=['GET','POST'])
 def index_pairwise(): 
@@ -154,6 +184,9 @@ def index_pairwise():
       columns = df.columns
       data = zip(df.values, index)
       session['index'] = int(session['index'])+ 1
+      
+
+       
       return  render_template("cluster_version.html",
                               data = data,
                               columns=columns)
