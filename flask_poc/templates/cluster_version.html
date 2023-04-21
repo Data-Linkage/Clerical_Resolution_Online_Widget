@@ -18,7 +18,7 @@
 {% endfor %}  
 </tr>
 
-{% for row,count in data %}
+{% for row in data %}
 <tr class = 'table__row'> 
 
    {% for cell in row %}
@@ -28,7 +28,7 @@
 
    {% endfor %}
 <td>
-    <input type="checkbox" name="cluster" value= {{count}}>
+    <input type="checkbox" name="cluster" value= {{row[-4]}} >
     <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
 </td>  
 </tr>
