@@ -23,7 +23,7 @@ file=spark.sql('SELECT * FROM crow.test3')
 #extract list of cluster ids and separate out into dataframes
 
 working_file=file.toPandas()
-working_file = working_file.sort_values(by = 'Cluster_Number').reset_index().astype(str)
+#working_file = working_file.sort_values(by = 'Cluster_Number').reset_index().astype(str)
 
 #working_file['Match']=''
 #####working poc#######
@@ -54,7 +54,7 @@ seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
-    return render_template("welcome_page.html")
+    return render_template("ira_html.html")
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
