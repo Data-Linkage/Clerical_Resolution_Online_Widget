@@ -9,26 +9,44 @@ import ast
 import numpy as np
 from dlh_utils import sessions
 from dlh_utils import utilities
+import configparser
+import getpass
+import pwd
+
 
 os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
 spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
+config = configparser.ConfigParser()
+config.read('config_flow.ini')
+rec_id=config['id_variables']['record_id']
+clust_id=config['id_variables']['cluster_id']
+file=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
+user = os.environ['HADOOP_USER_NAME']
 
-file=spark.sql('SELECT * FROM crow.test3')
 
-
-#extract list of cluster ids and separate out into dataframes
 
 working_file=file.toPandas()
-#working_file = working_file.sort_values(by = 'Cluster_Number').reset_index().astype(str)
+#this line not working
+#working_file = working_file.sort_values(by = clust_id).reset_index().astype(str)
 
-#temp thing
 #fill nulls in match column with '[]'.This is just to enable the advance cluster function, as is to work
-#could probably be improved so we don't have to do this. 
-working_file['Match'].replace('nan', '[]',inplace=True)
-working_file
+#could probably be improved so we don't have to do this.
+#renaming. 
+
+if 'Match' not in working_file.columns: 
+  working_file['Match']='[]'
+  print('hi')
+  
+if 'Sequential_Cluster_Id' not in working_file.columns: 
+    working_file['Sequential_Cluster_Id'] = pd.factorize(working_file[clust_id])[0]
+working_file=working_file.sort_values('Sequential_Cluster_Id')
+
+
+
+
 #####working poc#######
 #######################
 
@@ -36,6 +54,9 @@ working_file
 ##HELPER FUNCTIONS#####
 #Note will probably eventually move these into a separate script
 
+
+
+(working_file.Match.values != 'a').argmax()
 def advance_cluster():
   #note this function is very clunky and could likely be improved. 
   """
@@ -46,18 +67,30 @@ def advance_cluster():
   Returns: None
   
   """
-  num_in_cluster=len(working_file.loc[working_file['Cluster_Number']==str(session['index'])])
+  num_in_cluster=len(working_file.loc[working_file['Sequential_Cluster_Id']==session['index']])
   print(num_in_cluster)
-  list_decided=[set(ast.literal_eval(i)) for i in working_file.loc[working_file['Cluster_Number']==str(session['index'])]['Match']]
+  list_decided=[set(ast.literal_eval(i)) for i in working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]['Match']]
   print(list_decided)
   uni_set_decided={x for l in list_decided for x in l}
   print(uni_set_decided)
   num_decided=len(uni_set_decided)
   if (num_in_cluster-num_decided)<=1:
-      for rec_id in [x for x in working_file.loc[working_file['Cluster_Number']==str(session['index'])]['Resident_ID'] if x not in uni_set_decided]: 
-            working_file.loc[working_file['Resident_ID']==rec_id,'Match']=f"['No Match In Cluster For {rec_id}']"
+      for r_id in [x for x in working_file.loc[working_file['Sequential_Cluster_Id']==session['index']][rec_id] if x not in uni_set_decided]: 
+            working_file.loc[working_file[rec_id]==r_id,'Match']=f"['No Match In Cluster For {r_id}']"
       session['index'] = int(session['index'])+ 1
-    
+      
+def check_matching_done(df=working_file): 
+  if df['Match'].value_counts()['[]']!=len(df): 
+    print(df['Match'].value_counts()['[]'])
+    return 0
+  if df['Match'].value_counts()['[]']!=len(df): 
+    return 1
+  
+
+  
+      
+      
+
 
 #######################
 app= Flask(__name__)
@@ -90,64 +123,61 @@ def load_session():
 def index(): 
       #set highlighter toggle to 0
       session['highlighter']=False
+      #problem; this needs to only be ran when app first opened
       if 'index' not in session:
-              session['index']=int(working_file['Cluster_Number'][0])
+              session['index']=int(working_file['Sequential_Cluster_Id'][(working_file.Match.values == '[]').argmax()])
+              print(session['index'])
 
-      else: 
-        pass
-        #logic to display firdt unlinked record first. 
+      else:
+              print(f"{session['index']} newsesh")
       
       if {'Match'}.issubset(working_file.columns):
-        print('Matching_Began')
+            pass
             # variable indicates whether user has returned to this file (1) or not (0)
         
       else:
             
             # create a match column and fill with blanks
-          working_file['Match'] = ''
-       
-      #cluster = request.form.getlist("cluster")
-      #print(cluster)
-      
-      # df=working_file.loc[working_file['Cluster_Number']==session['index']]
-      # session['index'] = int(session['index'])+ 1
-      #cur_indexes=list(working_file.loc[working_file['Cluster_Number']==session['index']].index.values)
+            #working_file['Match'] = ''
+            pass
       if request.form.get('Match')=="Match":
               cluster = request.form.getlist("cluster")
+              print(cluster)
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
-                  working_file.loc[working_file['Resident_ID']==i,'Match']=str(cluster)
+                  working_file.loc[working_file[rec_id]==i,'Match']=str(cluster)
               advance_cluster()
             
 
       elif request.form.get('Non-Match')=="Non-Match":
               #note this section needs building out. 
-              #working_file.loc[working_file['Cluster_Number']==session['index'],'Match']=0
+              #working_file.loc[working_file['Sequential_Cluster_Id']==session['index'],'Match']=0
               cluster = request.form.getlist("cluster")
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
-                  working_file.loc[working_file['Resident_ID']==i,'Match']=f"['No Match In Cluster For {i}']"
+                  working_file.loc[working_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
               advance_cluster()
               
               
               
 
       if request.form.get('back')=="back":
-              session['index'] = int(session['index'])-1
+              session['index'] = session['index']-1
 
       if request.form.get('save')=="save":
-            table=utilities.pandas_to_spark(working_file)
-            utilities.write_format(table,'hive' ,'crow', 'test3')
+              table=utilities.pandas_to_spark(working_file)
+              print('save activated ')
+              utilities.write_format(table,'hive','crow',f"{config['filepath']['name']}")
       
       if 'index' not in working_file.columns:
           index = (list(range(max(working_file.count()))))
           working_file.insert(0,'index',index)
       else:
           pass
+      #not WORKIng 
+      df=working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]
+      cols_list=[config['display_columns'][var] for var in config['display_columns']]
 
-      df=working_file.loc[working_file['Cluster_Number']==str(session['index'])]
-
-      
       columns = df.columns
       data = df.values
 
@@ -167,7 +197,7 @@ def index_pairwise():
       #set highlighter toggle to 0
       session['highlighter']=False
       if 'index' not in session:
-              session['index']=int(working_file['Cluster_Number'][0])
+              session['index']=int(working_file['Sequential_Cluster_Id'][0])
 
       else: 
         pass
@@ -175,31 +205,31 @@ def index_pairwise():
 
       cluster = request.form.getlist("cluster")
       
-      # df=working_file.loc[working_file['Cluster_Number']==session['index']]
+      # df=working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]
       # session['index'] = int(session['index'])+ 1
 
       if request.form.get('Match')=="Match":
               working_file.iloc[cluster]['Match']=1
               session['index'] = int(session['index'])+ 1
+              check_matching_done()
 
       elif request.form.get('Non-Match')=="Non-Match":
-              working_file.loc[working_file['Cluster_Number']==session['index'],'Match']=0
+              working_file.loc[working_file['Sequential_Cluster_Id']==session['index'],'Match']=0
               session['index'] = int(session['index'])+ 1
 
       if request.form.get('back')=="back":
-              
+              print('back')
               session['index'] = int(session['index'])-1
 
       if request.form.get('save')=="save":
-            table=utilities.pandas_to_spark(working_file)
-            print('save activated ')
-            utilities.write_format(table,'hive' ,'crow', 'test3')
+              save_output()
 
 
 
 
 
-      df=working_file.loc[working_file['Cluster_Number']==session['index']]
+
+      df=working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]
       index = (list(range(max(df.count()))))
       df.insert(0,'index',index)
 
