@@ -45,13 +45,17 @@ if 'Sequential_Cluster_Id' not in working_file.columns:
 working_file=working_file.sort_values('Sequential_Cluster_Id')
 
 
+origin_file_path=config['filepath']['file']
+origin_file_path_fl=config['filepath']['file'].split('.')
 
 
+#######################
 #####working poc#######
 #######################
 
 ##################
-##HELPER FUNCTIONS#####
+##HELPER FUNCTIONS
+##################
 #Note will probably eventually move these into a separate script
 
 
@@ -80,12 +84,71 @@ def advance_cluster():
       session['index'] = int(session['index'])+ 1
       
 def check_matching_done(df=working_file): 
-  if df['Match'].value_counts()['[]']!=len(df): 
-    print(df['Match'].value_counts()['[]'])
+  if len(working_file[working_file.Match == '[]'])>0: 
     return 0
-  if df['Match'].value_counts()['[]']!=len(df): 
+  if len(working_file[working_file.Match == '[]'])==0:
+    print('matching_done')
     return 1
   
+def save_rename_hive(dataframe, old_path,new_path):
+    sparkDF=spark.createDataFrame(dataframe)
+    sparkDF.registerTempTable("temp_table")
+    spark.sql(f"""DROP TABLE IF EXISTS {old_path}""")
+    #unhash to delete after new table created 
+    spark.sql(f"""CREATE TABLE IF NOT EXISTS {new_path} AS SELECT * FROM temp_table""")
+    
+#################################################
+#################filepaths#######################
+#################################################
+
+if 'inProgress' in origin_file_path_fl[-1]:
+        
+        # If it is the same user
+        if (user in origin_file_path_fl[-1]):
+            # Dont rename the file
+            in_prog_path= origin_file_path
+            end_file_name=origin_file_path_fl[-1][:-11]+'_DONE'
+            # create the filepath name for when the file is finished
+            filepath_done = ".".join([origin_file_path_fl[0], end_file_name])
+        else:
+            
+            print('USER_NOT_IN_NAME')
+
+            # Rename the file to contain the additional user
+            in_prog_path = origin_file_path_fl[-1][:-11]+f'_{user}'+'_inProgress'
+            
+            
+            end_file_name=origin_file_path_fl[-1][:-11]+f'_{user}'+'_DONE'
+            filepath_done=".".join([origin_file_path_fl[0],end_file_name ])
+ 
+                               
+    # If a user is picking this file again and its done
+elif 'DONE' in origin_file_path_fl[-1]:
+        
+        # If it is the same user
+        if (user in origin_file_path_fl[-1]):
+            # dont change filepath done - keep it as it is
+            filepath_done = config['filepath']['file']
+        
+            # Rename the file 
+            in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+'_inProgress'])
+
+            
+        else:
+            # If it is a different user
+            # Rename the file to include the additional user
+            in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+f'_{user}'+'_inProgress'])
+
+            # create the filepath done
+            filepath_done=".".join([origin_file_path_fl[0],in_prog_path[:-11]+'_DONE' ])
+            
+else:
+      
+        in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_inProgress' ])
+
+
+
+save_rename_hive(working_file, origin_file_path, in_prog_path) 
 
   
       
@@ -165,9 +228,13 @@ def index():
               session['index'] = session['index']-1
 
       if request.form.get('save')=="save":
-              table=utilities.pandas_to_spark(working_file)
+              if check_matching_done(): 
+                  print('matching_done')
+                  save_rename_hive(working_file, in_prog_path, filepath_done)
+              else: 
+                  save_rename_hive(working_file, in_prog_path, in_prog_path)
               print('save activated ')
-              utilities.write_format(table,'hive','crow',f"{config['filepath']['name']}")
+
       
       if 'index' not in working_file.columns:
           index = (list(range(max(working_file.count()))))
@@ -180,10 +247,12 @@ def index():
 
       columns = df.columns
       data = df.values
+      num_clusters=str(working_file.Sequential_Cluster_Id.nunique())
+      display_message=config['message_for_matchers']['message_to_display']
 
       return  render_template("cluster_version.html",
                               data = data,
-                              columns=columns)
+                              columns=columns, cluster_number=session['index'], num_clusters=num_clusters, display_message=display_message)
 
     
     
