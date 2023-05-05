@@ -10,6 +10,12 @@
 <body>   
 <div style="overflow-x:auto;" style="overflow-y:auto;">
 <form action='#' method="POST">  
+
+<div class = 'box'>
+<box>{{display_message}}</box>
+</div>  
+<h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
+  
 <table class = 'table' cellspacing = '0' table-bordered>
 
 <tr class = 'table__header'>  
@@ -28,7 +34,7 @@
 
    {% endfor %}
 <td>
-    <input type="checkbox" name="cluster" value= {{count}}>
+    <input type="checkbox" name="cluster" value= {{row[-6]}} >
     <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
 </td>  
 </tr>
