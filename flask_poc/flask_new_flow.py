@@ -5,13 +5,17 @@ import logging
 from flask import Flask, render_template, request, redirect, \
 url_for, flash, make_response, session, jsonify
 import os
-import ast
-import numpy as np
+
+import difflib
 from dlh_utils import sessions
 from dlh_utils import utilities
+from markupsafe import Markup
+import ast
+import numpy as np
 import configparser
 import getpass
 import pwd
+
 
 
 os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
@@ -29,6 +33,7 @@ user = os.environ['HADOOP_USER_NAME']
 
 
 working_file=file.toPandas()
+
 #this line not working
 #working_file = working_file.sort_values(by = clust_id).reset_index().astype(str)
 
@@ -47,6 +52,7 @@ working_file=working_file.sort_values('Sequential_Cluster_Id')
 
 origin_file_path=config['filepath']['file']
 origin_file_path_fl=config['filepath']['file'].split('.')
+
 
 
 #######################
@@ -160,10 +166,29 @@ app= Flask(__name__)
 #may need to be something more secretive/encryptable! 
 app.config['SECRET_KEY']='abcd'
 
+def show_diff(seqm):
+    """Unify operations between two compared strings
+seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
+    output= []
+    for opcode, a0, a1, b0, b1 in seqm.get_opcodes():
+        if opcode == 'equal':
+            output.append(seqm.a[a0:a1])
+        elif opcode == 'insert':
+            output.append(seqm.a[a0:a1])
+            #output.append("<mark>" + f"{seqm.b[b0:b1]}" + "</mark>")
+        elif opcode == 'delete':
+            output.append("<mark>" + f"{seqm.a[a0:a1]}" + "</mark>")
+        elif opcode == 'replace':
+            output.append("<mark>" + f"{seqm.a[a0:a1]}" + "</mark>")
+        else:
+            raise RuntimeError("unexpected opcode")
+    return ''.join(output)
+  
+  
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
-    return render_template("welcome_page.html")
+    return render_template("ira_html.html")
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
@@ -245,6 +270,7 @@ def index():
       df=working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]
       cols_list=[config['display_columns'][var] for var in config['display_columns']]
 
+
       columns = df.columns
       data = df.values
       num_clusters=str(working_file.Sequential_Cluster_Id.nunique())
@@ -253,7 +279,6 @@ def index():
       return  render_template("cluster_version.html",
                               data = data,
                               columns=columns, cluster_number=session['index'], num_clusters=num_clusters, display_message=display_message)
-
     
     
     
@@ -306,6 +331,9 @@ def index_pairwise():
       columns = df.columns
       data = zip(df.values, index)
       session['index'] = int(session['index'])+ 1
+      
+
+       
       return  render_template("cluster_version.html",
                               data = data,
                               columns=columns)

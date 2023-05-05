@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="{{url_for('static', filename='welcome_page.css')}}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CROW clerical tool</title>
+  </head>
+  <body>
+    <main>
+      <div class = 'container'>
+        <div class='left'>
+          <div class = 'centered'>
+            <img src="{{url_for('static', filename='logo.PNG')}}"align='center'width=400 height=150>
+            <br>
+            <body>
+              <form method = 'post'>
+                <p>Please choose from the following options:</p>
+                    <div class='submit-toolbar'>
+                    <input type='submit' id = 'new' name = 'new' formaction = '/new_session'>
+                    <label for="new">New session</label>
+                    <br>
+                    <br>
+                    <input type='submit' id = 'load' name = 'load' formaction = '/load_session'>
+                    <label for="load">Load session</label>
+                    <br>
+                    <br>
+                    <input type='submit' id = 'help' name = 'help' formaction = '/help'>
+                    <label for="help">Crow help</label>
+                </div>
+              </form>
+            </body>
+          </div>
+        </div>
+
+      <div class='right'>
+        <div class = 'right-centre'>
+          <h1>Welcome to CROW</h1>
+          <h2> An app to meet all your clerical needs </h2>
+        </div>
+<!--          <img src="{{url_for('static', filename='crow2.jpg')}}"align='right'> -->
+        </div> 
+      </div>
+    </main>
+  </body>
+          
+</html>

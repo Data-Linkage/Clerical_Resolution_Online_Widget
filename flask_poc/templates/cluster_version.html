@@ -50,7 +50,23 @@
     <input type="submit" name="Non-Match" value="Non-Match">
 <br>
 <br> 
-</form>  
+<p>Highligh Differences</p> 
+{% if highlight == "Highlight differences" %}
+<label class="switch">
+  <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
+  <span class="slider round" ></span>
+</label>  
+{% else %}  
+<label class="switch">
+  <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()">
+  <span class="slider round" ></span>
+</label>    
+{% endif %}
+<br>
+<br>  
+</form>
+<br>
+<br>   
 <form action='#' method='POST'>
     <input type="submit" name="back" value="back">
     <input type="submit" name="save" value="save">
