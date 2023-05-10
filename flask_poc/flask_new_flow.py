@@ -18,6 +18,7 @@ import pwd
 
 
 
+
 os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
@@ -116,6 +117,8 @@ if 'inProgress' in origin_file_path_fl[-1]:
             end_file_name=origin_file_path_fl[-1][:-11]+'_DONE'
             # create the filepath name for when the file is finished
             filepath_done = ".".join([origin_file_path_fl[0], end_file_name])
+            print(f'filepath done={filepath_done}')
+            print(f'in prog path={in_prog_path}')
         else:
             
             print('USER_NOT_IN_NAME')
@@ -126,6 +129,9 @@ if 'inProgress' in origin_file_path_fl[-1]:
             
             end_file_name=origin_file_path_fl[-1][:-11]+f'_{user}'+'_DONE'
             filepath_done=".".join([origin_file_path_fl[0],end_file_name ])
+            print(f'filepath done={filepath_done}')
+            print(f'in prog path={in_prog_path}')                        
+
  
                                
     # If a user is picking this file again and its done
@@ -138,7 +144,8 @@ elif 'DONE' in origin_file_path_fl[-1]:
         
             # Rename the file 
             in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+'_inProgress'])
-
+            print(f'filepath done={filepath_done}')
+            print(f'in prog path={in_prog_path}')
             
         else:
             # If it is a different user
@@ -147,6 +154,8 @@ elif 'DONE' in origin_file_path_fl[-1]:
 
             # create the filepath done
             filepath_done=".".join([origin_file_path_fl[0],in_prog_path[:-11]+'_DONE' ])
+            print(f'filepath done={filepath_done}')
+            print(f'in prog path={in_prog_path}')
             
 else:
       
