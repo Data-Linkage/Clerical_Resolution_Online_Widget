@@ -19,25 +19,30 @@
   
 <table class = 'table' cellspacing = '0' table-bordered>
 
-<tr class = 'table__header'>  
-{% for i in columns %}    
-<th class = 'table__cell'>{{i}}</th>  
+<tr class = 'table__header'>
+  
+<th class = 'table__cell'></th>
+  
+{% for i in columns %} 
+
+<th class = 'table__cell'>{{i}}</th> 
 {% endfor %}  
 </tr>
 
-{% for column in data %}
-<tr class = 'table__row'> 
+{% for row in data %}
 
-   {% for cell in column %}
+<tr class = 'table__row'> 
+<td>
+    <input type="checkbox" name="cluster" value= {{row[id_col_index]}} >
+    <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
+</td>  
+   {% for cell in row %}
  
     
     <td class = 'table__cell'>{{cell}} </td>
 
    {% endfor %}
-<td>
-    <input type="checkbox" name="cluster" value= {{column[id_col_index]}} >
-    <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
-</td>  
+
 </tr>
 {% endfor %}
 </tr>    

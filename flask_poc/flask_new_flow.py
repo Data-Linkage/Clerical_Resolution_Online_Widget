@@ -278,14 +278,17 @@ def index():
           pass
       #not WORKIng 
       df=working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]
-      cols_list=[config['display_columns'][i] for i in config['display_columns']]+["Match"]
-
-      df_display=df[[config['display_columns'][i] for i in config['display_columns']]]
+      
+      df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match"]]
       columns = df_display.columns
       data = df_display.values
       num_clusters=str(working_file.Sequential_Cluster_Id.nunique())
       display_message=config['message_for_matchers']['message_to_display']
       id_col_index=df_display.columns.get_loc(rec_id)
+      print(data)
+      print(columns)
+      
+      
       if check_matching_done()==0:
           done_message='Keep Matching'
       else: 
