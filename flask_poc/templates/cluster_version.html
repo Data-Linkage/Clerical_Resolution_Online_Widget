@@ -15,6 +15,7 @@
 <box>{{display_message}}</box>
 </div>  
 <h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
+<h2>{{done_message}}</h2>
   
 <table class = 'table' cellspacing = '0' table-bordered>
 
@@ -24,17 +25,17 @@
 {% endfor %}  
 </tr>
 
-{% for row in data %}
+{% for column in data %}
 <tr class = 'table__row'> 
 
-   {% for cell in row %}
+   {% for cell in column %}
  
     
     <td class = 'table__cell'>{{cell}} </td>
 
    {% endfor %}
 <td>
-    <input type="checkbox" name="cluster" value= {{row[-5]}} >
+    <input type="checkbox" name="cluster" value= {{column[id_col_index]}} >
     <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
 </td>  
 </tr>

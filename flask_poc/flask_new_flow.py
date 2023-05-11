@@ -221,6 +221,7 @@ def index():
       #set highlighter toggle to 0
       session['highlighter']=False
       #problem; this needs to only be ran when app first opened
+      
       if 'index' not in session:
               session['index']=int(working_file['Sequential_Cluster_Id'][(working_file.Match.values == '[]').argmax()])
               print(session['index'])
@@ -277,17 +278,24 @@ def index():
           pass
       #not WORKIng 
       df=working_file.loc[working_file['Sequential_Cluster_Id']==session['index']]
-      cols_list=[config['display_columns'][var] for var in config['display_columns']]
+      cols_list=[config['display_columns'][i] for i in config['display_columns']]+["Match"]
 
-
-      columns = df.columns
-      data = df.values
+      df_display=df[[config['display_columns'][i] for i in config['display_columns']]]
+      columns = df_display.columns
+      data = df_display.values
       num_clusters=str(working_file.Sequential_Cluster_Id.nunique())
       display_message=config['message_for_matchers']['message_to_display']
+      id_col_index=df_display.columns.get_loc(rec_id)
+      if check_matching_done()==0:
+          done_message='Keep Matching'
+      else: 
+          done_message='Matching Finished. Press Save'
 
       return  render_template("cluster_version.html",
                               data = data,
-                              columns=columns, cluster_number=session['index'], num_clusters=num_clusters, display_message=display_message)
+                              columns=columns, cluster_number=session['index'],\
+                              num_clusters=num_clusters, display_message=display_message, \
+                              done_message=done_message, id_col_index=id_col_index)
     
     
     
