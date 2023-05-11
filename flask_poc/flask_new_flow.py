@@ -215,7 +215,7 @@ def load_session():
     directory = os.listdir('saved_sessions')
     #set session index here so that it always sets to first unmatched cluster when you first launch
     #but does not reset when you reload /cluster_version
-    session_index=int(working_file['Sequential_Cluster_Id'][(working_file.Match.values == '[]').argmax()])
+    session['index']=int(working_file['Sequential_Cluster_Id'][(working_file.Match.values == '[]').argmax()])
     
     return render_template('load_session.html', directory=directory)
 
