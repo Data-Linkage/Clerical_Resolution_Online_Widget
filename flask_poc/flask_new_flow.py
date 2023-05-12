@@ -160,7 +160,7 @@ elif 'DONE' in origin_file_path_fl[-1]:
 else:
       
         in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_inProgress' ])
-
+        filepath_done=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_DONE' ])
 
 
 save_rename_hive(working_file, origin_file_path, in_prog_path) 
