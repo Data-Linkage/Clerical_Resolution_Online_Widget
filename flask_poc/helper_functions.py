@@ -20,7 +20,14 @@ def advance_cluster(df):
             df.loc[df[rec_id]==r_id,'Match']=f"['No Match In Cluster For {r_id}']"
       session['index'] = int(session['index'])+ 1
       
-def check_matching_done(df): 
+def check_matching_done(df):
+  """
+  A function to check if all the records have a match/non-match status
+  
+  Parameters: dataframe
+  Returns: Boolean
+  
+  """
   if len(df[df.Match == '[]'])>0: 
     return 0
   if len(df[df.Match == '[]'])==0:
@@ -28,6 +35,13 @@ def check_matching_done(df):
     return 1
   
 def save_rename_hive(dataframe, old_path,new_path):
+    """
+    A function that takes in a pandas dataframe, and saves it to a hive location, while deleting an old path location
+     
+    Parameters: Dataframe (Pd.dataframe), old_path (Sring); hive file path to be deleted, new_path (String); new file path to be saved to. 
+    Returns: None 
+    
+    """
     sparkDF=spark.createDataFrame(dataframe)
     sparkDF.registerTempTable("temp_table")
     spark.sql(f"""DROP TABLE IF EXISTS {old_path}""")
@@ -36,6 +50,14 @@ def save_rename_hive(dataframe, old_path,new_path):
 
 
 def get_save_paths(origin_file_path,origin_file_path_fl ):
+    """
+    Takes the input filepath and creates a filepaths for the inprogress and done status of that file. 
+    
+    Parameters: origin_file_path (string); path of hive location, origin_file_path_fl (List); dot separated list. 
+    Returns: in_proh_path (String), filepath_done (String)
+    
+    
+    """
       if 'inProgress' in origin_file_path_fl[-1]:
 
             # If it is the same user
