@@ -26,9 +26,18 @@
           <br>
  
           <p>Please upload a config:</p>
-          <div class="file-upload-wrapper">
-                <input type="file" id="input-file-now" class="file-upload" name= "input_file" value='True' />
-          </div>
+              <br>
+          <body> 
+          <h2>Please choose a file to load:</h2>  
+              <select method = "post", name = "file_path" , id="file_path">  
+              Please select a session... <option value = "default" SELECTED >Please select a session...</option>
+              {% for i in std_out %}
+              {{i}} <option value = "{{i}}" >{{i}}</option>
+              <br>
+              <br>
+              {% endfor %}
+            </select>
+            <br>
           <p>&nbsp;</p>
 
 

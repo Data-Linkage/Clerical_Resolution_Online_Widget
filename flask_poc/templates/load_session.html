@@ -12,9 +12,9 @@
   <body> 
   <h2>Please choose a session to load:</h2>  
       <form action="/cluster_version" method = "post"> 
-            <select action="/adapt_columns" method = "post", name = "form" >  
+            <select action="/adapt_columns" method = "post", name = "file_path" >  
                 Please select a session... <option value = "default" SELECTED >Please select a session...</option>
-                {% for i in directory %}
+                {% for i in std_out %}
                      {{i}} <option value = "{{i}}" >{{i}}</option>
                      <br>
                      <br>
