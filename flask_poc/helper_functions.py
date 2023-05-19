@@ -1,3 +1,42 @@
+
+import pandas as pd
+import logging
+from flask import Flask, render_template, request, redirect, \
+url_for, flash, make_response, session, jsonify
+import os
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
+import difflib
+from dlh_utils import sessions
+from dlh_utils import utilities
+from markupsafe import Markup
+import ast
+import numpy as np
+import configparser
+import getpass
+import pwd
+import subprocess
+import helper_functions as hf
+app=Flask(__name__)
+logging.getLogger('werkzeug').disabled=True
+
+spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
+config = configparser.ConfigParser()
+config.read('config_flow.ini')
+rec_id=config['id_variables']['record_id']
+clust_id=config['id_variables']['cluster_id']
+#ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
+user = os.environ['HADOOP_USER_NAME']
+
+
+
+
+
+
+
+
+
+
+
 def advance_cluster(df):
   #note this function is very clunky and could likely be improved. 
   """
@@ -49,7 +88,7 @@ def save_rename_hive(dataframe, old_path,new_path):
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {new_path} AS SELECT * FROM temp_table""")
 
 
-def get_save_paths(origin_file_path,origin_file_path_fl ):
+def get_save_paths(origin_file_path,origin_file_path_fl):
     """
     Takes the input filepath and creates a filepaths for the inprogress and done status of that file. 
     
@@ -58,7 +97,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl ):
     
     
     """
-      if 'inProgress' in origin_file_path_fl[-1]:
+    if 'inProgress' in origin_file_path_fl[-1]:
 
             # If it is the same user
             if (user in origin_file_path_fl[-1]):
@@ -85,7 +124,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl ):
 
 
         # If a user is picking this file again and its done
-      elif 'DONE' in origin_file_path_fl[-1]:
+    elif 'DONE' in origin_file_path_fl[-1]:
 
             # If it is the same user
             if (user in origin_file_path_fl[-1]):
@@ -107,9 +146,9 @@ def get_save_paths(origin_file_path,origin_file_path_fl ):
                 print(f'filepath done={filepath_done}')
                 print(f'in prog path={in_prog_path}')
                 
-      else:
+    else:
 
               in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_inProgress' ])
               filepath_done=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_DONE' ])
       
-      return in_prog_path, filepath_done
+    return in_prog_path, filepath_done

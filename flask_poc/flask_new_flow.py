@@ -16,7 +16,7 @@ import configparser
 import getpass
 import pwd
 import subprocess
-import helper_functions 
+import helper_functions as hf
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
@@ -132,14 +132,14 @@ def index():
 
           origin_file_path=f"{config['filepath']['hive_directory']}.{session['file_path']}"
           origin_file_path_fl=f"{config['filepath']['hive_directory']}.{session['file_path']}".split('.') 
-          in_prog_path, filepath_done=get_save_paths(origin_file_path,origin_file_path_fl)
-          save_rename_hive(local_file, origin_file_path, in_prog_path)
+          in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
+          hf.save_rename_hive(local_file, origin_file_path, in_prog_path)
           
       else: 
           local_file=pd.read_json(session['working_file'])
           origin_file_path=f"{config['filepath']['hive_directory']}.{session['file_path']}"
           origin_file_path_fl=f"{config['filepath']['hive_directory']}.{session['file_path']}".split('.') 
-          in_prog_path, filepath_done=get_save_paths(origin_file_path,origin_file_path_fl)
+          in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
     
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
@@ -162,7 +162,7 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-              advance_cluster(local_file)
+              hf.advance_cluster(local_file)
             
 
       elif request.form.get('Non-Match')=="Non-Match":
@@ -172,7 +172,7 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
-              advance_cluster(local_file)
+              hf.advance_cluster(local_file)
               
               
               
@@ -181,10 +181,10 @@ def index():
               session['index'] = session['index']-1
 
       if request.form.get('save')=="save":
-              if check_matching_done(local_file): 
-                  save_rename_hive(local_file, in_prog_path, filepath_done)
+              if hf.check_matching_done(local_file): 
+                  hf.save_rename_hive(local_file, in_prog_path, filepath_done)
               else: 
-                  save_rename_hive(local_file, in_prog_path, in_prog_path)
+                  hf.save_rename_hive(local_file, in_prog_path, in_prog_path)
               print('save activated ')
 
       
@@ -206,7 +206,7 @@ def index():
       session['working_file']=local_file.to_json()
       
       
-      if check_matching_done(local_file)==0:
+      if hf.check_matching_done(local_file)==0:
           done_message='Keep Matching'
       else: 
           done_message='Matching Finished. Press Save'
@@ -242,7 +242,7 @@ def index_pairwise():
       if request.form.get('Match')=="Match":
               local_file.iloc[cluster]['Match']=1
               session['index'] = int(session['index'])+ 1
-              check_matching_done(local_file)
+              hf.check_matching_done(local_file)
 
       elif request.form.get('Non-Match')=="Non-Match":
               local_file.loc[local_file['Sequential_Cluster_Id']==session['index'],'Match']=0
