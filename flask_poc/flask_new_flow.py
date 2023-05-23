@@ -30,8 +30,6 @@ user = os.environ['HADOOP_USER_NAME']
 
 
 
-#orking_file=file.toPandas()
-
 #this line not working
 #working_file = working_file.sort_values(by = clust_id).reset_index().astype(str)
 
@@ -108,16 +106,13 @@ def load_session():
     process = subprocess.Popen(["hadoop", "fs","-ls","-C",'/ons/crow/hive' ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     std_out, std_error = process.communicate() 
     std_out2=list(str(std_out).split('\\n'))
-    #set session index here so that it always sets to first unmatched cluster when you first launch
-    #but does not reset when you reload /cluster_version
-    #session['index']=int(session['working_file']['Sequential_Cluster_Id'][(working_file.Match.values == '[]').argmax()], std_out=std_out2)
-    
     return render_template('load_session.html', directory=directory, std_out=std_out2)
 
 @app.route('/cluster_version', methods=['GET','POST'])
 def index(): 
-      #set highlighter toggle to 0
+  
       if 'file_path' not in session:
+          print('fileath_no_in_session')
           session['file_path']=str(request.form.get("file_path")).split('/')[-1]
           file=spark.sql(f"SELECT * FROM {config['filepath']['hive_directory']}.{session['file_path']}")
           session['working_file']=file.toPandas().to_json()
@@ -134,12 +129,15 @@ def index():
           origin_file_path_fl=f"{config['filepath']['hive_directory']}.{session['file_path']}".split('.') 
           in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
           hf.save_rename_hive(local_file, origin_file_path, in_prog_path)
+        
           
       else: 
-          local_file=pd.read_json(session['working_file'])
+          session['file_path']=str(request.form.get("file_path")).split('/')[-1]
+          local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
           origin_file_path=f"{config['filepath']['hive_directory']}.{session['file_path']}"
           origin_file_path_fl=f"{config['filepath']['hive_directory']}.{session['file_path']}".split('.') 
           in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
+          print(origin_file_path, origin_file_path_fl, in_prog_path, filepath_done)
     
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
@@ -148,15 +146,6 @@ def index():
       else:
               print(f"{session['index']} newsesh")
       
-      if {'Match'}.issubset(local_file.columns):
-            pass
-            # variable indicates whether user has returned to this file (1) or not (0)
-        
-      else:
-            print("that ran3")
-            # create a match column and fill with blanks
-            #local_file['Match'] = ''
-           # pass
       if request.form.get('Match')=="Match":
               cluster = request.form.getlist("cluster")
               for i in cluster:
@@ -185,7 +174,8 @@ def index():
                   hf.save_rename_hive(local_file, in_prog_path, filepath_done)
               else: 
                   hf.save_rename_hive(local_file, in_prog_path, in_prog_path)
-              print('save activated ')
+  
+             
 
       
       if 'index' not in local_file.columns:
@@ -210,6 +200,7 @@ def index():
           done_message='Keep Matching'
       else: 
           done_message='Matching Finished. Press Save'
+          
 
       return  render_template("cluster_version.html",
                               data = data,
@@ -254,7 +245,7 @@ def index_pairwise():
 
       if request.form.get('save')=="save":
               save_output()
-
+      
 
 
 
@@ -279,6 +270,9 @@ def index_pairwise():
 @app.route('/about_page', methods=['GET','POST'])
 def about():
     return render_template("about_page.html")
+  
+
+
 
 #########################
 #########################
