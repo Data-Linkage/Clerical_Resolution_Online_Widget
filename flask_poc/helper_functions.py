@@ -93,7 +93,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
     Takes the input filepath and creates a filepaths for the inprogress and done status of that file. 
     
     Parameters: origin_file_path (string); path of hive location, origin_file_path_fl (List); dot separated list. 
-    Returns: in_proh_path (String), filepath_done (String)
+    Returns: in_prog_path (String), filepath_done (String)
     
     
     """
@@ -105,7 +105,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 in_prog_path= origin_file_path
                 end_file_name=origin_file_path_fl[-1][:-11]+'_done'
                 # create the filepath name for when the file is finished
-                filepath_done = ".".join([origin_file_path_fl[0], end_file_name])
+                filepath_done = "/".join([origin_file_path_fl[0:-1]+ [end_file_name]])
                 print(f'filepath done={filepath_done}')
                 print(f'in prog path={in_prog_path}')
             else:
@@ -117,7 +117,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
 
 
                 end_file_name=origin_file_path_fl[-1][:-11]+f'_{user}'+'_done'
-                filepath_done=".".join([origin_file_path_fl[0],end_file_name ])
+                filepath_done="/".join([origin_file_path_fl[0],end_file_name ])
                 print(f'filepath done={filepath_done}')
                 print(f'in prog path={in_prog_path}')                        
 
@@ -132,7 +132,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 filepath_done = origin_file_path
 
                 # Rename the file 
-                in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+'_inprogress'])
+                in_prog_path="/".join(origin_file_path_fl[0:-1] + [origin_file_path_fl[-1][:-5]+'_inprogress'])
                 print(f'filepath done={filepath_done}')
                 print(f'in prog path={in_prog_path}')
 
@@ -148,7 +148,30 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 
     else:
 
-              in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_inprogress' ])
-              filepath_done=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_done' ])
+              in_prog_path="/".join([origin_file_path_fl[0:-1],origin_file_path_fl[-1]+f'_{user}'+'_inprogress' ])
+              filepath_done="/".join([origin_file_path_fl[0:-1],origin_file_path_fl[-1]+f'_{user}'+'_done' ])
       
     return in_prog_path, filepath_done
+  
+  
+  
+  
+def rename_hadoop(old, new):
+  
+    process = subprocess.Popen(["hadoop", "fs","-mv",old, new])
+
+    process.communicate()
+  
+  
+def get_hadoop(hdfs_path):
+  
+    process = subprocess.Popen(["hadoop", "fs","-get",hive_folder,'/home/cdsw/tmp' ])
+
+    process.communicate()
+    
+def save_hadoop(local_path,hdfs_path):
+  
+    process = subprocess.Popen(["hadoop", "fs","-put",local_folder,hive_folder ])
+
+    process.communicate()
+    

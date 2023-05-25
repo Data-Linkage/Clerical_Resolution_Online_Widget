@@ -1,4 +1,3 @@
-#note file relates to templates 2 folder in git 
 
 import pandas as pd
 import logging
@@ -113,10 +112,10 @@ def index():
   
       if 'file_path' not in session:
           print('fileath_no_in_session')
-          session['file_path']=str(request.form.get("file_path")).split('/')[-1]
-          file=spark.sql(f"SELECT * FROM {config['filepath']['hive_directory']}.{session['file_path']}")
-          session['working_file']=file.toPandas().to_json()
-          local_file=file.toPandas()
+          session['filename']=str(request.form.get("file_path")).split('/')[-1]
+          hf.get_hadoop()
+          local_file=pd.read_parquet(f"tmp/{config['filepath']['hive_directory']}/{session['filename']}")
+          session['working_file']=local_file.to_json()
           if 'Match' not in local_file.columns: 
               local_file['Match']='[]'
               print('hi')
@@ -125,17 +124,16 @@ def index():
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
 
-          origin_file_path=f"{config['filepath']['hive_directory']}.{session['file_path']}"
-          origin_file_path_fl=f"{config['filepath']['hive_directory']}.{session['file_path']}".split('.') 
+          origin_file_path=f"{config['hive_folder_space']['hive_folder']}/{session['file_path']}"
+          origin_file_path_fl=f"{config['hive_folder_space'][hive_folder]}/{session['file_path']}".split('/') 
           in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
-          hf.save_rename_hive(local_file, origin_file_path, in_prog_path)
-        
+          hf.rename_hadoop(origin_file_path, in_prog_path)
           
       else: 
           session['file_path']=str(request.form.get("file_path")).split('/')[-1]
           local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
-          origin_file_path=f"{config['filepath']['hive_directory']}.{session['file_path']}"
-          origin_file_path_fl=f"{config['filepath']['hive_directory']}.{session['file_path']}".split('.') 
+          origin_file_path=f"{config['hive_folder_space']['hive_folder']}/{session['file_path']}"
+          origin_file_path_fl=f"{config['hive_folder_space'][hive_folder]}/{session['file_path']}".split('/') 
           in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
           print(origin_file_path, origin_file_path_fl, in_prog_path, filepath_done)
     
@@ -246,7 +244,6 @@ def index_pairwise():
       if request.form.get('save')=="save":
               save_output()
       
-
 
 
 
