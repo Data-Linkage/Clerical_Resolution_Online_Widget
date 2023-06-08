@@ -85,9 +85,12 @@ def welcome_page():
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
    # session['input_df']=data_pd
-    process = subprocess.Popen(["hadoop", "fs","-ls","-C",'/ons/crow/hive' ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    std_out, std_error = process.communicate()  
+    print(config['hdfs_file_space']['hdfs_folder'])
+    process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['hdfs_file_space']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    std_out, std_error = process.communicate() 
+    print(std_out)
     std_out2=list(str(std_out).split('\\n'))
+    print(std_out2)
     button = request.form.get("hdfs")
     config_status = request.form.get("config")
     version = request.form.get("version")
@@ -102,7 +105,7 @@ def load_session():
     directory = os.listdir('saved_sessions')
      
     #this lists the files in a given location
-    process = subprocess.Popen(["hadoop", "fs","-ls","-C",'/ons/crow/hive' ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    process = subprocess.Popen(["hadoop", "fs","-ls","-C",config['hdfs_file_space']['hdfs_folder']],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     std_out, std_error = process.communicate() 
     std_out2=list(str(std_out).split('\\n'))
     return render_template('load_session.html', directory=directory, std_out=std_out2)
@@ -110,11 +113,17 @@ def load_session():
 @app.route('/cluster_version', methods=['GET','POST'])
 def index(): 
   
-      if 'file_path' not in session:
-          print('fileath_no_in_session')
-          session['filename']=str(request.form.get("file_path")).split('/')[-1]
-          hf.get_hadoop()
-          local_file=pd.read_parquet(f"tmp/{config['filepath']['hive_directory']}/{session['filename']}")
+      if 'full_path' not in session:
+      #all the actions that need to happen if a path not in session 
+          print('filepath_no_in_session')
+          
+          session['full_path']=str(request.form.get("file_path"))
+          #this is the full original filepath
+          session['filename']=session['full_path'].split('/')[-1]
+          #this is the current file name
+
+          hf.get_hadoop(session['full_path'],f"/home/cdsw/tmp/session['filename']")
+          local_file=pd.read_parquet(f"/home/cdsw/tmp/{session[filename]}")
           session['working_file']=local_file.to_json()
           if 'Match' not in local_file.columns: 
               local_file['Match']='[]'
@@ -124,15 +133,16 @@ def index():
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
 
-          origin_file_path=f"{config['hive_folder_space']['hive_folder']}/{session['file_path']}"
-          origin_file_path_fl=f"{config['hive_folder_space'][hive_folder]}/{session['file_path']}".split('/') 
+          origin_file_path=session['full_path']
+          origin_file_path_fl=origin_file_path.split('/') 
           in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
           hf.rename_hadoop(origin_file_path, in_prog_path)
           
       else: 
-          session['file_path']=str(request.form.get("file_path")).split('/')[-1]
+          session['filename']=str(request.form.get("file_path")).split('/')[-1]
+          session['full_path']=str(request.form.get("file_path"))
           local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
-          origin_file_path=f"{config['hive_folder_space']['hive_folder']}/{session['file_path']}"
+          origin_file_path=f"{config['hive_file_space']['hive_folder']}/{session['file_path']}"
           origin_file_path_fl=f"{config['hive_folder_space'][hive_folder]}/{session['file_path']}".split('/') 
           in_prog_path, filepath_done=hf.get_save_paths(origin_file_path,origin_file_path_fl)
           print(origin_file_path, origin_file_path_fl, in_prog_path, filepath_done)

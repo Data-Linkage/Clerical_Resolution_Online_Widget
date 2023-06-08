@@ -15,7 +15,7 @@ import configparser
 import getpass
 import pwd
 import subprocess
-import helper_functions as hf
+
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
@@ -26,8 +26,6 @@ rec_id=config['id_variables']['record_id']
 clust_id=config['id_variables']['cluster_id']
 #ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
 user = os.environ['HADOOP_USER_NAME']
-
-
 
 
 
@@ -93,7 +91,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
     Takes the input filepath and creates a filepaths for the inprogress and done status of that file. 
     
     Parameters: origin_file_path (string); path of hive location, origin_file_path_fl (List); dot separated list. 
-    Returns: in_prog_path (String), filepath_done (String)
+    Returns: in_proh_path (String), filepath_done (String)
     
     
     """
@@ -104,22 +102,23 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 # Dont rename the file
                 in_prog_path= origin_file_path
                 end_file_name=origin_file_path_fl[-1][:-11]+'_done'
+                
                 # create the filepath name for when the file is finished
-                filepath_done = "/".join([origin_file_path_fl[0:-1]+ [end_file_name]])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')
+                filepath_done = "/".join(origin_file_path_fl[:-1]+[end_file_name])
+
             else:
 
                 print('USER_NOT_IN_NAME')
 
                 # Rename the file to contain the additional user
-                in_prog_path = origin_file_path_fl[-1][:-11]+f'_{user}'+'_inprogress'
-
+                
+                in_prog_name = origin_file_path_fl[-1][:-11]+f'_{user}'+'_inprogress'
+                in_prog_path="/".join(origin_file_path_fl[:-1]+[in_prog_name])
 
                 end_file_name=origin_file_path_fl[-1][:-11]+f'_{user}'+'_done'
-                filepath_done="/".join([origin_file_path_fl[0],end_file_name ])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')                        
+                filepath_done="/".join(origin_file_path_fl[:-1]+[end_file_name])
+
+                  
 
 
 
@@ -132,25 +131,29 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 filepath_done = origin_file_path
 
                 # Rename the file 
-                in_prog_path="/".join(origin_file_path_fl[0:-1] + [origin_file_path_fl[-1][:-5]+'_inprogress'])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')
+                in_prog_name=origin_file_path_fl[-1][:-5]+'_inprogress'
+                in_prog_path="/".join(origin_file_path_fl[:-1]+ [in_prog_name])
+
 
             else:
                 # If it is a different user
                 # Rename the file to include the additional user
-                in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+f'_{user}'+'_inprogress'])
-
+                in_prog_name=origin_file_path_fl[-1][:-5]+f'_{user}'+'_inprogress'
+                in_prog_path="/".join(origin_file_path_fl[:-1] +[in_prog_name])
+                
                 # create the filepath done
-                filepath_done=".".join([origin_file_path_fl[0],in_prog_path[:-11]+'_DONE' ])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')
+                end_file_name=in_prog_path[:-11]+'_DONE' 
+                filepath_done="/".join(origin_file_path_fl[:-1] +[end_file_name ])
+
                 
     else:
-
-              in_prog_path="/".join([origin_file_path_fl[0:-1],origin_file_path_fl[-1]+f'_{user}'+'_inprogress' ])
-              filepath_done="/".join([origin_file_path_fl[0:-1],origin_file_path_fl[-1]+f'_{user}'+'_done' ])
-      
+              in_prog_name=origin_file_path_fl[-1]+f'_{user}'+'_inprogress'
+              in_prog_path="/".join(origin_file_path_fl[:-1]+[in_prog_name])
+              end_file_name=origin_file_path_fl[-1]+f'_{user}'+'_done' 
+              filepath_done="/".join(origin_file_path_fl[:-1]+ [end_file_name])
+              
+    print(f'filepath done={filepath_done}')
+    print(f'in prog path={in_prog_path}')
     return in_prog_path, filepath_done
   
   
@@ -163,15 +166,24 @@ def rename_hadoop(old, new):
     process.communicate()
   
   
-def get_hadoop(hdfs_path):
+def get_hadoop(hdfs_path, ):
   
-    process = subprocess.Popen(["hadoop", "fs","-get",hive_folder,'/home/cdsw/tmp' ])
+    process = subprocess.Popen(["hadoop", "fs","-get",hdfs_path,local_path])
 
     process.communicate()
     
 def save_hadoop(local_path,hdfs_path):
   
-    process = subprocess.Popen(["hadoop", "fs","-put",local_folder,hive_folder ])
+    process = subprocess.Popen(["hadoop", "fs","-put",local_folder,hdfs_path ])
 
     process.communicate()
     
+    
+    
+    
+    
+#this is all non-sensitive and in dev-test    
+    
+process = subprocess.Popen(["hadoop", "fs","-put",'/home/cdsw/tmp/new_data','/ons/crow/hive/new_TEST'])
+
+process.communicate()
