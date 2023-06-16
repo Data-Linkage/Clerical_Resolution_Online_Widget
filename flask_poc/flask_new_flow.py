@@ -71,10 +71,13 @@ seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
+    session.clear()
     return render_template("ira_html.html")
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
+    session.clear()
+    
    # session['input_df']=data_pd
     print(config['hdfs_file_space']['hdfs_folder'])
     process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['hdfs_file_space']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -107,10 +110,8 @@ def index():
           print('filepath_no_in_session')
           
           session['full_path']=str(request.form.get("file_path"))
-          print(session['full_path'])
           #this is the full original filepath
           session['filename']=session['full_path'].split('/')[-1]
-          print(session['filename'])
           #this is the current file name
           temp_local_path=f"/home/cdsw/Clerical_Resolution_Online_Widget/tmp/{session['filename']}"
 
