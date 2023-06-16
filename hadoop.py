@@ -26,14 +26,18 @@ clust_id=config['id_variables']['cluster_id']
 #ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
 user = os.environ['HADOOP_USER_NAME']
 
-hive_folder= '/ons/crow/hive/testfile_9'
+hdfs_folder="/ons/crow/crow_test_parquet/testfile_again_7"
 
-!hadoop dfs -get /ons/crow/hive/testfile_9
+#!hadoop dfs -get /ons/crow/hive/testfile_9
 
 #loading in 
-process = subprocess.Popen(["hadoop", "fs","-get",hive_folder,'/home/cdsw/tmp' ])
+process = subprocess.Popen(["hadoop", "fs","-get",hdfs_folder,'/home/cdsw/tmp' ])
 
 process.communicate()
+
+#read_pandas
+
+testdf=pd.read_parquet('/home/cdsw/tmp/testfile_again_7')
 
 #sending out 
 
@@ -44,3 +48,6 @@ process.communicate()
 process = subprocess.Popen(["hadoop", "fs","-mv",hive_folder, '/ons/crow/hive/testfile_NEW'])
 
 process.communicate()
+
+###
+# -rm remove 

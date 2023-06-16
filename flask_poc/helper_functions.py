@@ -15,6 +15,7 @@ import configparser
 import getpass
 import pwd
 import subprocess
+import pydoop
 
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
@@ -84,6 +85,21 @@ def save_rename_hive(dataframe, old_path,new_path):
     spark.sql(f"""DROP TABLE IF EXISTS {old_path}""")
     #unhash to delete after new table created 
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {new_path} AS SELECT * FROM temp_table""")
+    
+def save_rename_parquet(dataframe, old_local_location, old_hdfs_location, new_hdfs_location):
+    """
+    
+    
+    """
+    dataframe.to_parquet('/home/cdsw/Clerical_Resolution_Online_Widget/tmp/lost_my_mind_6/')
+    dataframe.to_parquet('/home/cdsw/Clerical_Resolution_Online_Widget/tmp/tempfile')
+    
+    process = subprocess.Popen(["hadoop", "fs","-put",'/home/cdsw/Clerical_Resolution_Online_Widget/tmp/tempfile','/ons/crow/crow_test_parquet'])
+    process.communicate()
+    process = subprocess.Popen(["hadoop", "fs","-mv","/ons/crow/crow_test_parquet/tempfile", new_hdfs_location])
+    process.communicate()
+   # os.remove('/home/cdsw/Clerical_Resolution_Online_Widget/tmp/tempfile')
+    print('hdfs file saved at {new_hdfs_location}')
 
 
 def get_save_paths(origin_file_path,origin_file_path_fl):
@@ -166,7 +182,7 @@ def rename_hadoop(old, new):
     process.communicate()
   
   
-def get_hadoop(hdfs_path, ):
+def get_hadoop(hdfs_path,local_path ):
   
     process = subprocess.Popen(["hadoop", "fs","-get",hdfs_path,local_path])
 
@@ -174,16 +190,34 @@ def get_hadoop(hdfs_path, ):
     
 def save_hadoop(local_path,hdfs_path):
   
-    process = subprocess.Popen(["hadoop", "fs","-put",local_folder,hdfs_path ])
+    process = subprocess.Popen(["hadoop", "fs","-put",local_path,hdfs_path ])
 
     process.communicate()
     
-    
-    
-    
-    
-#this is all non-sensitive and in dev-test    
-    
-process = subprocess.Popen(["hadoop", "fs","-put",'/home/cdsw/tmp/new_data','/ons/crow/hive/new_TEST'])
 
-process.communicate()
+    
+    
+    
+def remove_hadoop(hdfs_path):
+
+    file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+    dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+    if file_test.returncode==0: 
+        
+        command='-rm'
+        print('file')
+    
+    elif dir_test.returncode==0: 
+        command='-rmr'
+        print('directory')
+        
+    else:
+        print('some_error')
+        #build in some error handling 
+    
+
+        
+    process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+
+    process.communicate()
+        
