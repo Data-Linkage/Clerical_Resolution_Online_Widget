@@ -183,7 +183,7 @@ def index():
       if request.form.get('save')=="save":
               hf.remove_hadoop(hdfs_in_prog_path)
               os.remove(local_in_prog_path)
-              if hf.check_matching_done(local_file):
+              if hf.check_matching_done():
                   local_file.to_parquet(local_filepath_done)
                   hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
                   
@@ -243,3 +243,4 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
 
 #note to self; some of the pages are still kids bugy. Fix the numbers and counts
+#troubeshoot real wierd issue where lots of records displaying
