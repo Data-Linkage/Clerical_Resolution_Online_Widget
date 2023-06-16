@@ -58,7 +58,7 @@ def advance_cluster(df):
             df.loc[df[rec_id]==r_id,'Match']=f"['No Match In Cluster For {r_id}']"
       session['index'] = int(session['index'])+ 1
       
-def check_matching_done(df):
+def check_matching_done():
   """
   A function to check if all the records have a match/non-match status
   
@@ -66,7 +66,7 @@ def check_matching_done(df):
   Returns: Boolean
   
   """
-  if len(df[df.Match == '[]'])>0: 
+  if len(df[df.Match == '[]'])>0 : 
     return 0
   if len(df[df.Match == '[]'])==0:
     print('matching_done')

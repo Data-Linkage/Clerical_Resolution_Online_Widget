@@ -153,10 +153,7 @@ def index():
     
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
-
-
-      else:
-              print(f"{session['index']} newsesh")
+              
       
       if request.form.get('Match')=="Match":
               cluster = request.form.getlist("cluster")
@@ -173,13 +170,15 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
-              hf.advance_cluster(local_file)
+              if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
+                  hf.advance_cluster(local_file)
               
               
               
 
       if request.form.get('back')=="back":
-              session['index'] = session['index']-1
+              if int(session['index'])>0:
+                  session['index'] = session['index']-1
 
       if request.form.get('save')=="save":
               hf.remove_hadoop(hdfs_in_prog_path)
@@ -211,16 +210,16 @@ def index():
       
       session['working_file']=local_file.to_json()
       
-      
-      if hf.check_matching_done(local_file)==0:
+      print(local_file.Sequential_Cluster_Id.nunique())
+      if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
           done_message='Keep Matching'
-      else: 
+      elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
           
 
       return  render_template("cluster_version.html",
                               data = data,
-                              columns=columns, cluster_number=session['index'],\
+                              columns=columns, cluster_number=str(int(session['index']+1)),\
                               num_clusters=num_clusters, display_message=display_message, \
                               done_message=done_message, id_col_index=id_col_index)
     
@@ -242,3 +241,5 @@ def about():
 
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
+
+#note to self; some of the pages are still kids bugy. Fix the numbers and counts
