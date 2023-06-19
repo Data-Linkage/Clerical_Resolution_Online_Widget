@@ -160,7 +160,9 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-              hf.advance_cluster(local_file)
+              if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
+                  hf.advance_cluster(local_file)
+              
             
 
       elif request.form.get('Non-Match')=="Non-Match":
@@ -170,10 +172,15 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
-              if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
+              if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
               
-              
+      if request.form.get('Clear-Cluster')=="Clear-Cluster":
+            cluster_ids=list(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']][rec_id].values)
+            print(f'cluster ids= {cluster_ids}, type= {type(cluster_ids)}')
+            for  i in cluster_ids:
+                local_file.loc[local_file[rec_id]==i,'Match']='[]'
+         
               
 
       if request.form.get('back')=="back":
