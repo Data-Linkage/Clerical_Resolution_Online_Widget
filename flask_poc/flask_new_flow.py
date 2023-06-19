@@ -190,7 +190,7 @@ def index():
       if request.form.get('save')=="save":
               hf.remove_hadoop(hdfs_in_prog_path)
               os.remove(local_in_prog_path)
-              if hf.check_matching_done():
+              if hf.check_matching_done(local_file):
                   local_file.to_parquet(local_filepath_done)
                   hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
                   
