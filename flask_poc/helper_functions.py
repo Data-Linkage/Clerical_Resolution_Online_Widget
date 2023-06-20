@@ -168,8 +168,6 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
               end_file_name=origin_file_path_fl[-1]+f'_{user}'+'_done' 
               filepath_done="/".join(origin_file_path_fl[:-1]+ [end_file_name])
               
-    print(f'filepath done={filepath_done}')
-    print(f'in prog path={in_prog_path}')
     return in_prog_path, filepath_done
   
   

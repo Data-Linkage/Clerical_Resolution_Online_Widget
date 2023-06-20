@@ -229,19 +229,26 @@ def index():
           local_file.insert(0,'index',index)
       else:
           pass
-
+        
+      ####################Things to display code#########################
+      
+      #extract a df dor the current cluster
       df=local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]
       
+      #select columns; split into column headers and data
       df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match"]]
       columns = df_display.columns
       data = df_display.values
+      
+      #get number of clusters and message to display. 
       num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
       display_message=config['message_for_matchers']['message_to_display']
       id_col_index=df_display.columns.get_loc(rec_id)
       
+      #cast local_file back to json
       session['working_file']=local_file.to_json()
       
-      print(local_file.Sequential_Cluster_Id.nunique())
+      #set continuation message
       if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
           done_message='Keep Matching'
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
@@ -272,6 +279,3 @@ def about():
 
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
-
-#note to self; some of the pages are still kids bugy. Fix the numbers and counts
-#troubeshoot real wierd issue where lots of records displaying
