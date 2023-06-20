@@ -79,8 +79,8 @@ def new_session():
     session.clear()
     
    # session['input_df']=data_pd
-    print(config['hdfs_file_space']['hdfs_folder'])
-    process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['hdfs_file_space']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    print(config['filespaces']['hdfs_folder'])
+    process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['filespaces']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     std_out, std_error = process.communicate() 
     std_out2=list(str(std_out).split('\\n'))
     button = request.form.get("hdfs")
@@ -104,23 +104,36 @@ def load_session():
 
 @app.route('/cluster_version', methods=['GET','POST'])
 def index(): 
+      
+      #################Loading/renaming data/setting up session###########
   
       if 'full_path' not in session:
       #all the actions that need to happen if a path not in session 
-          print('filepath_no_in_session')
-          
+      
+          #get the hdfs file paths and file name
           session['full_path']=str(request.form.get("file_path"))
-          #this is the full original filepath
           session['filename']=session['full_path'].split('/')[-1]
-          #this is the current file name
-          temp_local_path=f"/home/cdsw/Clerical_Resolution_Online_Widget/tmp/{session['filename']}"
+          
+          #get the temporary file location from config
+          temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
+          #get the data from hdfs into local location
           hf.get_hadoop(session['full_path'],temp_local_path)
+          
+          #load from local location to a pandas df
           local_file=pd.read_parquet(temp_local_path)
+          
+          #if temp path is now a directory; remove directory 
           if os.path.isdir(temp_local_path):
               shutil.rmtree(temp_local_path)
+              
+          #save back to temp path as a one-partition parquet
           local_file.to_parquet(temp_local_path)
+          
+          #create json version of the local file (a flask hack)
           session['working_file']=local_file.to_json()
+          
+          #if there are not already; create a match column and sequential_id column
           if 'Match' not in local_file.columns: 
               local_file['Match']='[]'
   
@@ -128,33 +141,38 @@ def index():
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
 
-          #get the local filepath in_prog and done paths 
+          #get the local filepath in_prog and done paths rename locally to in_prog_path
           local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
-          
-          
           os.rename(temp_local_path, local_in_prog_path)
           
-          #get the hdfs filepath in_prog and done paths 
+          #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
           hf.remove_hadoop(session['full_path'])
           hf.save_hadoop(local_in_prog_path, hdfs_in_prog_path)
           
           
       else: 
+          #read session variable json to pandas
           local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
-          temp_local_path=f"/home/cdsw/Clerical_Resolution_Online_Widget/tmp/{session['filename']}"
-          #get the local filepath in_prog and done paths 
+          
+          #set temp loaction 
+          temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
+          
+          #get the local filepath in_prog and done paths rename locally to in_prog_path
           local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
-          print(local_in_prog_path, local_filepath_done)
-          #get the hdfs filepath in_prog and done paths 
+          
+          #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
-          print(hdfs_in_prog_path,hdfs_filepath_done)
 
     
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
               
       
+      
+      ##############################Button Code###############################
+      
+      #if match button pressed; add the record Id's of the selected records to the match column as an embedded list
       if request.form.get('Match')=="Match":
               cluster = request.form.getlist("cluster")
               for i in cluster:
@@ -164,7 +182,7 @@ def index():
                   hf.advance_cluster(local_file)
               
             
-
+      #if match button pressed; add 'No Match in Cluster...' message 
       elif request.form.get('Non-Match')=="Non-Match":
               #note this section needs building out. 
               #local_file.loc[local_file['Sequential_Cluster_Id']==session['index'],'Match']=0
@@ -175,6 +193,7 @@ def index():
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
               
+      #if Clear-Cluster pressed; replace the match column for cluster with '[]'
       if request.form.get('Clear-Cluster')=="Clear-Cluster":
             cluster_ids=list(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']][rec_id].values)
             print(f'cluster ids= {cluster_ids}, type= {type(cluster_ids)}')
@@ -182,18 +201,23 @@ def index():
                 local_file.loc[local_file[rec_id]==i,'Match']='[]'
          
               
-
+      #if back button pressed; set session['index'] back to move to previous cluster 
       if request.form.get('back')=="back":
               if int(session['index'])>0:
                   session['index'] = session['index']-1
-
+              
+      #if save pressed...save file to hdfs    
       if request.form.get('save')=="save":
+              #delete in_prog_file locally and on hdfs
               hf.remove_hadoop(hdfs_in_prog_path)
               os.remove(local_in_prog_path)
+              
+              #if matching is finished save as done locally and to hdfs
               if hf.check_matching_done(local_file):
                   local_file.to_parquet(local_filepath_done)
                   hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
                   
+              #else matching is finished save as in_prog locally and to hdfs
               else:
                   local_file.to_parquet(local_in_prog_path)
                   hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
@@ -205,7 +229,7 @@ def index():
           local_file.insert(0,'index',index)
       else:
           pass
-      #not WORKIng 
+
       df=local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]
       
       df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match"]]

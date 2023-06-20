@@ -206,10 +206,12 @@ def remove_hadoop(hdfs_path):
         
         command='-rm'
         print('file')
+        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
     
     elif dir_test.returncode==0: 
         command='-rmr'
         print('directory')
+        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
         
     else:
         print('some_error')
@@ -217,7 +219,7 @@ def remove_hadoop(hdfs_path):
     
 
         
-    process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+
 
     process.communicate()
         
