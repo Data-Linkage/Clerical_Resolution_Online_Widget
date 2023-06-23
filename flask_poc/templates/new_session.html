@@ -1,57 +1,50 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>
+<!--    <img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>-->
     <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CROW clerical tool</title>
   </head>
-    <h1>CROW</h1>
-    <br>
   <body> 
-  <h2>Please upload the relevant files:</h2>  
-  <form method = "post">  
-            <p>Please choose a local file or HDFS file:</p>
-            <div class="input_file">
+    <main>
+      <div class = 'top'>
+        <div class = 'top-image'>
+          <img src="{{url_for('static', filename='logo.PNG')}}"align='right'width=240 height=100>
+        </div>     
+      </div>      
+      <div class = 'container'>
+        <div class = 'middle'>
+          <form method = "post", class = 'centered'> 
+            <h2>Please upload the relevant files:</h2> 
+                    <div class="input_file">
                       <input type="file" id="input_file" class="input_file" name= "input_file" value='True' />
-            </div>
-            <br>
-            <button type='submit' id = 'hdfs' name = 'hdfs' value = 'hdfs'>HDFS</button> 
-
-            {% if button == 'hdfs'%}
-               <input type='text' name = 'hdfs_path'>
-            {% endif %} 
-          <br> 
-          <br>
- 
-          <p>Please upload a config:</p>
-              <br>
-          <body> 
-          <h2>Please choose a file to load:</h2>  
-              <select method = "post", name = "file_path" , id="file_path">  
-              Please select a session... <option value = "default" SELECTED >Please select a session...</option>
-              {% for i in std_out %}
-              {{i}} <option value = "{{i}}" >{{i}}</option>
-              <br>
-              <br>
-              {% endfor %}
-            </select>
-            <br>
-          <p>&nbsp;</p>
-
-
-          <p>Once the above is complete, please choose a version:</p>
-          <div class="submit-toolbar">
-              <input type="submit" id="cluster" name="version" value="Cluster Version" formaction = '/cluster_version'>
-              <label for="cluster">Cluster Version</label>
-              <input type="submit" id="pairwise" name="version" value="Pairwise Version" formaction = '/pairwise'>
-              <label for="pairwise">Pairwise Version</label>
-
-          </div>
-          <p>&nbsp;</p>
-
-      
-  </body>
-  </form>            
+                      <label for="input_file">Choose File</label>
+                    </div> 
+                    <p> or </p>
+                  <h2>Please choose a file to load:</h2>  
+                      <select method = "post", name = "file_path" , id="file_path">  
+                      Please select a session... <option value = "default" SELECTED >Please select a session...</option>
+                      {% for i in std_out %}
+                      {{i}} <option value = "{{i}}" >{{i}}</option>
+                      <br>
+                      {% endfor %}
+                    </select>
+                    <br>
+                  <p>Once the above is complete, press Continue:</p>
+                  <div class="submit-toolbar">
+                      <input type="submit" id="cluster" name="version" value="Cluster Version" formaction = '/cluster_version'>
+                      <label for="cluster">Continue</label>
+                  </div>
+         </form>         
+        </div>     
+      </div>
+      <div class = 'bottom'>
+        <div class = 'bottom-image'>
+          <p> </p>
+        </div>
+      </div>
+    </main>
+  </body>            
 </html>
