@@ -15,7 +15,8 @@ import configparser
 import getpass
 import pwd
 import subprocess
-import helper_functions as hf
+import pydoop
+
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
@@ -26,8 +27,6 @@ rec_id=config['id_variables']['record_id']
 clust_id=config['id_variables']['cluster_id']
 #ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
 user = os.environ['HADOOP_USER_NAME']
-
-
 
 
 
@@ -67,7 +66,7 @@ def check_matching_done(df):
   Returns: Boolean
   
   """
-  if len(df[df.Match == '[]'])>0: 
+  if len(df[df.Match == '[]'])>0 : 
     return 0
   if len(df[df.Match == '[]'])==0:
     print('matching_done')
@@ -86,6 +85,21 @@ def save_rename_hive(dataframe, old_path,new_path):
     spark.sql(f"""DROP TABLE IF EXISTS {old_path}""")
     #unhash to delete after new table created 
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {new_path} AS SELECT * FROM temp_table""")
+    
+def save_rename_parquet(dataframe, old_local_location, old_hdfs_location, new_hdfs_location):
+    """
+    
+    
+    """
+    dataframe.to_parquet('/home/cdsw/Clerical_Resolution_Online_Widget/tmp/lost_my_mind_6/')
+    dataframe.to_parquet('/home/cdsw/Clerical_Resolution_Online_Widget/tmp/tempfile')
+    
+    process = subprocess.Popen(["hadoop", "fs","-put",'/home/cdsw/Clerical_Resolution_Online_Widget/tmp/tempfile','/ons/crow/crow_test_parquet'])
+    process.communicate()
+    process = subprocess.Popen(["hadoop", "fs","-mv","/ons/crow/crow_test_parquet/tempfile", new_hdfs_location])
+    process.communicate()
+   # os.remove('/home/cdsw/Clerical_Resolution_Online_Widget/tmp/tempfile')
+    print('hdfs file saved at {new_hdfs_location}')
 
 
 def get_save_paths(origin_file_path,origin_file_path_fl):
@@ -104,22 +118,23 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 # Dont rename the file
                 in_prog_path= origin_file_path
                 end_file_name=origin_file_path_fl[-1][:-11]+'_done'
+                
                 # create the filepath name for when the file is finished
-                filepath_done = ".".join([origin_file_path_fl[0], end_file_name])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')
+                filepath_done = "/".join(origin_file_path_fl[:-1]+[end_file_name])
+
             else:
 
                 print('USER_NOT_IN_NAME')
 
                 # Rename the file to contain the additional user
-                in_prog_path = origin_file_path_fl[-1][:-11]+f'_{user}'+'_inprogress'
-
+                
+                in_prog_name = origin_file_path_fl[-1][:-11]+f'_{user}'+'_inprogress'
+                in_prog_path="/".join(origin_file_path_fl[:-1]+[in_prog_name])
 
                 end_file_name=origin_file_path_fl[-1][:-11]+f'_{user}'+'_done'
-                filepath_done=".".join([origin_file_path_fl[0],end_file_name ])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')                        
+                filepath_done="/".join(origin_file_path_fl[:-1]+[end_file_name])
+
+                  
 
 
 
@@ -132,23 +147,77 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
                 filepath_done = origin_file_path
 
                 # Rename the file 
-                in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+'_inprogress'])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')
+                in_prog_name=origin_file_path_fl[-1][:-5]+'_inprogress'
+                in_prog_path="/".join(origin_file_path_fl[:-1]+ [in_prog_name])
+
 
             else:
                 # If it is a different user
                 # Rename the file to include the additional user
-                in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1][:-5]+f'_{user}'+'_inprogress'])
-
+                in_prog_name=origin_file_path_fl[-1][:-5]+f'_{user}'+'_inprogress'
+                in_prog_path="/".join(origin_file_path_fl[:-1] +[in_prog_name])
+                
                 # create the filepath done
-                filepath_done=".".join([origin_file_path_fl[0],in_prog_path[:-11]+'_DONE' ])
-                print(f'filepath done={filepath_done}')
-                print(f'in prog path={in_prog_path}')
+                end_file_name=in_prog_path[:-11]+'_DONE' 
+                filepath_done="/".join(origin_file_path_fl[:-1] +[end_file_name ])
+
                 
     else:
-
-              in_prog_path=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_inprogress' ])
-              filepath_done=".".join([origin_file_path_fl[0],origin_file_path_fl[-1]+f'_{user}'+'_done' ])
-      
+              in_prog_name=origin_file_path_fl[-1]+f'_{user}'+'_inprogress'
+              in_prog_path="/".join(origin_file_path_fl[:-1]+[in_prog_name])
+              end_file_name=origin_file_path_fl[-1]+f'_{user}'+'_done' 
+              filepath_done="/".join(origin_file_path_fl[:-1]+ [end_file_name])
+              
     return in_prog_path, filepath_done
+  
+  
+  
+  
+def rename_hadoop(old, new):
+  
+    process = subprocess.Popen(["hadoop", "fs","-mv",old, new])
+
+    process.communicate()
+  
+  
+def get_hadoop(hdfs_path,local_path ):
+  
+    process = subprocess.Popen(["hadoop", "fs","-get",hdfs_path,local_path])
+
+    process.communicate()
+    
+def save_hadoop(local_path,hdfs_path):
+  
+    process = subprocess.Popen(["hadoop", "fs","-put",local_path,hdfs_path ])
+
+    process.communicate()
+    
+
+    
+    
+    
+def remove_hadoop(hdfs_path):
+
+    file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+    dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+    if file_test.returncode==0: 
+        
+        command='-rm'
+        print('file')
+        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+    
+    elif dir_test.returncode==0: 
+        command='-rmr'
+        print('directory')
+        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+        
+    else:
+        print('some_error')
+        #build in some error handling 
+    
+
+        
+
+
+    process.communicate()
+        
