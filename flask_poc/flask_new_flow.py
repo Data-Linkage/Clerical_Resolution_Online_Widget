@@ -1,6 +1,6 @@
 
 import pandas as pd
-
+import threading
 import logging
 from flask import Flask, render_template, request, redirect, \
 url_for, flash, make_response, session, jsonify
@@ -20,8 +20,45 @@ import helper_functions as hf
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 import shutil
+from datetime import datetime
+from datetime import timedelta
+from multiprocessing import Process
+start_time=datetime.now()
 
 
+"""
+def thread_function():
+    nowtime=datetime.now()
+    n=(nowtime-start_time).total_seconds()
+    print('func_ran')
+    print(int(n))
+    while n<10:
+      nowtime=datetime.now()
+      print(int(n))
+      n=(nowtime-start_time).total_seconds()
+      return 1
+    else:
+      print('exiting loop')
+      sys.exit()
+      return 0
+      
+      
+
+#x = threading.Thread(target=thread_function)
+x.start()
+
+"""
+
+def get_runtime():
+    nowtime=datetime.now()
+    n=(nowtime-start_time).total_seconds()
+    print('runtime_ran')
+    print(int(n))
+
+
+#time_difference=datetime.now().strptime(finish_time,'%H:%M:%S')-datetime.strptime(start_time,'%H:%M:%S').time()
+#if time_difference.minute<60: 
+ #   print('Yay')
 
 spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 config = configparser.ConfigParser()
@@ -72,12 +109,13 @@ seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
     session.clear()
+    
     return render_template("ira_html.html")
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
     session.clear()
-    
+    #START timer USING SESSION VAR
    # session['input_df']=data_pd
     print(config['filespaces']['hdfs_folder'])
     process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['filespaces']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -86,7 +124,7 @@ def new_session():
     button = request.form.get("hdfs")
     config_status = request.form.get("config")
     version = request.form.get("version")
-    
+   #session['start_time']=datetime.now()
 
     return render_template("new_session.html", button=button,
                                               version=version,
@@ -103,10 +141,13 @@ def load_session():
     return render_template('load_session.html', directory=directory, std_out=std_out2)
 
 @app.route('/cluster_version', methods=['GET','POST'])
-def index(): 
-      
-      #################Loading/renaming data/setting up session###########
+def index():
   
+      #################Loading/renaming data/setting up session###########
+      
+      #tIME elapsed
+      #if time elasped>val: 
+      #kill terminal
       if 'full_path' not in session:
       #all the actions that need to happen if a path not in session 
       
@@ -222,7 +263,10 @@ def index():
                   local_file.to_parquet(local_in_prog_path)
                   hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
              
-
+      
+      
+      #build in a mechanism of backup saving. 
+      
       
       if 'index' not in local_file.columns:
           index = (list(range(max(local_file.count()))))
@@ -253,7 +297,7 @@ def index():
           done_message='Keep Matching'
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
-          
+      
 
       return  render_template("cluster_version.html",
                               data = data,
@@ -275,7 +319,31 @@ def about():
 
 #########################
 #########################
+if __name__=='__main__':
+    
+    def timeout(): 
+      nowtime=datetime.now()
+      n=(nowtime-start_time).total_seconds()
+      while n < 20:
+        nowtime=datetime.now()
+        n=(nowtime-start_time).total_seconds()
+       # print(n)
+      else:
+        ra.terminate()
+ 
+        print('app_closed')
+        
+    def run_app():
+        app.config["TEMPLATES_AUTO_RELOAD"] = True
+        app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
+
+    ra=Process(target=run_app)
+    ra.start()
+    to = Process(target=timeout)
+    to.start()
+    
 
 
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
+
+
+
