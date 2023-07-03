@@ -12,7 +12,7 @@ li:hover ul { display: block; text-decoration:none; background: #343a40 !importa
 body{
   margin:0;
   padding:0;
-  height:100vh
+  height:100vh;
 }
 
 .container{
@@ -131,7 +131,8 @@ body{
 }
 
 h1 {
-  color: #b3b0a2;
+/*  color: #b3b0a2;*/
+  color: white;
   font-family: sans-serif, Arial;
   font-size: 50px;
   size: 15em;  
@@ -140,7 +141,8 @@ h1 {
 }
 
 h2 {
-  color: #b3b0a2;
+/*  color: #b3b0a2;*/
+  color: white;
   font-family: sans-serif, Arial;
   size: 15em; 
   font-size: 40px;
@@ -214,13 +216,13 @@ p{
     display: inline-block;
     background-color: #f5f7fa;
     padding: 10px 150px;
+    width: 100px;
     font-family: sans-serif, Arial;
     font-size: 16px;
     border: 2px solid #444;
     border-radius: 12px;
     color: #033fa0;
 }
-
 
 .submit-toolbar input[type="radio"]:checked + label {
     background-color:#2834b4;
