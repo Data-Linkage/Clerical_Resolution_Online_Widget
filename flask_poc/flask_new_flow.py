@@ -26,29 +26,6 @@ from multiprocessing import Process
 start_time=datetime.now()
 
 
-"""
-def thread_function():
-    nowtime=datetime.now()
-    n=(nowtime-start_time).total_seconds()
-    print('func_ran')
-    print(int(n))
-    while n<10:
-      nowtime=datetime.now()
-      print(int(n))
-      n=(nowtime-start_time).total_seconds()
-      return 1
-    else:
-      print('exiting loop')
-      sys.exit()
-      return 0
-      
-      
-
-#x = threading.Thread(target=thread_function)
-x.start()
-
-"""
-
 def get_runtime():
     nowtime=datetime.now()
     n=(nowtime-start_time).total_seconds()
@@ -56,9 +33,7 @@ def get_runtime():
     print(int(n))
 
 
-#time_difference=datetime.now().strptime(finish_time,'%H:%M:%S')-datetime.strptime(start_time,'%H:%M:%S').time()
-#if time_difference.minute<60: 
- #   print('Yay')
+
 
 spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 config = configparser.ConfigParser()
@@ -319,12 +294,13 @@ def about():
 
 #########################
 #########################
-if __name__=='__main__':
-    
+
+if __name__=='__main__':  
+  
     def timeout(): 
       nowtime=datetime.now()
       n=(nowtime-start_time).total_seconds()
-      while n < 20:
+      while n < 3600:
         nowtime=datetime.now()
         n=(nowtime-start_time).total_seconds()
        # print(n)
@@ -336,6 +312,7 @@ if __name__=='__main__':
     def run_app():
         app.config["TEMPLATES_AUTO_RELOAD"] = True
         app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
+
 
     ra=Process(target=run_app)
     ra.start()
