@@ -31,11 +31,6 @@ user = os.environ['HADOOP_USER_NAME']
 
 
 
-
-
-
-
-
 def advance_cluster(df):
   #note this function is very clunky and could likely be improved. 
   """
@@ -220,4 +215,15 @@ def remove_hadoop(hdfs_path):
 
 
     process.communicate()
+    
+def validate_input_data(filepath):
+    if os.path.getsize(filepath) > 536871:
+        raise ('Filesize error; file is bigger than 0.5GB')
+        
+        
+
+    
+    
+
+    
         
