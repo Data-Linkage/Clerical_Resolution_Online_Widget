@@ -25,7 +25,7 @@ from datetime import timedelta
 from multiprocessing import Process
 start_time=datetime.now()
 
-
+ 
 def get_runtime():
     nowtime=datetime.now()
     n=(nowtime-start_time).total_seconds()
@@ -35,7 +35,7 @@ def get_runtime():
 
 
 
-spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
+#spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 config = configparser.ConfigParser()
 config.read('config_flow.ini')
 rec_id=config['id_variables']['record_id']
@@ -184,7 +184,11 @@ def index():
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
               
-      
+
+      if hf.check_matching_done(local_file):
+          local_file.to_parquet(local_filepath_done)
+      else:
+          local_file.to_parquet(local_in_prog_path)
       
       ##############################Button Code###############################
       
@@ -194,8 +198,10 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
+             # hf.save_local()
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
+              
               
             
       #if match button pressed; add 'No Match in Cluster...' message 
@@ -206,8 +212,10 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
+              #hf.save_local()
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
+              
               
       #if Clear-Cluster pressed; replace the match column for cluster with '[]'
       if request.form.get('Clear-Cluster')=="Clear-Cluster":
@@ -224,19 +232,22 @@ def index():
               
       #if save pressed...save file to hdfs    
       if request.form.get('save')=="save":
+              st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+              st.start()
+              
               #delete in_prog_file locally and on hdfs
-              hf.remove_hadoop(hdfs_in_prog_path)
-              os.remove(local_in_prog_path)
+             # hf.remove_hadoop(hdfs_in_prog_path)
+             # os.remove(local_in_prog_path)
               
               #if matching is finished save as done locally and to hdfs
-              if hf.check_matching_done(local_file):
-                  local_file.to_parquet(local_filepath_done)
-                  hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
+              #if hf.check_matching_done(local_file):
+                 # local_file.to_parquet(local_filepath_done)
+                #  hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
                   
               #else matching is finished save as in_prog locally and to hdfs
-              else:
-                  local_file.to_parquet(local_in_prog_path)
-                  hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
+             # else:
+                  #local_file.to_parquet(local_in_prog_path)
+                #  hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
              
       
       
@@ -296,6 +307,22 @@ def about():
 #########################
 
 if __name__=='__main__':  
+    
+    def save_thread(hdfs_in_prog_path,local_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done):
+        hf.remove_hadoop(hdfs_in_prog_path)
+        os.remove(local_in_prog_path)
+              
+              #if matching is finished save as done locally and to hdfs
+        if hf.check_matching_done(local_file):
+            local_file.to_parquet(local_filepath_done)
+            hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
+                  
+              #else matching is finished save as in_prog locally and to hdfs
+        else:
+            local_file.to_parquet(local_in_prog_path)
+            hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
+             
+    
   
     def timeout(): 
       nowtime=datetime.now()
@@ -306,8 +333,11 @@ if __name__=='__main__':
        # print(n)
       else:
         ra.terminate()
+
  
         print('app_closed')
+    
+
         
     def run_app():
         app.config["TEMPLATES_AUTO_RELOAD"] = True

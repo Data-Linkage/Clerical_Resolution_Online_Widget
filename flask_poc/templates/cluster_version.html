@@ -116,7 +116,6 @@
 <!--
 <div style="overflow-x:auto;" style="overflow-y:auto;">
 <form action='#' method="POST">  
-
 <div class = 'box'>
 <box>{{display_message}}</box>
 </div>  
@@ -124,19 +123,15 @@
 <h2>{{done_message}}</h2>
   
 <table class = 'table' cellspacing = '0' table-bordered>
-
 <tr class = 'table__header'>
   
 <th class = 'table__cell'></th>
   
 {% for i in columns %} 
-
 <th class = 'table__cell'>{{i}}</th> 
 {% endfor %}  
 </tr>
-
 {% for row in data %}
-
 <tr class = 'table__row'> 
 <td>
     <input type="checkbox" name="cluster" value= {{row[id_col_index]}} >
@@ -146,19 +141,14 @@
  
     
     <td class = 'table__cell'>{{cell}} </td>
-
    {% endfor %}
-
 </tr>
 {% endfor %}
 </tr>    
-
 </table>
-
 </div>
 <br>
     <input type="submit" name="Match" value="Match">
-
     <input type="submit" name="Non-Match" value="Non-Match">
   
     <input type="submit" name="Clear-Cluster" value="Clear-Cluster">
@@ -185,7 +175,6 @@
     <input type="submit" name="back" value="back">
     <input type="submit" name="save" value="save">
 </form>  
-
 <div class="form-check">
     </label>
   
@@ -193,4 +182,3 @@
 </body>
 -->
 </html>
-
