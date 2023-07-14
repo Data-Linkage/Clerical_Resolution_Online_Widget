@@ -192,6 +192,12 @@ def save_hadoop(local_path,hdfs_path):
     
     
 def remove_hadoop(hdfs_path):
+    """
+    Takes a given hdfs files path, and checks if it a file or directory, then if so deletes the file or directory. 
+    
+    Parameters: hdfs_path(string); any given hdfs filepath
+     
+    """
     try: 
         file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE)
         dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}", shell=True, stdout=subprocess.PIPE)
@@ -211,6 +217,13 @@ def remove_hadoop(hdfs_path):
     
     
 def validate_columns(df):
+    """
+    Checks for a given dataframe, if the record_id and cluser if columns are present and that the record id column contains 
+    all unique values. Relevant errors are then raised. 
+    
+    Parameters: df (Pandas Dataframe )
+    
+    """
     if rec_id not in df.columns:
           raise Exception('no record ID in data')
     if not df[rec_id].is_unique: 

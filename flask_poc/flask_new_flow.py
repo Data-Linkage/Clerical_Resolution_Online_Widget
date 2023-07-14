@@ -34,13 +34,6 @@ clust_id=config['id_variables']['cluster_id']
 user = os.environ['HADOOP_USER_NAME']
 
 
-data = {
-  "calories": [420, 380, 390],
-  "duration": [50, 40, 45]
-}
-
-#load data into a DataFrame object:
-
 
 #######################
 app= Flask(__name__)
@@ -115,6 +108,8 @@ def index():
           session['full_path']=str(request.form.get("file_path"))
           session['filename']=session['full_path'].split('/')[-1]
           
+
+          
           #get the temporary file location from config
           temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
@@ -144,6 +139,7 @@ def index():
           if 'Sequential_Cluster_Id' not in local_file.columns: 
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
+        
           
           
 
@@ -151,9 +147,11 @@ def index():
           local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
           os.rename(temp_local_path, local_in_prog_path)
           
+          
+          
           #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
-          #hf.remove_hadoop(session['full_path'])
+          remove_hadoop(session['full_path'])
           st=Process(target=save_thread, args= (session['full_path'],local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
           st.start()
    
@@ -293,6 +291,8 @@ if __name__=='__main__':
     
     
     def save_thread(cur_hdfs_path,cur_local_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done):
+        """
+        """
         hf.remove_hadoop(cur_hdfs_path)
         os.remove(cur_local_path)
               
@@ -308,7 +308,12 @@ if __name__=='__main__':
              
     
   
-    def timeout(): 
+    def timeout():
+      """
+      A function to termiate the main app thread when a given time is reached. 
+      
+      
+      """
       nowtime=datetime.now()
       n=(nowtime-start_time).total_seconds()
       while n < 3600:
@@ -323,6 +328,9 @@ if __name__=='__main__':
 
         
     def run_app():
+        """
+        A function to run the main app
+        """
         app.config["TEMPLATES_AUTO_RELOAD"] = True
         app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
 
