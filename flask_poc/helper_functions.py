@@ -20,7 +20,7 @@ import pydoop
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 
-spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
+#spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 config = configparser.ConfigParser()
 config.read('config_flow.ini')
 rec_id=config['id_variables']['record_id']
@@ -192,29 +192,33 @@ def save_hadoop(local_path,hdfs_path):
     
     
 def remove_hadoop(hdfs_path):
+    try: 
+        file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+        dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+        if file_test.returncode==0: 
 
-    file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE)
-    dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}", shell=True, stdout=subprocess.PIPE)
-    if file_test.returncode==0: 
-        
-        command='-rm'
-        print('file')
-        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+            command='-rm'
+            print('file')
+            process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+
+        elif dir_test.returncode==0: 
+            command='-rmr'
+            print('directory')
+            process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+        process.communicate()
+    except:
+        print('hdfs_path cannot be deleted')
     
-    elif dir_test.returncode==0: 
-        command='-rmr'
-        print('directory')
-        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
-        
-    else:
-        print('some_error')
-        #build in some error handling 
     
-
-        
-
-
-    process.communicate()
+def validate_columns(df):
+    if rec_id not in df.columns:
+          raise Exception('no record ID in data')
+    if not df[rec_id].is_unique: 
+          raise Exception('record ids are not unique; please contact your project leader for guidance ')
+    if clust_id not in df.columns: 
+          raise Exception('no cluster id column in data')
+    else: 
+          print('record id and cluster is columns are correct')
     
 def validate_input_data(filepath):
     if os.path.getsize(filepath) > 536871:

@@ -22,20 +22,10 @@ logging.getLogger('werkzeug').disabled=True
 import shutil
 from datetime import datetime
 from datetime import timedelta
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 start_time=datetime.now()
 
  
-def get_runtime():
-    nowtime=datetime.now()
-    n=(nowtime-start_time).total_seconds()
-    print('runtime_ran')
-    print(int(n))
-
-
-
-
-#spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 config = configparser.ConfigParser()
 config.read('config_flow.ini')
 rec_id=config['id_variables']['record_id']
@@ -44,16 +34,12 @@ clust_id=config['id_variables']['cluster_id']
 user = os.environ['HADOOP_USER_NAME']
 
 
+data = {
+  "calories": [420, 380, 390],
+  "duration": [50, 40, 45]
+}
 
-#this line not working
-#working_file = working_file.sort_values(by = clust_id).reset_index().astype(str)
-
-#fill nulls in match column with '[]'.This is just to enable the advance cluster function, as is to work
-#could probably be improved so we don't have to do this.
-#renaming. 
-
- 
-      
+#load data into a DataFrame object:
 
 
 #######################
@@ -120,9 +106,8 @@ def index():
   
       #################Loading/renaming data/setting up session###########
       
-      #tIME elapsed
-      #if time elasped>val: 
-      #kill terminal
+      #actions for if this is the initial launch 
+      
       if 'full_path' not in session:
       #all the actions that need to happen if a path not in session 
       
@@ -138,6 +123,9 @@ def index():
           
           #load from local location to a pandas df
           local_file=pd.read_parquet(temp_local_path)
+          
+          #validate pd columns
+          hf.validate_columns(local_file)
           
           #if temp path is now a directory; remove directory 
           if os.path.isdir(temp_local_path):
@@ -156,6 +144,8 @@ def index():
           if 'Sequential_Cluster_Id' not in local_file.columns: 
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
+          
+          
 
           #get the local filepath in_prog and done paths rename locally to in_prog_path
           local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
@@ -163,8 +153,10 @@ def index():
           
           #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
-          hf.remove_hadoop(session['full_path'])
-          hf.save_hadoop(local_in_prog_path, hdfs_in_prog_path)
+          #hf.remove_hadoop(session['full_path'])
+          st=Process(target=save_thread, args= (session['full_path'],local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+          st.start()
+   
           
           
       else: 
@@ -189,7 +181,9 @@ def index():
           local_file.to_parquet(local_filepath_done)
       else:
           local_file.to_parquet(local_in_prog_path)
-      
+        
+
+    
       ##############################Button Code###############################
       
       #if match button pressed; add the record Id's of the selected records to the match column as an embedded list
@@ -201,7 +195,10 @@ def index():
              # hf.save_local()
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
-              
+              if session['index'] % int(config['custom_setting']['backup_save'])==0:
+                  st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+                  st.start()
+                  
               
             
       #if match button pressed; add 'No Match in Cluster...' message 
@@ -212,9 +209,11 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
-              #hf.save_local()
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
+              if session['index'] % int(config['custom_setting']['backup_save'])==0:
+                  st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+                  st.start()
               
               
       #if Clear-Cluster pressed; replace the match column for cluster with '[]'
@@ -223,7 +222,7 @@ def index():
             print(f'cluster ids= {cluster_ids}, type= {type(cluster_ids)}')
             for  i in cluster_ids:
                 local_file.loc[local_file[rec_id]==i,'Match']='[]'
-         
+            
               
       #if back button pressed; set session['index'] back to move to previous cluster 
       if request.form.get('back')=="back":
@@ -232,26 +231,10 @@ def index():
               
       #if save pressed...save file to hdfs    
       if request.form.get('save')=="save":
-              st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+              st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
               st.start()
-              
-              #delete in_prog_file locally and on hdfs
-             # hf.remove_hadoop(hdfs_in_prog_path)
-             # os.remove(local_in_prog_path)
-              
-              #if matching is finished save as done locally and to hdfs
-              #if hf.check_matching_done(local_file):
-                 # local_file.to_parquet(local_filepath_done)
-                #  hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
-                  
-              #else matching is finished save as in_prog locally and to hdfs
-             # else:
-                  #local_file.to_parquet(local_in_prog_path)
-                #  hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
-             
       
-      
-      #build in a mechanism of backup saving. 
+     
       
       
       if 'index' not in local_file.columns:
@@ -308,9 +291,10 @@ def about():
 
 if __name__=='__main__':  
     
-    def save_thread(hdfs_in_prog_path,local_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done):
-        hf.remove_hadoop(hdfs_in_prog_path)
-        os.remove(local_in_prog_path)
+    
+    def save_thread(cur_hdfs_path,cur_local_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done):
+        hf.remove_hadoop(cur_hdfs_path)
+        os.remove(cur_local_path)
               
               #if matching is finished save as done locally and to hdfs
         if hf.check_matching_done(local_file):
@@ -333,10 +317,9 @@ if __name__=='__main__':
        # print(n)
       else:
         ra.terminate()
-
- 
         print('app_closed')
-    
+      
+        
 
         
     def run_app():
@@ -348,8 +331,9 @@ if __name__=='__main__':
     ra.start()
     to = Process(target=timeout)
     to.start()
+    ra.join()
+    to.join()
     
-
 
 
 

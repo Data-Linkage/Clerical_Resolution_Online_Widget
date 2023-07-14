@@ -35,6 +35,7 @@
               </div>  
               <h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
               <h2>{{done_message}}</h2>
+              <h2>{{timeout_warning_message}}</h2>
 
               <table class = 'table' cellspacing = '0' table-bordered>
 
@@ -97,6 +98,8 @@
                 <label for="back">Back</label>
                 <input type="submit" id = 'save' name="save" value="save">
                 <label for="save">Save</label>
+                <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster">
+                <label for="Clear-Cluster">Clear-Cluster</label>
               </div>
 <!--              </form>  -->
               <div class="form-check">
