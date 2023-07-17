@@ -53,7 +53,7 @@
 
                 <tr class = 'table__row'> 
                 <td>
-                  <input type="checkbox" name="cluster" value= {{row[id_col_index]}} >
+                  <input type="checkbox" name="cluster" value= {{row[id_col_index]}} {{'checked' if select_all else ''}} >
                   <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
                 </td>  
                   {% for cell in row %}
@@ -80,7 +80,7 @@
               <p>Highlight Differences</p> 
               {% if highlight == "Highlight differences" %}
               <label class="switch">
-                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
+                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" >
                 <span class="slider round" ></span>
               </label>  
               {% else %}  
@@ -100,6 +100,8 @@
                 <label for="save">Save</label>
                 <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster">
                 <label for="Clear-Cluster">Clear-Cluster</label>
+                <input type="submit" id = 'selectall' name="selectall" value="selectall">
+                <label for="selectall">selectall</label>
               </div>
 <!--              </form>  -->
               <div class="form-check">

@@ -151,7 +151,7 @@ def index():
           
           #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
-          remove_hadoop(session['full_path'])
+          #remove_hadoop(session['full_path'])
           st=Process(target=save_thread, args= (session['full_path'],local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
           st.start()
    
@@ -231,8 +231,16 @@ def index():
       if request.form.get('save')=="save":
               st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
               st.start()
-      
-     
+    
+      if "select_all" not in session: 
+          session['select_all']=0
+      #if save pressed...save file to hdfs    
+      if request.form.get('selectall')=="selectall":
+          print(session['select_all'])
+          if session['select_all']==1:
+              session['select_all']=0
+          elif session['select_all']==0:
+              session['select_all']=1
       
       
       if 'index' not in local_file.columns:
@@ -270,7 +278,7 @@ def index():
                               data = data,
                               columns=columns, cluster_number=str(int(session['index']+1)),\
                               num_clusters=num_clusters, display_message=display_message, \
-                              done_message=done_message, id_col_index=id_col_index)
+                              done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'])
     
     
     
@@ -293,15 +301,19 @@ if __name__=='__main__':
     def save_thread(cur_hdfs_path,cur_local_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done):
         """
         """
-        hf.remove_hadoop(cur_hdfs_path)
-        os.remove(cur_local_path)
+        
+        if os.path.exists(local_in_prog_path):
+            os.remove(local_in_prog_path)
+            hf.remove_hadoop(hdfs_in_prog_path)
+        if os.path.exists(local_filepath_done): 
+            os.remove(local_filepath_done)
+            hf.remove_hadoop(hdfs_filepath_done)
               
               #if matching is finished save as done locally and to hdfs
         if hf.check_matching_done(local_file):
             local_file.to_parquet(local_filepath_done)
             hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
-                  
-              #else matching is finished save as in_prog locally and to hdfs
+
         else:
             local_file.to_parquet(local_in_prog_path)
             hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
@@ -341,8 +353,13 @@ if __name__=='__main__':
     to.start()
     ra.join()
     to.join()
-    
-
-
+    try: 
+        ra.terminate()
+    except: 
+        print('app already closed')
+    try: 
+        to.terminate()
+    except: 
+        print('timeout already stopped')
 
 
