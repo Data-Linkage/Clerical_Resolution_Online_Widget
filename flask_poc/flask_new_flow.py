@@ -23,6 +23,8 @@ import shutil
 from datetime import datetime
 from datetime import timedelta
 from multiprocessing import Process
+from markupsafe import Markup
+
 start_time=datetime.now()
 
 
@@ -35,7 +37,6 @@ def get_runtime():
 
 
 
-spark=sessions.getOrCreateSparkSession(appName='crow_test', size='medium')
 config = configparser.ConfigParser()
 config.read('config_flow.ini')
 rec_id=config['id_variables']['record_id']
@@ -61,24 +62,6 @@ app= Flask(__name__)
 #may need to be something more secretive/encryptable! 
 app.config['SECRET_KEY']='abcd'
 
-def show_diff(seqm):
-    """Unify operations between two compared strings
-seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
-    output= []
-    for opcode, a0, a1, b0, b1 in seqm.get_opcodes():
-        if opcode == 'equal':
-            output.append(seqm.a[a0:a1])
-        elif opcode == 'insert':
-            output.append(seqm.a[a0:a1])
-            #output.append("<mark>" + f"{seqm.b[b0:b1]}" + "</mark>")
-        elif opcode == 'delete':
-            output.append("<mark>" + f"{seqm.a[a0:a1]}" + "</mark>")
-        elif opcode == 'replace':
-            output.append("<mark>" + f"{seqm.a[a0:a1]}" + "</mark>")
-        else:
-            raise RuntimeError("unexpected opcode")
-    return ''.join(output)
-  
   
 
 @app.route('/', methods=['GET','POST'])
@@ -256,8 +239,41 @@ def index():
       
       #select columns; split into column headers and data
       df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match"]]
+      
+      
+      count_letters = len(df_display.index)
+      df_display = df_display.astype(str)
+      highlight_differences = request.form.get('highlight_differences')
+      if highlight_differences == 'True':
+         
+         for column in df_display.columns:
+
+             for i in range(1,count_letters):
+                output = []
+                element = df_display[column][i]
+                for count, letter in enumerate(element):
+
+                    try:
+                      if letter != df_display[column][0][count]:
+                         output.append("<mark>"+ letter + "</mark>")
+                      else:  
+                         output.append(letter)
+                    except: 
+                       output.append("<mark>"+ letter + "</mark>")
+                      
+                    data_point = ''.join(output)
+                    
+                    df_display[column][i] = Markup(data_point)
+                  
+                  
       columns = df_display.columns
       data = df_display.values
+      
+
+            
+            
+            
+
       
       #get number of clusters and message to display. 
       num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
@@ -272,13 +288,14 @@ def index():
           done_message='Keep Matching'
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
-      
+
 
       return  render_template("cluster_version.html",
                               data = data,
                               columns=columns, cluster_number=str(int(session['index']+1)),\
                               num_clusters=num_clusters, display_message=display_message, \
-                              done_message=done_message, id_col_index=id_col_index)
+                              done_message=done_message, id_col_index=id_col_index,
+                              highlight_differences=highlight_differences)
     
     
     

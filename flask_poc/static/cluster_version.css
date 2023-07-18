@@ -152,3 +152,9 @@ padding: 8px;
 .submit-toolbar label:hover {
   background-color: #72bce9;
 }
+
+
+mark {
+  background-color: yellow;
+  color: black;
+}

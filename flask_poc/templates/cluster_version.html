@@ -51,10 +51,8 @@
                 {% for row in data %}
 
                 <tr class = 'table__row'> 
-                <td>
-                  <input type="checkbox" name="cluster" value= {{row[id_col_index]}} >
-                  <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
-                </td>  
+                <td><input type="checkbox" name="cluster" value= "{{row[id_col_index]}}" ></td>
+                
                   {% for cell in row %}
 
 
@@ -62,9 +60,10 @@
 
                   {% endfor %}
 
-                </tr>
+
                 {% endfor %}
                 </tr>    
+
 
               </table>
               <br>
@@ -73,23 +72,17 @@
                 <label for="Match">Match</label>
                 <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match"> 
                 <label for="Non-Match">Non-Match</label>
-              </div>
+                </div>
               <br>
-              <br> 
-              <p>Highlight Differences</p> 
-              {% if highlight == "Highlight differences" %}
-              <label class="switch">
-                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
-                <span class="slider round" ></span>
-              </label>  
-              {% else %}  
-              <label class="switch">
-                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()">
-                <span class="slider round" ></span>
-              </label>    
-              {% endif %}
-              <br>
-              <br>  
+                
+                <p>Highlight Differences</p>
+                {% if highlight_differences =="True" %}  
+              <input type="checkbox" name = 'highlight_differences' value = "False" id="highlight_differences" onChange="this.form.submit()" checked data-toggle="toggle">
+                {% else %}
+                <input type="checkbox" name = 'highlight_differences' value = "True" id="highlight_differences" onChange="this.form.submit()" unchecked data-toggle="toggle">
+                {% endif %}
+              
+
 <!--              </form>  -->
 <!--              <form action='#' method='POST' class = 'centered'>-->
               <div class = "submit-toolbar">
