@@ -22,6 +22,7 @@ logging.getLogger('werkzeug').disabled=True
 import shutil
 from datetime import datetime
 from datetime import timedelta
+#import multiprocessing as mp
 from multiprocessing import Process, Queue
 start_time=datetime.now()
 
@@ -107,9 +108,7 @@ def index():
           #get the hdfs file paths and file name
           session['full_path']=str(request.form.get("file_path"))
           session['filename']=session['full_path'].split('/')[-1]
-          
-
-          
+                    
           #get the temporary file location from config
           temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
@@ -140,9 +139,7 @@ def index():
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
         
-          
-          
-
+    
           #get the local filepath in_prog and done paths rename locally to in_prog_path
           local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
           os.rename(temp_local_path, local_in_prog_path)
@@ -154,9 +151,7 @@ def index():
           #remove_hadoop(session['full_path'])
           st=Process(target=save_thread, args= (session['full_path'],local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
           st.start()
-   
-          
-          
+       
       else: 
           #read session variable json to pandas
           local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
@@ -170,7 +165,6 @@ def index():
           #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
 
-    
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
               
@@ -300,16 +294,18 @@ if __name__=='__main__':
     
     def save_thread(cur_hdfs_path,cur_local_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done):
         """
+        A fumctiom to save to hdfs
         """
         
         if os.path.exists(local_in_prog_path):
             os.remove(local_in_prog_path)
             hf.remove_hadoop(hdfs_in_prog_path)
+            
         if os.path.exists(local_filepath_done): 
             os.remove(local_filepath_done)
             hf.remove_hadoop(hdfs_filepath_done)
               
-              #if matching is finished save as done locally and to hdfs
+        #if matching is finished save as done locally and to hdfs
         if hf.check_matching_done(local_file):
             local_file.to_parquet(local_filepath_done)
             hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
