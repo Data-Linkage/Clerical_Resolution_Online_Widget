@@ -116,6 +116,17 @@ h2 {
   text-align: center;
 }
 
+h3 {
+  color: #033fa0;
+  font-family: sans-serif, Arial;
+/*
+  font-size: 14px;
+  size: 2.5em;  
+*/
+  font-weight: bold;
+  text-align: center;
+}
+
 p{
   color: #033fa0;
   font-family: sans-serif, Arial;

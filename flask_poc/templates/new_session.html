@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
 <!--    <img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>-->
-    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='new_session.css')}}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CROW clerical tool</title>
@@ -17,13 +17,13 @@
       <div class = 'container'>
         <div class = 'middle'>
           <form method = "post", class = 'centered'> 
-            <h2>Please upload the relevant files:</h2> 
+            <h2 style = {{font_choice}}>Please upload the relevant files:</h2> 
                     <div class="input_file">
                       <input type="file" id="input_file" class="input_file" name= "input_file" value='True' />
-                      <label for="input_file">Choose File</label>
+                      <label style = {{font_choice}} for="input_file" >Choose File</label>
                     </div> 
-                    <p> or </p>
-                  <h2>Please choose a file to load:</h2>  
+                    <h3 style = {{font_choice}} > or </h3>
+                  <h2 style = {{font_choice}}>Please choose a file to load:</h2>  
                       <select method = "post", name = "file_path" , id="file_path">  
                       Please select a session... <option value = "default" SELECTED >Please select a session...</option>
                       {% for i in std_out %}
@@ -32,10 +32,10 @@
                       {% endfor %}
                     </select>
                     <br>
-                  <p>Once the above is complete, press Continue:</p>
+                  <p style = {{font_choice}}>Once the above is complete, press Continue:</p>
                   <div class="submit-toolbar">
                       <input type="submit" id="cluster" name="version" value="Cluster Version" formaction = '/cluster_version'>
-                      <label for="cluster">Continue</label>
+                      <label style = {{font_choice}} for="cluster" >Continue</label>
                   </div>
          </form>         
         </div>     

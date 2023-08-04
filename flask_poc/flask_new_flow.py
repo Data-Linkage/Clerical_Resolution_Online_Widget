@@ -83,7 +83,9 @@ seqm is a difflib.SequenceMatcher instance whose a & b are strings"""
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
-    return render_template("ira_html.html")
+  
+    session['font_choice'] = f"font-family:{request.form.get('font_choice')}"
+    return render_template("welcome_page.html", font_choice = session['font_choice'])
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
@@ -98,7 +100,8 @@ def new_session():
 
     return render_template("new_session.html", button=button,
                                               version=version,
-                                              config_status=config_status, std_out=std_out2)
+                                              config_status=config_status, std_out=std_out2,
+                                              font_choice = session['font_choice'])
 
 @app.route('/load_session', methods=['GET','POST'])
 def load_session():

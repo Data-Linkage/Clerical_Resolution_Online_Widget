@@ -106,7 +106,7 @@ th, td {
 }
 */
 
-.table__row:hover {background-color: #72bce9;}
+.table__row:hover {background-color: #d3eafd;}
 
 .table__cell {
 padding: 8px;
@@ -115,9 +115,11 @@ padding: 8px;
 
 .box {
   width: 400px;
-  border: 15px solid green;
+  border: 15px solid white;
   padding: 10px;
   margin: 30px;
+  color: #033fa0;
+  font-family: sans-serif, Arial;
  background-color: #FFFFFF;
 }
 
