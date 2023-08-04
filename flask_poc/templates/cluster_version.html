@@ -36,6 +36,17 @@
               <h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
               <h2>{{done_message}}</h2>
               <h2>{{timeout_warning_message}}</h2>
+                {%if flagging_enabled==1%}
+              <h2>Flag the file:</h2>  
+                      <select method = "post", name = "flag" , id="flag">  
+                      Please select a flag... <option value = "default" SELECTED >Flag</option>
+                      {% for i in flag_options %}
+                      {{i}} <option value = "{{i}}" >{{i}}</option>
+                      <br>
+                      {% endfor %}
+                    </select>
+              {% endif %}
+                    <br>
 
               <table class = 'table' cellspacing = '0' table-bordered>
 
@@ -106,6 +117,11 @@
 <!--              </form>  -->
               <div class="form-check">
                   </label>
+              <label for="Comment">Comment:</label>
+              <input type="text" id="Comment" name="Comment" placeholder="">
+            
+              
+
             </form>  
           </div>          
         </div>
