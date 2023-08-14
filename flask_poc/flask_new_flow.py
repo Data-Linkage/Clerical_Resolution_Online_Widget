@@ -245,6 +245,18 @@ def index():
           local_file.insert(0,'index',index)
       else:
           pass
+            
+      if 'highlight_differences' not in session: 
+          session['highlight_differences']=0
+          
+      if request.form.get('highlight_differences') == 'highlight_differences':
+         if session['highlight_differences']==1:
+            session['highlight_differences']=0
+            print('highlighter_off')
+         elif session['highlight_differences']==0:
+            session['highlight_differences']=1
+            print('highlighter_on')
+      
         
       ####################Things to display code#########################
       
@@ -254,43 +266,36 @@ def index():
       #select columns; split into column headers and data
 
       df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]]
-      
-      if 'highlight_differences' not in session: 
-          session['highlight_differences']=0
-      highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
-      count_rows = len(df_display.index)
-      #count_letters is not actually displaying the number of letters; its displaying the number of rows in the cluster 
-      print(df)
 
+      highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
       df_display[highlight_cols] = df_display[highlight_cols].astype(str)
+      highlight_cols.remove(rec_id)
+      print(highlight_cols)
+      count_rows = len(df_display.index)
+
       
-      if request.form.get('highlight_differences') == 'highlight_differences':
-         if session['highlight_differences']==1:
-            session['highlight_differences']=0
-            print('highlighter_off')
-         elif session['highlight_differences']==0:
-            session['highlight_differences']=1
-            print('highlighter_on')
+      ################HIGHLIGHTER###############
       
+      
+
+      print(df_display)
+
       if session['highlight_differences']==1: 
         
          for column in highlight_cols:
             print(column)
             for i in df_display.index.values[1:]:
               output = []
-              print(i)
-              print(df_display.loc[i,column])
               element = df_display.loc[i,column]
-              print(i)
-              print(element)
               for count, letter in enumerate(element):
-
-                  try:
+                  #try:
+                  if count<= len(df_display.loc[df_display.index.values[0],column])-1:
                     if letter != df_display.loc[df_display.index.values[0],column][count] :
                         output.append("<mark>"+ letter + "</mark>")
                     else:  
                         output.append(letter)
-                  except: 
+                  #except:
+                  else:
                       output.append("<mark>"+ letter + "</mark>")
 
                   data_point = ''.join(output)
@@ -304,6 +309,11 @@ def index():
       print(f'data={data}')
       print(type(data))
       print(f'columns = {columns}')
+      
+##fix other error with stuff swapping arround
+#
+      #############OTHER THINGS TO DISPLAY#######
+      
       
       #get number of clusters and message to display. 
       num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
