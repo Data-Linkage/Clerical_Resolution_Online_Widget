@@ -65,10 +65,10 @@
                 <tr class = 'table__row'> 
                   
                 <td>
-                  <input type="checkbox" name="cluster" value= {{row[id_col_index]}} {{'checked' if select_all else ''}} >
-                  <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
+                  <input type="checkbox" name="cluster" value= {{row[id_col_index]}}  {{'checked' if select_all else 'unchecked'}}
+                  <!--<label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>-->
                 </td>  
-
+<!-- value= {{row[id_col_index]}}-->
                   {% for cell in row %}
 
 
@@ -92,15 +92,15 @@
               <br>
                 
                 <p>Highlight Differences</p>
-                {% if highlight_differences =="True" %}  
-              <input type="checkbox" name = 'highlight_differences' value = "False" id="highlight_differences" onChange="this.form.submit()" checked data-toggle="toggle">
-                {% else %}
-                <input type="checkbox" name = 'highlight_differences' value = "True" id="highlight_differences" onChange="this.form.submit()" unchecked data-toggle="toggle">
-                {% endif %}
+             
+              
+
+              <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" >
+
               
 
 <!--              </form>  -->
-<!--              <form action='#' method='POST' class = 'centered'>-->
+              <form action='#' method='POST' class = 'centered'>
               <div class = "submit-toolbar">
                 <input type="submit" id = 'back' name="back" value="back">
                 <label for="back">Back</label>
@@ -111,7 +111,7 @@
                 <input type="submit" id = 'selectall' name="selectall" value="selectall">
                 <label for="selectall">selectall</label>
               </div>
-<!--              </form>  -->
+              </form>
               <div class="form-check">
                   </label>
               <label for="Comment">Comment:</label>

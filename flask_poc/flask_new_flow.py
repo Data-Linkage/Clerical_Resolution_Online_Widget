@@ -28,7 +28,7 @@ from multiprocessing import Process, Queue
 start_time=datetime.now()
 
  
-=======
+
 from multiprocessing import Process
 from markupsafe import Markup
 
@@ -92,7 +92,7 @@ def load_session():
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
   
-      #################Loading/renaming data/setting up session###########
+      #################Loading/renaming data/setting up ###########
       
       #actions for if this is the initial launch 
       
@@ -255,41 +255,55 @@ def index():
 
       df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]]
       
+      if 'highlight_differences' not in session: 
+          session['highlight_differences']=0
+      highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
+      count_rows = len(df_display.index)
+      #count_letters is not actually displaying the number of letters; its displaying the number of rows in the cluster 
+      print(df)
+
+      df_display[highlight_cols] = df_display[highlight_cols].astype(str)
       
-      count_letters = len(df_display.index)
-      df_display = df_display.astype(str)
-      highlight_differences = request.form.get('highlight_differences')
-      if highlight_differences == 'True':
-         
-         for column in df_display.columns:
+      if request.form.get('highlight_differences') == 'highlight_differences':
+         if session['highlight_differences']==1:
+            session['highlight_differences']=0
+            print('highlighter_off')
+         elif session['highlight_differences']==0:
+            session['highlight_differences']=1
+            print('highlighter_on')
+      
+      if session['highlight_differences']==1: 
+        
+         for column in highlight_cols:
+            print(column)
+            for i in df_display.index.values[1:]:
+              output = []
+              print(i)
+              print(df_display.loc[i,column])
+              element = df_display.loc[i,column]
+              print(i)
+              print(element)
+              for count, letter in enumerate(element):
 
-             for i in range(1,count_letters):
-                output = []
-                element = df_display[column][i]
-                for count, letter in enumerate(element):
+                  try:
+                    if letter != df_display.loc[df_display.index.values[0],column][count] :
+                        output.append("<mark>"+ letter + "</mark>")
+                    else:  
+                        output.append(letter)
+                  except: 
+                      output.append("<mark>"+ letter + "</mark>")
 
-                    try:
-                      if letter != df_display[column][0][count]:
-                         output.append("<mark>"+ letter + "</mark>")
-                      else:  
-                         output.append(letter)
-                    except: 
-                       output.append("<mark>"+ letter + "</mark>")
-                      
-                    data_point = ''.join(output)
-                    
-                    df_display[column][i] = Markup(data_point)
-                  
-                  
+                  data_point = ''.join(output)
 
+              df_display.loc[i,column] = Markup(data_point)
+
+
+      print(df_display)            
       columns = df_display.columns
       data = df_display.values
-      
-
-            
-            
-            
-
+      print(f'data={data}')
+      print(type(data))
+      print(f'columns = {columns}')
       
       #get number of clusters and message to display. 
       num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
@@ -314,7 +328,7 @@ def index():
                               num_clusters=num_clusters, display_message=display_message, \
                               done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
                               flag_options=flag_options,\
-                              flagging_enabled=flagging_enabled, highlight_differences=highlight_differences)
+                              flagging_enabled=flagging_enabled, highlight_differences=session['highlight_differences'])
 
     
     
