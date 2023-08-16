@@ -31,8 +31,9 @@
             <div style="overflow-x:auto;" style="overflow-y:auto;">
             <form action='#' method="POST" class = centered>  
               <div class = 'box'>
-                <box>{{display_message}}</box>
+                <box style = {{font_choice}}>{{display_message}}</box>
               </div>  
+
               <h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
               <h2>{{done_message}}</h2>
               <h2>{{timeout_warning_message}}</h2>
@@ -47,6 +48,10 @@
                     </select>
               {% endif %}
                     <br>
+
+              <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
+              <h2 style = {{font_choice}}>{{done_message}}</h2>
+
 
               <table class = 'table' cellspacing = '0' table-bordered>
 
@@ -85,13 +90,25 @@
               <br>
               <div class = "submit-toolbar">
                 <input type="submit" id="Match" name="Match" value="Match">
-                <label for="Match">Match</label>
-                <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match"> 
-                <label for="Non-Match">Non-Match</label>
-                </div>
+                <label style = {{font_choice}} for="Match">Match</label>
+                <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
+                <label style = {{font_choice}} for="Non-Match">Non-Match</label>
+              </div>
               <br>
-                
-                <p>Highlight Differences</p>
+              <br> 
+              <p style = {{font_choice}}>Highlight Differences</p> 
+              {% if highlight == "Highlight differences" %}
+              <label class="switch">
+                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
+                <span class="slider round" ></span>
+              </label>  
+              {% else %}  
+              <label class="switch">
+                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()">
+                <span class="slider round" ></span>
+              </label>    
+              {% endif %}
+              <br>
              
               
 
@@ -103,13 +120,14 @@
               <form action='#' method='POST' class = 'centered'>
               <div class = "submit-toolbar">
                 <input type="submit" id = 'back' name="back" value="back">
-                <label for="back">Back</label>
+                <label style = {{font_choice}} for="back">Back</label>
                 <input type="submit" id = 'save' name="save" value="save">
-                <label for="save">Save</label>
+                <label style = {{font_choice}} for="save">Save</label>
                 <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster">
-                <label for="Clear-Cluster">Clear-Cluster</label>
+                <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
                 <input type="submit" id = 'selectall' name="selectall" value="selectall">
-                <label for="selectall">selectall</label>
+                <label style = {{font_choice}} for="selectall">selectall</label>
+                
               </div>
               </form>
               <div class="form-check">
