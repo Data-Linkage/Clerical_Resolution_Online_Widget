@@ -57,14 +57,14 @@ app.config['SECRET_KEY']='abcd'
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
-    session.clear()
+    #session.clear()
     session['font_choice'] = f"font-family:{request.form.get('font_choice')}"
     return render_template("welcome_page.html", font_choice = session['font_choice'])
 
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
-    session.clear()
+   # session.clear()
     #START timer USING SESSION VAR
    # session['input_df']=data_pd
     print(config['filespaces']['hdfs_folder'])
@@ -340,7 +340,8 @@ def index():
                               num_clusters=num_clusters, display_message=display_message, \
                               done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
                               flag_options=flag_options,\
-                              flagging_enabled=flagging_enabled, highlight_differences=session['highlight_differences'])
+                              flagging_enabled=flagging_enabled, highlight_differences=session['highlight_differences'],\
+                              font_choice = session['font_choice'])
 
     
     

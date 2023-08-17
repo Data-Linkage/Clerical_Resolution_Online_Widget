@@ -1,14 +1,4 @@
-<!--
-<!DOCTYPE html>
-<html lang="en">
-<img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='cluster_version.css')}}" media = 'all'/>
-</head>
-<h1>CROW</h1>  
--->
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -34,8 +24,6 @@
                 <box style = {{font_choice}}>{{display_message}}</box>
               </div>  
 
-              <h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-              <h2>{{done_message}}</h2>
               <h2>{{timeout_warning_message}}</h2>
                 {%if flagging_enabled==1%}
               <h2>Flag the file:</h2>  
@@ -71,7 +59,7 @@
                   
                 <td>
                   <input type="checkbox" name="cluster" value= {{row[id_col_index]}}  {{'checked' if select_all else 'unchecked'}}
-                  <!--<label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>-->
+                  <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
                 </td>  
 <!-- value= {{row[id_col_index]}}-->
                   {% for cell in row %}
@@ -96,38 +84,19 @@
               </div>
               <br>
               <br> 
-              <p style = {{font_choice}}>Highlight Differences</p> 
-              {% if highlight == "Highlight differences" %}
-              <label class="switch">
-                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
-                <span class="slider round" ></span>
-              </label>  
-              {% else %}  
-              <label class="switch">
-                <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()">
-                <span class="slider round" ></span>
-              </label>    
-              {% endif %}
-              <br>
-             
-              
-
-              <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" >
-
-              
-
-<!--              </form>  -->
+          
               <form action='#' method='POST' class = 'centered'>
               <div class = "submit-toolbar">
                 <input type="submit" id = 'back' name="back" value="back">
-                <label style = {{font_choice}} for="back">Back</label>
+                <label style = {{font_choice}} for="back">Back</label> 
                 <input type="submit" id = 'save' name="save" value="save">
                 <label style = {{font_choice}} for="save">Save</label>
                 <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster">
                 <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
                 <input type="submit" id = 'selectall' name="selectall" value="selectall">
                 <label style = {{font_choice}} for="selectall">selectall</label>
-                
+                <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" >
+                <label style = {{font_choice}} for="highlight_differences">highlight_differences</label>
               </div>
               </form>
               <div class="form-check">
