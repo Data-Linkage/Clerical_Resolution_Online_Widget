@@ -59,14 +59,19 @@ app.config['SECRET_KEY']='abcd'
 def welcome_page():
     #session.clear()
     session['font_choice'] = f"font-family:{request.form.get('font_choice')}"
+    for i in session: 
+        if i!= 'font_choice':
+            print(i)
+            session.pop(i)
     return render_template("welcome_page.html", font_choice = session['font_choice'])
 
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
-   # session.clear()
-    #START timer USING SESSION VAR
-   # session['input_df']=data_pd
+    for i in session: 
+        if i!= 'font_choice':
+            print(i)
+            session.pop(i)
     print(config['filespaces']['hdfs_folder'])
     process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['filespaces']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     std_out, std_error = process.communicate() 
@@ -75,6 +80,7 @@ def new_session():
     config_status = request.form.get("config")
     version = request.form.get("version")
    #session['start_time']=datetime.now()
+    print([i for i in session])
 
     return render_template("new_session.html", button=button,
                                               version=version,
@@ -168,7 +174,7 @@ def index():
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
               
-
+      print([i for i in session])
       if hf.check_matching_done(local_file):
           local_file.to_parquet(local_filepath_done)
       else:
