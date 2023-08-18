@@ -68,34 +68,31 @@ def welcome_page():
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
+    #code to remove session variables except for font choice
+    #this is to ensure if the page is returned to in the same session- variables are cleared 
+    #to avoid conflicts/saving over wrong files. 
+    
     for i in session: 
         if i!= 'font_choice':
             print(i)
             session.pop(i)
-    print(config['filespaces']['hdfs_folder'])
+    
+    #using hadoop commands- get list of files in folder from hdfs 
     process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['filespaces']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    std_out, std_error = process.communicate() 
+    std_out, std_error = process.communicate()
     std_out2=list(str(std_out).split('\\n'))
+    
+    #fix for error where first file in the folder has b' due to hadoop commands
+    std_out2=[re.sub(r"^b'","",i) for i in std_out2 ]
+    
     button = request.form.get("hdfs")
     config_status = request.form.get("config")
     version = request.form.get("version")
-   #session['start_time']=datetime.now()
-    print([i for i in session])
-
     return render_template("new_session.html", button=button,
                                               version=version,
                                               config_status=config_status, std_out=std_out2,
                                               font_choice = session['font_choice'])
 
-@app.route('/load_session', methods=['GET','POST'])
-def load_session():
-    directory = os.listdir('saved_sessions')
-     
-    #this lists the files in a given location
-    process = subprocess.Popen(["hadoop", "fs","-ls","-C",config['hdfs_file_space']['hdfs_folder']],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    std_out, std_error = process.communicate() 
-    std_out2=list(str(std_out).split('\\n'))
-    return render_template('load_session.html', directory=directory, std_out=std_out2)
 
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
