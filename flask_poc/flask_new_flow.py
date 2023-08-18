@@ -77,6 +77,7 @@ def new_session():
         if i!= 'font_choice':
             print(i)
             session.pop(i)
+    print(f'session1={list(session)}')
     
     #using hadoop commands- get list of files in folder from hdfs 
     process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['filespaces']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -97,9 +98,13 @@ def new_session():
 
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
-  
+      if request.form.get('version')=="Cluster Version":
+        for i in list(session): 
+            if i!= 'font_choice':
+                print(i)
+                session.pop(i)
       #################Loading/renaming data/setting up ###########
-      
+      print(session)
       #actions for if this is the initial launch 
       
       if 'full_path' not in session:
@@ -111,7 +116,7 @@ def index():
                     
           #get the temporary file location from config
           temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
-
+          print(f'{temp_local_path}')
           #get the data from hdfs into local location
           hf.get_hadoop(session['full_path'],temp_local_path)
           
@@ -330,6 +335,7 @@ def index():
           done_message='Keep Matching'
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
+      print(f"final file {session['full_path']}")
 
 
       return  render_template("cluster_version.html",
