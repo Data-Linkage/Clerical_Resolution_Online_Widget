@@ -22,6 +22,7 @@ logging.getLogger('werkzeug').disabled=True
 import shutil
 from datetime import datetime
 from datetime import timedelta
+import re
 
 #import multiprocessing as mp
 from multiprocessing import Process, Queue
@@ -134,7 +135,7 @@ def index():
           if 'Match' not in local_file.columns: 
               local_file['Match']='[]'
           if 'Comment' not in local_file.columns: 
-              local_file['Comment']=""
+              local_file['Comment']=''
           if config['custom_setting']['flagging_enabled']==1:
               if 'Flag' not in local_file.columns: 
                   local_file['Flag']=""
@@ -187,7 +188,7 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-                  local_file.loc[local_file[rec_id]==i,'Comment']=request.form.get("Comment")
+                  local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
                   if config['custom_setting']['flagging_enabled']==1:
                       local_file.loc[local_file[rec_id]==i,'Flag']=request.form.get("flag")
              # hf.save_local()
@@ -205,9 +206,8 @@ def index():
               #local_file.loc[local_file['Sequential_Cluster_Id']==session['index'],'Match']=0
               cluster = request.form.getlist("cluster")
               for i in cluster:
-                  #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
-                  local_file.loc[local_file[rec_id]==i,'Comment']=request.form.get("Comment")
+                  local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
 
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
@@ -275,7 +275,6 @@ def index():
       highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
       df_display[highlight_cols] = df_display[highlight_cols].astype(str)
       highlight_cols.remove(rec_id)
-      print(highlight_cols)
       count_rows = len(df_display.index)
 
       
@@ -307,13 +306,10 @@ def index():
 
               df_display.loc[i,column] = Markup(data_point)
 
-
-      print(df_display)            
+      
       columns = df_display.columns
       data = df_display.values
-      print(f'data={data}')
-      print(type(data))
-      print(f'columns = {columns}')
+
       
 ##fix other error with stuff swapping arround
 #
@@ -325,7 +321,6 @@ def index():
       display_message=config['message_for_matchers']['message_to_display']
       id_col_index=df_display.columns.get_loc(rec_id)
       flag_options=config['custom_setting']['flag_options'].split(', ')
-      print(flag_options)
       flagging_enabled=int(config['custom_setting']['flagging_enabled'])
       #cast local_file back to json
       session['working_file']=local_file.to_json()
