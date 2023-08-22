@@ -193,6 +193,7 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
+                  print("comment{str(request.form.get('Comment'))}")
                   local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
                   if config['custom_setting']['flagging_enabled']==1:
                       local_file.loc[local_file[rec_id]==i,'Flag']=request.form.get("flag")
