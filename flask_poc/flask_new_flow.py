@@ -22,6 +22,7 @@ logging.getLogger('werkzeug').disabled=True
 import shutil
 from datetime import datetime
 from datetime import timedelta
+import re
 
 #import multiprocessing as mp
 from multiprocessing import Process, Queue
@@ -68,40 +69,42 @@ def welcome_page():
 
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
+    #code to remove session variables except for font choice
+    #this is to ensure if the page is returned to in the same session- variables are cleared 
+    #to avoid conflicts/saving over wrong files. 
+    
     for i in session: 
         if i!= 'font_choice':
             print(i)
             session.pop(i)
-    print(config['filespaces']['hdfs_folder'])
+    print(f'session1={list(session)}')
+    
+    #using hadoop commands- get list of files in folder from hdfs 
     process = subprocess.Popen(["hadoop", "fs","-ls","-C", config['filespaces']['hdfs_folder'] ],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    std_out, std_error = process.communicate() 
+    std_out, std_error = process.communicate()
     std_out2=list(str(std_out).split('\\n'))
+    
+    #fix for error where first file in the folder has b' due to hadoop commands
+    std_out2=[re.sub(r"^b'","",i) for i in std_out2 ]
+    
     button = request.form.get("hdfs")
     config_status = request.form.get("config")
     version = request.form.get("version")
-   #session['start_time']=datetime.now()
-    print([i for i in session])
-
     return render_template("new_session.html", button=button,
                                               version=version,
                                               config_status=config_status, std_out=std_out2,
                                               font_choice = session['font_choice'])
 
-@app.route('/load_session', methods=['GET','POST'])
-def load_session():
-    directory = os.listdir('saved_sessions')
-     
-    #this lists the files in a given location
-    process = subprocess.Popen(["hadoop", "fs","-ls","-C",config['hdfs_file_space']['hdfs_folder']],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-    std_out, std_error = process.communicate() 
-    std_out2=list(str(std_out).split('\\n'))
-    return render_template('load_session.html', directory=directory, std_out=std_out2)
 
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
-  
+      if request.form.get('version')=="Cluster Version":
+        for i in list(session): 
+            if i!= 'font_choice':
+                print(i)
+                session.pop(i)
       #################Loading/renaming data/setting up ###########
-      
+      print(session)
       #actions for if this is the initial launch 
       
       if 'full_path' not in session:
@@ -113,7 +116,7 @@ def index():
                     
           #get the temporary file location from config
           temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
-
+          print(f'{temp_local_path}')
           #get the data from hdfs into local location
           hf.get_hadoop(session['full_path'],temp_local_path)
           
@@ -137,7 +140,7 @@ def index():
           if 'Match' not in local_file.columns: 
               local_file['Match']='[]'
           if 'Comment' not in local_file.columns: 
-              local_file['Comment']=""
+              local_file['Comment']=''
           if config['custom_setting']['flagging_enabled']==1:
               if 'Flag' not in local_file.columns: 
                   local_file['Flag']=""
@@ -190,7 +193,8 @@ def index():
               for i in cluster:
                   #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-                  local_file.loc[local_file[rec_id]==i,'Comment']=request.form.get("Comment")
+                  print("comment{str(request.form.get('Comment'))}")
+                  local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
                   if config['custom_setting']['flagging_enabled']==1:
                       local_file.loc[local_file[rec_id]==i,'Flag']=request.form.get("flag")
              # hf.save_local()
@@ -208,9 +212,8 @@ def index():
               #local_file.loc[local_file['Sequential_Cluster_Id']==session['index'],'Match']=0
               cluster = request.form.getlist("cluster")
               for i in cluster:
-                  #note resident ID will need to change from to be read from a config as any reccord id 
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
-                  local_file.loc[local_file[rec_id]==i,'Comment']=request.form.get("Comment")
+                  local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
 
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
@@ -278,7 +281,6 @@ def index():
       highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
       df_display[highlight_cols] = df_display[highlight_cols].astype(str)
       highlight_cols.remove(rec_id)
-      print(highlight_cols)
       count_rows = len(df_display.index)
 
       
@@ -310,13 +312,10 @@ def index():
 
               df_display.loc[i,column] = Markup(data_point)
 
-
-      print(df_display)            
+      
       columns = df_display.columns
       data = df_display.values
-      print(f'data={data}')
-      print(type(data))
-      print(f'columns = {columns}')
+
       
 ##fix other error with stuff swapping arround
 #
@@ -328,7 +327,6 @@ def index():
       display_message=config['message_for_matchers']['message_to_display']
       id_col_index=df_display.columns.get_loc(rec_id)
       flag_options=config['custom_setting']['flag_options'].split(', ')
-      print(flag_options)
       flagging_enabled=int(config['custom_setting']['flagging_enabled'])
       #cast local_file back to json
       session['working_file']=local_file.to_json()
@@ -338,6 +336,7 @@ def index():
           done_message='Keep Matching'
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
+      print(f"final file {session['full_path']}")
 
 
       return  render_template("cluster_version.html",
