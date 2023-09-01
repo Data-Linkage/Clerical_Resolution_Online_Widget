@@ -38,9 +38,27 @@
                     <br>
 
               <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-              <h2 style = {{font_choice}}>{{done_message}}</h2>
-
-
+              <div class = "submit-toolbar-left" >
+              <table class = table1 border="1" cellspacing = '0' style="float:left;">
+              <tr1> 
+                <td1>
+                  <input type="submit" id = 'selectall' name="selectall" value="selectall" style="float:left;">
+                  <label style = {{font_choice}} for="selectall">Select All</label> 
+                  <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" style="float:left;">
+                  <label style = {{font_choice}} for="highlight_differences">Highlight </label>                  
+                </td1>
+                <td1>
+                  <input type="submit" id = 'back' name="back" value="back">
+                  <label style = {{font_choice}} for="back">Back</label> 
+                  <input type="submit" id = 'save' name="save" value="save">
+                  <label style = {{font_choice}} for="save">Save</label>
+                  <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster"> 
+                  <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
+                </td1>
+              </tr1>
+            </table>
+            </div> 
+           <form action='#' method="POST" class = centered>  
               <table class = 'table' cellspacing = '0' table-bordered>
 
                 <tr class = 'table__header'>
@@ -76,35 +94,19 @@
 
               </table>
               <br>
+              <form action='#' method='POST' class = 'centered'>   
+                <div class="form-check">
+                    </label>
+                <label for="Comment">Comment:</label>
+              <input type="text" id="Comment" name="Comment" placeholder="">
+                </div>   
+              <br>
               <div class = "submit-toolbar">
                 <input type="submit" id="Match" name="Match" value="Match">
                 <label style = {{font_choice}} for="Match">Match</label>
                 <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
                 <label style = {{font_choice}} for="Non-Match">Non-Match</label>
               </div>
-              <br>
-              <br> 
-          
-              <form action='#' method='POST' class = 'centered'>
-              <div class = "submit-toolbar">
-                <input type="submit" id = 'back' name="back" value="back">
-                <label style = {{font_choice}} for="back">Back</label> 
-                <input type="submit" id = 'save' name="save" value="save">
-                <label style = {{font_choice}} for="save">Save</label>
-                <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster">
-                <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
-                <input type="submit" id = 'selectall' name="selectall" value="selectall">
-                <label style = {{font_choice}} for="selectall">selectall</label>
-                <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" >
-                <label style = {{font_choice}} for="highlight_differences">highlight_differences</label>
-
-
-
-              </div>
-             <div class="form-check">
-                  </label>
-              <label for="Comment">Comment:</label>
-              <input type="text" id="Comment" name="Comment" placeholder="">
             </form>  
           </div>          
         </div>
@@ -116,73 +118,4 @@
       </div>
     </main>
   </body>  
-    
-<!--
-<div style="overflow-x:auto;" style="overflow-y:auto;">
-<form action='#' method="POST">  
-<div class = 'box'>
-<box>{{display_message}}</box>
-</div>  
-<h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-<h2>{{done_message}}</h2>
-  
-<table class = 'table' cellspacing = '0' table-bordered>
-<tr class = 'table__header'>
-  
-<th class = 'table__cell'></th>
-  
-{% for i in columns %} 
-<th class = 'table__cell'>{{i}}</th> 
-{% endfor %}  
-</tr>
-{% for row in data %}
-<tr class = 'table__row'> 
-<td>
-    <input type="checkbox" name="cluster" value= {{row[id_col_index]}} >
-    <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
-</td>  
-   {% for cell in row %}
- 
-    
-    <td class = 'table__cell'>{{cell}} </td>
-   {% endfor %}
-</tr>
-{% endfor %}
-</tr>    
-</table>
-</div>
-<br>
-    <input type="submit" name="Match" value="Match">
-    <input type="submit" name="Non-Match" value="Non-Match">
-  
-    <input type="submit" name="Clear-Cluster" value="Clear-Cluster">
-<br>
-<br> 
-<p>Highligh Differences</p> 
-{% if highlight == "Highlight differences" %}
-<label class="switch">
-  <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
-  <span class="slider round" ></span>
-</label>  
-{% else %}  
-<label class="switch">
-  <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()">
-  <span class="slider round" ></span>
-</label>    
-{% endif %}
-<br>
-<br>  
-</form>
-<br>
-<br>   
-<form action='#' method='POST'>
-    <input type="submit" name="back" value="back">
-    <input type="submit" name="save" value="save">
-</form>  
-<div class="form-check">
-    </label>
-  
-</form>
-</body>
--->
 </html>
