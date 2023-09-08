@@ -23,15 +23,17 @@ import shutil
 from datetime import datetime
 from datetime import timedelta
 import re
-
+import tempfile
+import os, shutil
+from multiprocessing import Process
+from markupsafe import Markup
 #import multiprocessing as mp
 from multiprocessing import Process, Queue
 start_time=datetime.now()
 
  
 
-from multiprocessing import Process
-from markupsafe import Markup
+
 
 start_time=datetime.now()
 
@@ -48,6 +50,18 @@ rec_id=config['id_variables']['record_id']
 clust_id=config['id_variables']['cluster_id']
 #ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
 user = os.environ['HADOOP_USER_NAME']
+
+folder = f"{config['filespaces']['local_space']}"
+for filename in os.listdir(folder):
+    file_path = os.path.join(folder, filename)
+    try:
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+    except Exception as e:
+        print('Failed to delete %s. Reason: %s' % (file_path, e))
+
 
 #######################
 app= Flask(__name__)
@@ -132,7 +146,7 @@ def index():
               
           #save back to temp path as a one-partition parquet
           local_file.to_parquet(temp_local_path)
-          
+
           #create json version of the local file (a flask hack)
           session['working_file']=local_file.to_json()
           
@@ -371,14 +385,22 @@ if __name__=='__main__':
         """
         A fumctiom to save to hdfs
         """
-        
+        hf.remove_hadoop(session['full_path'])
+        hf.remove_hadoop(hdfs_in_prog_path)
+        hf.remove_hadoop(hdfs_filepath_done)
         if os.path.exists(local_in_prog_path):
             os.remove(local_in_prog_path)
-            hf.remove_hadoop(hdfs_in_prog_path)
+            print(f'{local_in_prog_path} deleted')
+        else:
+            print(f'{local_in_prog_path} NOT deleted')
             
         if os.path.exists(local_filepath_done): 
             os.remove(local_filepath_done)
-            hf.remove_hadoop(hdfs_filepath_done)
+            print(f'{local_filepath_done} deleted')
+        else:
+            print(f'{local_filepath_done} NOT deleted')
+        
+        
               
         #if matching is finished save as done locally and to hdfs
         if hf.check_matching_done(local_file):

@@ -16,6 +16,7 @@ import getpass
 import pwd
 import subprocess
 import pydoop
+import tempfile
 
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
@@ -168,11 +169,6 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
   
   
   
-def rename_hadoop(old, new):
-  
-    process = subprocess.Popen(["hadoop", "fs","-mv",old, new])
-
-    process.communicate()
   
   
 def get_hadoop(hdfs_path,local_path ):
@@ -212,8 +208,10 @@ def remove_hadoop(hdfs_path):
             print('directory')
             process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
         process.communicate()
+        
+        print(f'{hdfs_path} removed')
     except:
-        print('hdfs_path cannot be deleted')
+        print(f'{hdfs_path} cannot be deleted')
     
     
 def validate_columns(df):
@@ -237,6 +235,8 @@ def validate_input_data(filepath):
     if os.path.getsize(filepath) > 536871:
         raise ('Filesize error; file is bigger than 0.5GB')
         
+
+
         
 
     
