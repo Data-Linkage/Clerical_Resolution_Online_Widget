@@ -20,8 +20,7 @@ import helper_functions as hf
 app=Flask(__name__)
 logging.getLogger('werkzeug').disabled=True
 import shutil
-from datetime import datetime
-from datetime import timedelta
+
 import re
 import tempfile
 import os, shutil
@@ -29,12 +28,8 @@ from multiprocessing import Process
 from markupsafe import Markup
 #import multiprocessing as mp
 from multiprocessing import Process, Queue
-start_time=datetime.now()
-
- 
-
-
-
+from datetime import datetime
+from datetime import timedelta
 start_time=datetime.now()
 
 
@@ -48,9 +43,10 @@ config = configparser.ConfigParser()
 config.read('config_flow.ini')
 rec_id=config['id_variables']['record_id']
 clust_id=config['id_variables']['cluster_id']
-#ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
 user = os.environ['HADOOP_USER_NAME']
 
+
+#this clears the temporary folder
 folder = f"{config['filespaces']['local_space']}"
 for filename in os.listdir(folder):
     file_path = os.path.join(folder, filename)
@@ -74,10 +70,10 @@ app.config['SECRET_KEY']='abcd'
 def welcome_page():
     #session.clear()
     session['font_choice'] = f"font-family:{request.form.get('font_choice')}"
-    for i in session: 
+    session_keys=list(session)
+    for i in session_keys: 
         if i!= 'font_choice':
-            print(i)
-            session.pop(i)
+          session.pop(i)
     return render_template("welcome_page.html", font_choice = session['font_choice'])
 
 
@@ -86,10 +82,9 @@ def new_session():
     #code to remove session variables except for font choice
     #this is to ensure if the page is returned to in the same session- variables are cleared 
     #to avoid conflicts/saving over wrong files. 
-    
-    for i in session: 
+    session_keys=list(session)
+    for i in session_keys: 
         if i!= 'font_choice':
-            print(i)
             session.pop(i)
     print(f'session1={list(session)}')
     
@@ -112,38 +107,38 @@ def new_session():
 
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
+  
+     # #When cluster version button pressed. Remove font_choice from session variables.
       if request.form.get('version')=="Cluster Version":
-        for i in list(session): 
-            if i!= 'font_choice':
-                print(i)
-                session.pop(i)
-      #################Loading/renaming data/setting up ###########
-      print(session)
-      #actions for if this is the initial launch 
+          session_keys=list(session)
+          for i in session_keys: 
+              if i!= 'font_choice':
+                  session.pop(i)
+    
+
+      
       
       if 'full_path' not in session:
-      #all the actions that need to happen if a path not in session 
-      
+          #actions for if this is the initial launch/path is not a session variable 
           #get the hdfs file paths and file name
           session['full_path']=str(request.form.get("file_path"))
           session['filename']=session['full_path'].split('/')[-1]
                     
           #get the temporary file location from config
           temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
-          print(f'{temp_local_path}')
           #get the data from hdfs into local location
           hf.get_hadoop(session['full_path'],temp_local_path)
           
           #load from local location to a pandas df
           local_file=pd.read_parquet(temp_local_path)
           
-          #validate pd columns
+          #validate pd columns/raise errors
           hf.validate_columns(local_file)
           
           #if temp path is now a directory; remove directory 
           if os.path.isdir(temp_local_path):
               shutil.rmtree(temp_local_path)
-              
+              #this is a hack to resolve the problem that pandas.to_parquet only works with single partition files.
           #save back to temp path as a one-partition parquet
           local_file.to_parquet(temp_local_path)
 
@@ -155,9 +150,6 @@ def index():
               local_file['Match']='[]'
           if 'Comment' not in local_file.columns: 
               local_file['Comment']=''
-          if config['custom_setting']['flagging_enabled']==1:
-              if 'Flag' not in local_file.columns: 
-                  local_file['Flag']=""
           if 'Sequential_Cluster_Id' not in local_file.columns: 
               local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
               local_file=local_file.sort_values('Sequential_Cluster_Id')
@@ -167,15 +159,14 @@ def index():
           local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
           os.rename(temp_local_path, local_in_prog_path)
           
-          
-          
           #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
-          #remove_hadoop(session['full_path'])
+          #start the save thread to move in progress file back to hdfs. 
           st=Process(target=save_thread, args= (session['full_path'],local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
           st.start()
        
       else: 
+          #actions for every time the page is re-loaded. 
           #read session variable json to pandas
           local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
           
@@ -188,10 +179,22 @@ def index():
           #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
           hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],session['full_path'].split('/'))
 
+      #set the index variable. This is the iterator that controls the flow of the application as you move through clusters. 
+      #it is a sequential integer created based on the cluster id.
+      
+      ############ session variables and toggles#############
+      
       if 'index' not in session:
               session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
-              
-      print([i for i in session])
+      
+      #set select all toggle
+      if "select_all" not in session: 
+          session['select_all']=0
+          
+      #highlight differences toggle    
+      if 'highlight_differences' not in session: 
+          session['highlight_differences']=0
+          
       if hf.check_matching_done(local_file):
           local_file.to_parquet(local_filepath_done)
       else:
@@ -200,37 +203,43 @@ def index():
 
     
       ##############################Button Code###############################
-      
+      ##Code to control the actions on each button press.
       #if match button pressed; add the record Id's of the selected records to the match column as an embedded list
+      
       if request.form.get('Match')=="Match":
+      #if match button pressed. 
+      
+              #get a list of cluster ids that are currently selected
               cluster = request.form.getlist("cluster")
-              for i in cluster:
-                  #note resident ID will need to change from to be read from a config as any reccord id 
+              for i in cluster: 
                   local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
                   print("comment{str(request.form.get('Comment'))}")
                   local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
-                  if config['custom_setting']['flagging_enabled']==1:
-                      local_file.loc[local_file[rec_id]==i,'Flag']=request.form.get("flag")
-             # hf.save_local()
+              
+              #move on to next cluster if not at end of file
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
+              
+              #save if at a backup_save checkpoint.
               if session['index'] % int(config['custom_setting']['backup_save'])==0:
                   st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
                   st.start()
                   
               
-            
-      #if match button pressed; add 'No Match in Cluster...' message 
+             
       elif request.form.get('Non-Match')=="Non-Match":
-              #note this section needs building out. 
-              #local_file.loc[local_file['Sequential_Cluster_Id']==session['index'],'Match']=0
+      #if non-match button pressed. 
+      
               cluster = request.form.getlist("cluster")
               for i in cluster:
                   local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
                   local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
-
+              
+              #move on to next cluster if at the end of a file
               if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                   hf.advance_cluster(local_file)
+                  
+              ##save if at a backup_save checkpoint.
               if session['index'] % int(config['custom_setting']['backup_save'])==0:
                   st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
                   st.start()
@@ -239,12 +248,11 @@ def index():
       #if Clear-Cluster pressed; replace the match column for cluster with '[]'
       if request.form.get('Clear-Cluster')=="Clear-Cluster":
             cluster_ids=list(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']][rec_id].values)
-            print(f'cluster ids= {cluster_ids}, type= {type(cluster_ids)}')
             for  i in cluster_ids:
                 local_file.loc[local_file[rec_id]==i,'Match']='[]'
             
               
-      #if back button pressed; set session['index'] back to move to previous cluster 
+      #if back button pressed; set session['index'] back to move to previous cluster (Unless index=0)
       if request.form.get('back')=="back":
               if int(session['index'])>0:
                   session['index'] = session['index']-1
@@ -254,9 +262,7 @@ def index():
               st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
               st.start()
     
-      if "select_all" not in session: 
-          session['select_all']=0
-      #if save pressed...save file to hdfs    
+
       if request.form.get('selectall')=="selectall":
           print(session['select_all'])
           if session['select_all']==1:
@@ -264,16 +270,15 @@ def index():
           elif session['select_all']==0:
               session['select_all']=1
       
-      
-      if 'index' not in local_file.columns:
-          index = (list(range(max(local_file.count()))))
-          local_file.insert(0,'index',index)
-      else:
-          pass
-            
-      if 'highlight_differences' not in session: 
-          session['highlight_differences']=0
-          
+      ###NOTE TO SELFFFFF RESEARCH THIS BIT#####WHY HERE? 
+   #   if 'index' not in local_file.columns:
+          #index = (list(range(max(local_file.count()))))
+          #local_file.insert(0,'index',index)
+     # else:
+         # pass
+        #    
+
+      #highlighter button       
       if request.form.get('highlight_differences') == 'highlight_differences':
          if session['highlight_differences']==1:
             session['highlight_differences']=0
@@ -299,15 +304,11 @@ def index():
 
       
       ################HIGHLIGHTER###############
-      
-      
-
-      print(df_display)
+    
 
       if session['highlight_differences']==1: 
         
          for column in highlight_cols:
-            print(column)
             for i in df_display.index.values[1:]:
               output = []
               element = df_display.loc[i,column]
@@ -331,8 +332,6 @@ def index():
       data = df_display.values
 
       
-##fix other error with stuff swapping arround
-#
       #############OTHER THINGS TO DISPLAY#######
       
       
@@ -340,9 +339,9 @@ def index():
       num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
       display_message=config['message_for_matchers']['message_to_display']
       id_col_index=df_display.columns.get_loc(rec_id)
-      flag_options=config['custom_setting']['flag_options'].split(', ')
-      flagging_enabled=int(config['custom_setting']['flagging_enabled'])
-      #cast local_file back to json
+      #flag_options=config['custom_setting']['flag_options'].split(', ')
+      #flagging_enabled=int(config['custom_setting']['flagging_enabled'])
+      #cast local_file back to json - to pass back into the app
       session['working_file']=local_file.to_json()
       
       #set continuation message
@@ -350,7 +349,6 @@ def index():
           done_message='Keep Matching'
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
-      print(f"final file {session['full_path']}")
 
 
       return  render_template("cluster_version.html",
@@ -358,8 +356,7 @@ def index():
                               columns=columns, cluster_number=str(int(session['index']+1)),\
                               num_clusters=num_clusters, display_message=display_message, \
                               done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
-                              flag_options=flag_options,\
-                              flagging_enabled=flagging_enabled, highlight_differences=session['highlight_differences'],\
+                              highlight_differences=session['highlight_differences'],\
                               font_choice = session['font_choice'])
 
     
@@ -377,7 +374,6 @@ def about():
 
 #########################
 #########################
-
 if __name__=='__main__':  
     
     
@@ -454,5 +450,3 @@ if __name__=='__main__':
         to.terminate()
     except: 
         print('timeout already stopped')
-
-
