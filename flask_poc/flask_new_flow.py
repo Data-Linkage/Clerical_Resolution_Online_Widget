@@ -1,4 +1,7 @@
-#made a change 
+"""
+This is the main script to run the application.
+
+"""
 import os
 import shutil
 import logging
@@ -6,13 +9,14 @@ import numpy as np
 import configparser
 import subprocess
 import re
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
+import helper_functions as hf
 from markupsafe import Markup
 from multiprocessing import Process
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session
 import pandas as pd
-os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
-import helper_functions as hf
+
 
 
 
@@ -163,8 +167,8 @@ def index():
         hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],\
                                                                 session['full_path'].split('/'))
         #start the save thread to move in progress file back to hdfs. 
-        st=Process(target=save_thread, args= (session['full_path'],\
-                                              local_in_prog_path,local_in_prog_path,hdfs_in_prog_path,\
+        st=Process(target=save_thread, args= (local_in_prog_path,\
+                                              hdfs_in_prog_path,\
                                               local_file, local_filepath_done, hdfs_filepath_done))
         st.start()
 
@@ -226,7 +230,7 @@ def index():
 
         #save if at a backup_save checkpoint.
         if session['index'] % int(config['custom_setting']['backup_save'])==0:
-            st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+            st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
             st.start()
                   
               
@@ -245,7 +249,7 @@ def index():
 
         ##save if at a backup_save checkpoint.
         if session['index'] % int(config['custom_setting']['backup_save'])==0:
-            st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+            st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
             st.start()
 
               
@@ -263,7 +267,7 @@ def index():
 
     #if save pressed...save file to hdfs    
     if request.form.get('save')=="save":
-        st=Process(target=save_thread, args= (hdfs_in_prog_path,local_in_prog_path,local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+        st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
         st.start()
 
 
@@ -297,10 +301,11 @@ def index():
     df=local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]
 
     #select columns; split into column headers and data
-
-    df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]]
+    #possible copy set warning place
+    df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]].copy()
 
     highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
+    #possiple copy set warning place
     df_display[highlight_cols] = df_display[highlight_cols].astype(str)
     highlight_cols.remove(rec_id)
     
@@ -415,26 +420,6 @@ if __name__=='__main__':
             local_file.to_parquet(local_in_prog_path)
             hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
              
-    
-  
-    def timeout():
-        """
-        A function to termiate the main app thread when a given time is reached. 
-
-
-        """
-        nowtime=datetime.now()
-        n=(nowtime-start_time).total_seconds()
-        while n < 3600:
-            nowtime=datetime.now()
-            n=(nowtime-start_time).total_seconds()
-        else:
-            ra.terminate()
-            print('app_closed')
-      
-        
-
-        
     def run_app():
         """
         A function to run the main app
@@ -445,10 +430,19 @@ if __name__=='__main__':
 
     ra=Process(target=run_app)
     ra.start()
-    to = Process(target=timeout)
-    to.start()
-    ra.join()
-    to.join()
+    
+    #run a timer in the main terminal
+    #this is run in main occupying the kernel; but timesout after a set time
+    
+    nowtime=datetime.now()
+    n=(nowtime-start_time).total_seconds()
+    while n < 3600:
+         nowtime=datetime.now()
+         n=(nowtime-start_time).total_seconds()
+    else:
+         ra.terminate()
+         print('timeout')
+
 
 
 

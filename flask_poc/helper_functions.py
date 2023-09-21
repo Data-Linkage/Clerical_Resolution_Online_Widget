@@ -167,9 +167,9 @@ def remove_hadoop(hdfs_path):
     """
     try: 
         file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}",\
-                                   shell=True, stdout=subprocess.PIPE)
+                                   shell=True, stdout=subprocess.PIPE, check = True)
         dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}",\
-                                  shell=True, stdout=subprocess.PIPE)
+                                  shell=True, stdout=subprocess.PIPE, check = True)
         if file_test.returncode==0: 
 
             command='-rm'
