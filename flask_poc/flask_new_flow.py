@@ -337,11 +337,19 @@ def index():
       elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
           done_message='Matching Finished. Press Save'
       print(f"final file {session['full_path']}")
+      
+      column_width = len(columns)+1
+      button_left = int(column_width/2)
+      button_right = button_left + 2*(column_width / 2 - int(column_width / 2))
+      print(button_left)
+      print(button_right)
+      print(len(columns))
 
 
       return  render_template("cluster_version.html",
                               data = data,
                               columns=columns, cluster_number=str(int(session['index']+1)),\
+                              button_left = button_left, button_right = button_right,\
                               num_clusters=num_clusters, display_message=display_message, \
                               done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
                               flag_options=flag_options,\

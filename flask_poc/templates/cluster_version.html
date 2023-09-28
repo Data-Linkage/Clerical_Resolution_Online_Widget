@@ -15,10 +15,36 @@
           <img src="{{url_for('static', filename='logo.PNG')}}"align='right'width=240 height=100>
         </div>     
       </div>
+<!--
+      <div class="font" style="float:right;" >
+        <label for="fontFamilySelect" class="form-label" align='center'><h3 style="color: white">Choose your font</h3></label>
+        <form action = '#' method = 'post'>
+        <select name = 'font_choice' class="form-select" id="fontFamilySelect" onchange="this.form.submit()">
+            <option value="">Select</option>
+            <option disabled style="font-weight: bold; background-color: #EEEEEE">Serif Fonts</option>
+            <option name = 'font_choice' value="Georgia,serif" style="font-family: Georgia,serif">Georgia</option>
+            <option name = 'font_choice' value="Palatino Linotype,Book Antiqua,Palatino,serif" style="font-family: Palatino Linotype,Book Antiqua,Palatino,serif">Palatino Linotype</option>
+            <option name = 'font_choice' value="Times New Roman,Times,serif" style="font-family: Times New Roman,Times,serif">Times New Roman</option>
+            <option disabled style="font-weight: bold; background-color: #EEEEEE">Sans-Serif Fonts</option>
+            <option name = 'font_choice' selected="selected" value="Arial,Helvetica,sans-serif" style="font-family: Arial,Helvetica,sans-serif">Arial</option>
+            <option name = 'font_choice' value="Arial Black,Gadget,sans-serif" style="font-family: Arial Black,Gadget,sans-serif">Arial Black</option>
+            <option name = 'font_choice' value="Comic Sans MS,cursive,sans-serif" style="font-family: Comic Sans MS,cursive,sans-serif">Comic Sans MS</option>
+            <option name = 'font_choice' value="Impact,Charcoal,sans-serif" style="font-family: Impact,Charcoal,sans-serif">Impact</option>
+            <option name = 'font_choice' value="Lucida Sans Unicode,Lucida Grande,sans-serif" style="font-family: Lucida Sans Unicode,Lucida Grande,sans-serif">Lucida Sans Unicode</option>
+            <option name = 'font_choice' value="Tahoma,Geneva,sans-serif" style="font-family: Tahoma,Geneva,sans-serif">Tahoma</option>
+            <option name = 'font_choice' value="Trebuchet MS,Helvetica,sans-serif" style="font-family: Trebuchet MS,Helvetica,sans-serif">Trebuchet MS</option>
+            <option name = 'font_choice' value="Verdana,Geneva,sans-serif" style="font-family: Verdana,Geneva,sans-serif">Verdana</option>
+            <option disabled style="font-weight: bold; background-color: #EEEEEE">Monospace Fonts</option>
+            <option name = 'font_choice' value="Courier New,Courier,monospace" style="font-family: Courier New,Courier,monospace">Courier New</option>
+            <option name = 'font_choice' value="Lucida Console,Monaco,monospace" style="font-family: Lucida Console,Monaco,monospace">Lucida Console</option>
+        </select>
+        </form>
+      </div>
+-->
       <div class = 'container'>
         <div class = 'middle'>
           <div class = 'centered'>
-            <div style="overflow-x:auto;" style="overflow-y:auto;">
+            <div style="overflow-x:auto;">
             <form action='#' method="POST" class = centered>  
               <div class = 'box'>
                 <box style = {{font_choice}}>{{display_message}}</box>
@@ -38,29 +64,27 @@
                     <br>
 
               <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-              <div class = "submit-toolbar-left" >
-              <table class = table1 border="1" cellspacing = '0' style="float:left;">
-              <tr1> 
-                <td1>
+<!--              <div class = "submit-toolbar-left" >-->
+            </div> 
+          <div style="overflow-x:auto;overflow-y:auto">
+           <form action='#' method="POST" class = centered>  
+              <table class = 'table' style = {{font_choice}} cellspacing = '0' table-bordered>
+              <tr class = 'button tr1'> 
+                <td class = "button submit-toolbar-left" colspan = '{{button_left}}' align = 'left'>
                   <input type="submit" id = 'selectall' name="selectall" value="selectall" style="float:left;">
                   <label style = {{font_choice}} for="selectall">Select All</label> 
                   <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" style="float:left;">
                   <label style = {{font_choice}} for="highlight_differences">Highlight </label>                  
-                </td1>
-                <td1>
+                </td>
+                <td class = "button submit-toolbar-left" colspan = '{{button_right}}' align = 'right'>
                   <input type="submit" id = 'back' name="back" value="back">
                   <label style = {{font_choice}} for="back">Back</label> 
                   <input type="submit" id = 'save' name="save" value="save">
                   <label style = {{font_choice}} for="save">Save</label>
                   <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster"> 
                   <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
-                </td1>
-              </tr1>
-            </table>
-            </div> 
-           <form action='#' method="POST" class = centered>  
-              <table class = 'table' cellspacing = '0' table-bordered>
-
+                </td>
+              </tr>
                 <tr class = 'table__header'>
 
                 <th class = 'table__cell'></th>
@@ -79,7 +103,6 @@
                   <input type="checkbox" name="cluster" value= {{row[id_col_index]}}  {{'checked' if select_all else 'unchecked'}}
                   <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
                 </td>  
-<!-- value= {{row[id_col_index]}}-->
                   {% for cell in row %}
 
 
@@ -93,6 +116,7 @@
 
 
               </table>
+            </div>
               <br>
               <form action='#' method='POST' class = 'centered'>   
                 <div class="form-check">
