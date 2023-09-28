@@ -16,7 +16,9 @@ from multiprocessing import Process
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session
 import pandas as pd
+from flask_session import Session
 
+###some testimg
 
 
 
@@ -54,9 +56,11 @@ for filename in os.listdir(folder):
 
 app= Flask(__name__)
 #may need to be something more secretive/encryptable! 
-app.config['SECRET_KEY']='abcd'
-
-  
+#app.config['SECRET_KEY']='abcd'
+#app.config['SESSION_TYPE']='filesystem'
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 @app.route('/', methods=['GET','POST'])
 def welcome_page():
@@ -111,17 +115,20 @@ def index():
     """
     This is the main page where clerical happens! 
     """
-    # #When cluster version button pressed. Remove font_choice from session variables.
+    print(request.form.get('version'))
+    #When cluster version button pressed. Remove font_choice from session variables.
     if request.form.get('version')=="Cluster Version":
+        print('session cleared')
         session_keys=list(session)
         for i in session_keys: 
-            if i!= 'font_choice':
-                session.pop(i)
+           if i!= 'font_choice':
+               session.pop(i)
 
 
       
       
     if 'full_path' not in session:
+        print('running if 1')
         #actions for if this is the initial launch/path is not a session variable 
         #get the hdfs file paths and file name
         session['full_path']=str(request.form.get("file_path"))
@@ -155,7 +162,7 @@ def index():
             local_file['Comment']=''
         if 'Sequential_Cluster_Id' not in local_file.columns: 
             local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
-            local_file=local_file.sort_values('Sequential_Cluster_Id')
+            local_file=local_file.sort_values('Sequential_Cluster_Id').sort_values(by=['Sequential_Cluster_Id'])
 
 
         #get the local filepath in_prog and done paths rename locally to in_prog_path
@@ -173,10 +180,11 @@ def index():
         st.start()
 
     else: 
+        print('running if 2')
         #actions for every time the page is re-loaded. 
         #read session variable json to pandas
         local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
-
+        print(f"filename={session['filename']}")
         #set temp loaction 
         temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
@@ -216,12 +224,16 @@ def index():
       
     if request.form.get('Match')=="Match":
     #if match button pressed. 
-
+        print('running match button code')
             #get a list of cluster ids that are currently selected
         cluster = request.form.getlist("cluster")
+        print(cluster)
         for i in cluster: 
+            print(i)
+            print(type(i))
             local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-            print("comment{str(request.form.get('Comment'))}")
+            print(f"comment{str(request.form.get('Comment'))}")
+            print(f"{local_file.loc[local_file[rec_id]==i,'Match']}")
             local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
 
         #move on to next cluster if not at end of file
@@ -283,7 +295,7 @@ def index():
           #index = (list(range(max(local_file.count()))))
           #local_file.insert(0,'index',index)
      # else:
-         # pass
+         # passF
         #    
 
       #highlighter button       

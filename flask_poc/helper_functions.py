@@ -155,35 +155,32 @@ def save_hadoop(local_path,hdfs_path):
     
 
     
-    
-    
+ ####NOTE remove hadoop function is broken!   
 def remove_hadoop(hdfs_path):
-    """
-    Takes a given hdfs files path, and checks if it a file or directory,
-    then if so deletes the file or directory. 
-    
-    Parameters: hdfs_path(string); location of hdfs file
-     
-    """
-    try: 
-        file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}",\
-                                   shell=True, stdout=subprocess.PIPE, check = True)
-        dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}",\
-                                  shell=True, stdout=subprocess.PIPE, check = True)
-        if file_test.returncode==0: 
 
-            command='-rm'
-            process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
-
-        elif dir_test.returncode==0: 
-            command='-rmr'
-            process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
-        process.communicate()
+    file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+    dir_test = subprocess.run(f"hdfs dfs -test -d {hdfs_path}", shell=True, stdout=subprocess.PIPE)
+    if file_test.returncode==0: 
         
-        print(f'{hdfs_path} removed')
-    except:
-        print(f'{hdfs_path} cannot be deleted')
+        command='-rm'
+        print('file')
+        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+        process.communicate()
+    elif dir_test.returncode==0: 
+        command='-rmr'
+        print('directory')
+        process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
+        process.communicate()
+    else:
+        print(f'{hdfs_path} could not be deleted')
+        #build in some error handling 
     
+
+        
+
+
+    
+
     
 def validate_columns(df):
     """
