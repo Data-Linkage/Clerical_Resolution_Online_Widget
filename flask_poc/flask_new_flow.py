@@ -9,7 +9,7 @@ import numpy as np
 import configparser
 import subprocess
 import re
-os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
+os.chdir('/home/cdsw/crow/flask_poc')
 import helper_functions as hf
 from markupsafe import Markup
 from multiprocessing import Process
