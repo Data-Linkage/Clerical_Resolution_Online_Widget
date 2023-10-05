@@ -1,7 +1,9 @@
+
 """
 This is the main script to run the application.
 
 """
+
 import os
 import shutil
 import logging
@@ -9,7 +11,7 @@ import numpy as np
 import configparser
 import subprocess
 import re
-os.chdir('/home/cdsw/crow/flask_poc')
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
 import helper_functions as hf
 from markupsafe import Markup
 from multiprocessing import Process
@@ -354,39 +356,36 @@ def index():
       #############OTHER THINGS TO DISPLAY#######
       
 
-      #get number of clusters and message to display. 
-      num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
-      display_message=config['message_for_matchers']['message_to_display']
-      id_col_index=df_display.columns.get_loc(rec_id)
-      flag_options=config['custom_setting']['flag_options'].split(', ')
-      flagging_enabled=int(config['custom_setting']['flagging_enabled'])
-      #cast local_file back to json
-      session['working_file']=local_file.to_json()
-      
-      #set continuation message
-      if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
-          done_message='Keep Matching'
-      elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
-          done_message='Matching Finished. Press Save'
-      print(f"final file {session['full_path']}")
-      
-      column_width = len(columns)+1
-      button_left = int(column_width/2)
-      button_right = button_left + 2*(column_width / 2 - int(column_width / 2))
-      print(button_left)
-      print(button_right)
-      print(len(columns))
+    #get number of clusters and message to display. 
+    num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
+    display_message=config['message_for_matchers']['message_to_display']
+    id_col_index=df_display.columns.get_loc(rec_id)
+    #cast local_file back to json
+    session['working_file']=local_file.to_json()
+
+    #set continuation message
+    if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
+        done_message='Keep Matching'
+    elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
+        done_message='Matching Finished. Press Save'
+    print(f"final file {session['full_path']}")
+
+    column_width = len(columns)+1
+    button_left = int(column_width/2)
+    button_right = button_left + 2*(column_width / 2 - int(column_width / 2))
+    print(button_left)
+    print(button_right)
+    print(len(columns))
 
 
-      return  render_template("cluster_version.html",
-                              data = data,
-                              columns=columns, cluster_number=str(int(session['index']+1)),\
-                              button_left = button_left, button_right = button_right,\
-                              num_clusters=num_clusters, display_message=display_message, \
-                              done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
-                              flag_options=flag_options,\
-                              flagging_enabled=flagging_enabled, highlight_differences=session['highlight_differences'],\
-                              font_choice = session['font_choice'])
+    return  render_template("cluster_version.html",
+                            data = data,
+                            columns=columns, cluster_number=str(int(session['index']+1)),\
+                            button_left = button_left, button_right = button_right,\
+                            num_clusters=num_clusters, display_message=display_message, \
+                            done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
+                            highlight_differences=session['highlight_differences'],\
+                            font_choice = session['font_choice'])
 
     
     
