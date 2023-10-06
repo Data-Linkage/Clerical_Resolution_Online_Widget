@@ -1,188 +1,105 @@
-
 <!doctype html>
 <html lang="en">
+<!--  <img src="{{url_for('static', filename='logo.PNG')}}"align='right'width=240 height=100>-->
   <head>
-<!--    <img src="{{url_for('static', filename='crow.png')}}"align='left'width=100 height=50>-->
     <link rel="stylesheet" href="{{url_for('static', filename='cluster_version.css')}}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CROW clerical tool</title>
   </head>
-  <body> 
+  <body>
     <main>
-      <div class = 'top'>
-        <div class = 'top-image'>
-          <img src="{{url_for('static', filename='logo.PNG')}}"align='right'width=240 height=100>
-        </div>     
+      <div class = 'centered'>
+        <div class = 'box'>
+          <box style = {{font_choice}}>{{display_message}}</box>
+        </div>  
       </div>
-      <div class = 'container'>
-        <div class = 'middle'>
-          <div class = 'centered'>
-            <div style="overflow-x:auto;" style="overflow-y:auto;">
-            <form action='#' method="POST" class = centered>  
-              <div class = 'box'>
-                <box style = {{font_choice}}>{{display_message}}</box>
-              </div>  
-
-              <h2>{{timeout_warning_message}}</h2>
-                {%if flagging_enabled==1%}
-              <h2>Flag the file:</h2>  
-                      <select method = "post", name = "flag" , id="flag">  
-                      Please select a flag... <option value = "default" SELECTED >Flag</option>
-                      {% for i in flag_options %}
-                      {{i}} <option value = "{{i}}" >{{i}}</option>
-                      <br>
-                      {% endfor %}
-                    </select>
-              {% endif %}
-                    <br>
-
-              <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-              <h2 style = {{font_choice}}>{{done_message}}</h2>
-
-
-              <table class = 'table' cellspacing = '0' table-bordered>
-
-                <tr class = 'table__header'>
-
-                <th class = 'table__cell'></th>
-
-                {% for i in columns %} 
-
-                <th class = 'table__cell'>{{i}}</th> 
-                {% endfor %}  
-                </tr>
-
-                {% for row in data %}
-
-                <tr class = 'table__row'> 
-                  
-                <td>
-                  <input type="checkbox" name="cluster" value= {{row[id_col_index]}}  {{'checked' if select_all else 'unchecked'}}
-                  <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
-                </td>  
-<!-- value= {{row[id_col_index]}}-->
-                  {% for cell in row %}
-
-
-                    <td class = 'table__cell'>{{cell}} </td>
-
-                  {% endfor %}
-
-
-                {% endfor %}
-                </tr>    
-
-
-              </table>
-              <br>
-              <div class = "submit-toolbar">
-                <input type="submit" id="Match" name="Match" value="Match">
-                <label style = {{font_choice}} for="Match">Match</label>
-                <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
-                <label style = {{font_choice}} for="Non-Match">Non-Match</label>
-              </div>
-              <br>
-              <br> 
-          
-              <form action='#' method='POST' class = 'centered'>
-              <div class = "submit-toolbar">
-                <input type="submit" id = 'back' name="back" value="back">
-                <label style = {{font_choice}} for="back">Back</label> 
-                <input type="submit" id = 'save' name="save" value="save">
-                <label style = {{font_choice}} for="save">Save</label>
-                <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster">
-                <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
-                <input type="submit" id = 'selectall' name="selectall" value="selectall">
-                <label style = {{font_choice}} for="selectall">selectall</label>
-                <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" >
-                <label style = {{font_choice}} for="highlight_differences">highlight_differences</label>
-
-
-
-              </div>
-             <div class="form-check">
-                  </label>
-              <label for="Comment">Comment:</label>
-              <input type="text" id="Comment" name="Comment" placeholder="">
-            </form>  
-          </div>          
-        </div>
-      </div>
-      <div class = 'bottom'>
-        <div class = 'bottom-image'>
-          <p> </p>
-        </div>
-      </div>
-    </main>
-  </body>  
-    
+        <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
+      <br>
+      <br>
+      <br>
 <!--
-<div style="overflow-x:auto;" style="overflow-y:auto;">
-<form action='#' method="POST">  
-<div class = 'box'>
-<box>{{display_message}}</box>
-</div>  
-<h2>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-<h2>{{done_message}}</h2>
-  
-<table class = 'table' cellspacing = '0' table-bordered>
-<tr class = 'table__header'>
-  
-<th class = 'table__cell'></th>
-  
-{% for i in columns %} 
-<th class = 'table__cell'>{{i}}</th> 
-{% endfor %}  
-</tr>
-{% for row in data %}
-<tr class = 'table__row'> 
-<td>
-    <input type="checkbox" name="cluster" value= {{row[id_col_index]}} >
-    <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
-</td>  
-   {% for cell in row %}
- 
-    
-    <td class = 'table__cell'>{{cell}} </td>
-   {% endfor %}
-</tr>
-{% endfor %}
-</tr>    
-</table>
-</div>
-<br>
-    <input type="submit" name="Match" value="Match">
-    <input type="submit" name="Non-Match" value="Non-Match">
-  
-    <input type="submit" name="Clear-Cluster" value="Clear-Cluster">
-<br>
-<br> 
-<p>Highligh Differences</p> 
-{% if highlight == "Highlight differences" %}
-<label class="switch">
-  <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()" checked>
-  <span class="slider round" ></span>
-</label>  
-{% else %}  
-<label class="switch">
-  <input type="checkbox" name = "highlight_differences" value = "Highlight differences" onChange="this.form.submit()">
-  <span class="slider round" ></span>
-</label>    
-{% endif %}
-<br>
-<br>  
-</form>
-<br>
-<br>   
-<form action='#' method='POST'>
-    <input type="submit" name="back" value="back">
-    <input type="submit" name="save" value="save">
-</form>  
-<div class="form-check">
-    </label>
-  
-</form>
-</body>
+      <div style="overflow-x:auto;overflow-y:scroll">
 -->
-</html>
+        <form action='#' method="POST" class= centered>  
+          <table width = '90%' style = 'table-layout: fixed; border:none'>
+            <tr>
+              <td style = 'border:none'>
+                <table class = 'table' style = {{font_choice}} width = '100%' >
+                  <tr class = 'button tr1'> 
+                    <td class = "button submit-toolbar-left" colspan = '{{button_left}}' align = 'left'>
+                      <input type="submit" id = 'selectall' name="selectall" value="selectall" style="float:left;">
+                      <label style = {{font_choice}} for="selectall">Select All</label> 
+                      <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" style="float:left;">
+                      <label style = {{font_choice}} for="highlight_differences">Highlight </label>                  
+                    </td>
+                    <td class = "button submit-toolbar-left" colspan = '{{button_right}}' align = 'right'>
+                      <input type="submit" id = 'back' name="back" value="back">
+                      <label style = {{font_choice}} for="back">Back</label> 
+                      <input type="submit" id = 'save' name="save" value="save">
+                      <label style = {{font_choice}} for="save">Save</label>
+                      <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster"> 
+                      <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style = 'border:none'>
+                <div style="overflow-x:auto;overflow-y:scroll;max-height: 400px">  
+
+                  <table class = 'table' style = {{font_choice}} cellspacing = '0' table-bordered >
+                    <tr class = 'table__header'>
+
+                    <th class = 'table__cell'></th>
+
+                    {% for i in columns %} 
+
+                    <th class = 'table__cell'>{{i}}</th> 
+                    {% endfor %} 
+                       
+                    </tr>
+
+                    {% for row in data %}
+
+                    <tr class = 'table__row'> 
+
+                    <td>
+                      <input type="checkbox" name="cluster" value= {{row[id_col_index]}}  {{'checked' if select_all else 'unchecked'}}
+                      <label class="form-check-label" for="inlineCheckbox1"> &nbsp;</label>
+                    </td>  
+                      {% for cell in row %}
+
+
+                        <td class = 'table__cell'>{{cell}} </td>
+
+                      {% endfor %}
+
+
+                    {% endfor %}
+                    </tr>    
+                  </table>
+                </div>                             
+              </td>
+            </tr>
+    </table>
+      <br>
+<!--        <form action='#' method='POST' class = 'centered'>   -->
+          <div class="centered">
+              </label>
+          <label for="Comment">Comment:</label>
+        <input type="text" id="Comment" name="Comment" placeholder="">
+          </div>   
+        <br>
+      <div class = 'centered'> 
+        <div class = "submit-toolbar">
+          <input type="submit" id="Match" name="Match" value="Match">
+          <label style = {{font_choice}} for="Match">Match</label>
+          <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
+          <label style = {{font_choice}} for="Non-Match">Non-Match</label>
+        </div>
+      </div>
+      </form>           
+    </main>
+  </body>
