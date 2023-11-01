@@ -91,7 +91,6 @@ def new_session():
     for i in session_keys: 
         if i!= 'font_choice':
             session.pop(i)
-    print(f'session1={list(session)}')
     
     #using hadoop commands- get list of files in folder from hdfs 
     process = subprocess.Popen(["hadoop", "fs","-ls","-C",\
@@ -117,10 +116,8 @@ def index():
     """
     This is the main page where clerical happens! 
     """
-    print(request.form.get('version'))
     #When cluster version button pressed. Remove font_choice from session variables.
     if request.form.get('version')=="Cluster Version":
-        print('session cleared')
         session_keys=list(session)
         for i in session_keys: 
            if i!= 'font_choice':
@@ -130,7 +127,7 @@ def index():
       
       
     if 'full_path' not in session:
-        print('running if 1')
+        #print('running if 1')
         #actions for if this is the initial launch/path is not a session variable 
         #get the hdfs file paths and file name
         session['full_path']=str(request.form.get("file_path"))
@@ -160,11 +157,22 @@ def index():
         #if there are not already; create a match column and sequential_id column
         if 'Match' not in local_file.columns: 
             local_file['Match']='[]'
+        if 'Sequential_Cluster_Id' not in local_file.columns: 
+            local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
+            local_file=local_file.sort_values(by=['Sequential_Cluster_Id'])
+
         if 'Comment' not in local_file.columns: 
             local_file['Comment']=''
+       
+        if 'Sequential_Record_Id' not in local_file.columns: 
+            local_file['Sequential_Record_Id'] = pd.factorize(local_file[rec_id])[0]
+            local_file=local_file.sort_values(by=['Sequential_Record_Id'])
+            
+        
         if 'Sequential_Cluster_Id' not in local_file.columns: 
             local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
             local_file=local_file.sort_values('Sequential_Cluster_Id').sort_values(by=['Sequential_Cluster_Id'])
+
 
 
         #get the local filepath in_prog and done paths rename locally to in_prog_path
@@ -182,11 +190,10 @@ def index():
         st.start()
 
     else: 
-        print('running if 2')
+        #print('running if 2')
         #actions for every time the page is re-loaded. 
         #read session variable json to pandas
-        local_file=pd.read_json(session['working_file']).sort_values('Sequential_Cluster_Id')
-        print(f"filename={session['filename']}")
+        local_file=pd.read_json(session['working_file']).sort_values(by=['Sequential_Record_Id'])
         #set temp loaction 
         temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
@@ -226,16 +233,10 @@ def index():
       
     if request.form.get('Match')=="Match":
     #if match button pressed. 
-        print('running match button code')
             #get a list of cluster ids that are currently selected
         cluster = request.form.getlist("cluster")
-        print(cluster)
         for i in cluster: 
-            print(i)
-            print(type(i))
             local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-            print(f"comment{str(request.form.get('Comment'))}")
-            print(f"{local_file.loc[local_file[rec_id]==i,'Match']}")
             local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
 
         #move on to next cluster if not at end of file
@@ -272,6 +273,7 @@ def index():
         cluster_ids=list(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']][rec_id].values)
         for  i in cluster_ids:
             local_file.loc[local_file[rec_id]==i,'Match']='[]'
+            local_file.loc[local_file[rec_id]==i,'Comment']=''
 
 
     #if back button pressed; set session['index'] back to move to previous cluster (Unless index=0)
@@ -291,16 +293,7 @@ def index():
             session['select_all']=0
         elif session['select_all']==0:
             session['select_all']=1
-      
-      ###NOTE TO SELFFFFF RESEARCH THIS BIT#####WHY HERE? 
-   #   if 'index' not in local_file.columns:
-          #index = (list(range(max(local_file.count()))))
-          #local_file.insert(0,'index',index)
-     # else:
-         # passF
-        #    
-
-      #highlighter button       
+       
     if request.form.get('highlight_differences') == 'highlight_differences':
         if session['highlight_differences']==1:
             session['highlight_differences']=0
@@ -368,14 +361,11 @@ def index():
         done_message='Keep Matching'
     elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
         done_message='Matching Finished. Press Save'
-    print(f"final file {session['full_path']}")
+    
 
     column_width = len(columns)+1
     button_left = int(column_width/2)
     button_right = button_left + 2*(column_width / 2 - int(column_width / 2))
-    print(button_left)
-    print(button_right)
-    print(len(columns))
 
 
     return  render_template("cluster_version.html",
@@ -438,14 +428,20 @@ if __name__=='__main__':
         else:
             local_file.to_parquet(local_in_prog_path)
             hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
+            
+        print('Saving Complete')
              
     def run_app():
         """
         A function to run the main app
         """
+        print('App is running, press icon in top corner to launch application.\n\
+              It may take a few secounds for the "CROW clerical tool" icon to appear.\n\
+              if you cannot see it, look again in a few secounds')
+
         app.config["TEMPLATES_AUTO_RELOAD"] = True
         app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
-
+        
 
     ra=Process(target=run_app)
     ra.start()
