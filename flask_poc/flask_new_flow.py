@@ -235,19 +235,22 @@ def index():
     #if match button pressed. 
             #get a list of cluster ids that are currently selected
         cluster = request.form.getlist("cluster")
-        for i in cluster: 
-            local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
-            local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
+        for i in cluster:
+            if len(cluster)==1:
+                pass
+            elif len(cluster)>=2:
+                local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
+                local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
 
         #move on to next cluster if not at end of file
-        if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
-            hf.advance_cluster(local_file)
+                if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
+                    hf.advance_cluster(local_file)
 
-        #save if at a backup_save checkpoint.
-        if session['index'] % int(config['custom_setting']['backup_save'])==0:
-            st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
-            st.start()
-                  
+                #save if at a backup_save checkpoint.
+                if session['index'] % int(config['custom_setting']['backup_save'])==0:
+                    st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+                    st.start()
+
               
              
     elif request.form.get('Non-Match')=="Non-Match":
@@ -456,7 +459,7 @@ if __name__=='__main__':
          n=(nowtime-start_time).total_seconds()
     else:
          ra.terminate()
-         print('timeout')
+         print('Session has timed out. Please re-start your session \n and press the re-run the script to continue')
 
 
 
