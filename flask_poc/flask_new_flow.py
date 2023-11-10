@@ -3,7 +3,7 @@
 This is the main script to run the application.
 
 """
-
+import ast
 import os
 import shutil
 import logging
@@ -358,12 +358,23 @@ def index():
     id_col_index=df_display.columns.get_loc(rec_id)
     #cast local_file back to json
     session['working_file']=local_file.to_json()
+    
+
+    #check if current cluster finished
+    num_in_cluster=len(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']])
+    list_decided=[set(ast.literal_eval(i)) for i in local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]['Match']]
+    uni_set_decided={x for l in list_decided for x in l}
+    num_decided=len(uni_set_decided)
+    if (num_in_cluster-num_decided)==0: 
+        cur_cluster_done=1
+    else:
+        cur_cluster_done=0
 
     #set continuation message
-    if local_file.Sequential_Cluster_Id.nunique()>int(session['index']):
+    if (local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1) or cur_cluster_done==False:
         done_message='Keep Matching'
-    elif local_file.Sequential_Cluster_Id.nunique()==int(session['index']):
-        done_message='Matching Finished. Press Save'
+    elif (local_file.Sequential_Cluster_Id.nunique()==int(session['index'])+1) and cur_cluster_done==True:
+        done_message='Matching Finished- Press save and close the application'
     
 
     column_width = len(columns)+1
@@ -423,7 +434,7 @@ if __name__=='__main__':
         
         
               
-        #if matching is finished save as done locally and to hdfs
+    
         if hf.check_matching_done(local_file):
             local_file.to_parquet(local_filepath_done)
             hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
@@ -459,7 +470,7 @@ if __name__=='__main__':
          n=(nowtime-start_time).total_seconds()
     else:
          ra.terminate()
-         print('Session has timed out. Please re-start your session \n and press the re-run the script to continue')
+         print('Session has timed out. Please re-start your session \n and re-run the script to continue')
 
 
 

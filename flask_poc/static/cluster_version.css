@@ -147,12 +147,13 @@ padding: 8px;
 
 .box {
   width: 500px;
-  border: 15px solid white;
+  border: 2px solid white;
   padding: 10px;
   margin: 30px;
   color: #033fa0;
   font-family: sans-serif, Arial;
- background-color: #FFFFFF;
+  background-color: #FFFFFF;
+  border-radius: 25px;
 }
 
 .submit-toolbar-left input[type="submit"] {

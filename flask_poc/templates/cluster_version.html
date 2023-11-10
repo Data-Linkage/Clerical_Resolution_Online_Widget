@@ -7,7 +7,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CROW clerical tool</title>
   </head>
-  <body>
+</html>
+<body>
+<style>
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+}
+
+li a {
+  display: block;
+  color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+li a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+li a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+</style>
+<ul>
+  <li><a href="/about_page">CROW Help</a></li>
+</ul>
+
+
     <main>
       
       <div class = 'centered'>
@@ -15,10 +47,7 @@
           <box style = {{font_choice}}>{{display_message}}</box>
         </div>  
       </div>
-        <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}</h2>
-      <br>
-      <br>
-      <br>
+        <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}  :{{done_message}}</h2>
 <!--
       <div style="overflow-x:auto;overflow-y:scroll">
 -->
@@ -96,7 +125,7 @@
         <br>
       <div class = 'centered'> 
         <div class = "submit-toolbar">
-          <input type="submit" id="Match" name="Match" value="Match">
+          <input type="submit" id="Match" name="Match" value="Match" title="Match the records that ch">
           <label style = {{font_choice}} for="Match">Match</label>
           <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
           <label style = {{font_choice}} for="Non-Match">Non-Match</label>

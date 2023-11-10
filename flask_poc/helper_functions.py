@@ -192,11 +192,11 @@ def validate_columns(df):
     
     """
     if rec_id not in df.columns:
-        raise Exception('no record ID in data')
+        raise Exception('no record ID in data; contact your project leader for guidance')
     if not df[rec_id].is_unique: 
         raise Exception('record ids are not unique; contact your project leader for guidance ')
     if clust_id not in df.columns: 
-        raise Exception('no cluster id column in data')
+        raise Exception('no cluster id column in data; contact your project leader for guidance')
 
     
 def validate_input_data(filepath):
