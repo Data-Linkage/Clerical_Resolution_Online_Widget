@@ -230,14 +230,15 @@ def index():
       ##############################Button Code###############################
       ##Code to control the actions on each button press.
       #if match button pressed; add the record Id's of the selected records to the match column as an embedded list
-      
+    
+    match_error=''
     if request.form.get('Match')=="Match":
     #if match button pressed. 
             #get a list of cluster ids that are currently selected
         cluster = request.form.getlist("cluster")
         for i in cluster:
-            if len(cluster)==1:
-                pass
+            if len(cluster)<=1:
+                match_error='you have only selected one record'
             elif len(cluster)>=2:
                 local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
                 local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
@@ -389,7 +390,8 @@ def index():
                             num_clusters=num_clusters, display_message=display_message, \
                             done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
                             highlight_differences=session['highlight_differences'],\
-                            font_choice = session['font_choice'])
+                            font_choice = session['font_choice'],\
+                            match_error=match_error)
 
     
     
