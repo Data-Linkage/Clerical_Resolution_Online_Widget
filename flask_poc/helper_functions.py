@@ -207,6 +207,19 @@ def validate_input_data(filepath):
         raise ('Filesize error; file is bigger than 0.5GB')
         
 
+def check_cluster_done(dataframe): 
+    """
+    XXX
+    
+    """
+    num_in_cluster=len(dataframe.loc[dataframe['Sequential_Cluster_Id']==session['index']])
 
+    list_decided=[set(ast.literal_eval(i)) for i in dataframe.loc[dataframe['Sequential_Cluster_Id']==session['index']]['Match']]
 
+    uni_set_decided={x for l in list_decided for x in l}
 
+    num_decided=len(uni_set_decided)
+    if (num_in_cluster-num_decided)==0: 
+        return 1 
+    else: 
+        return 0

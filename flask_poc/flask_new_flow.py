@@ -314,7 +314,7 @@ def index():
     #select columns; split into column headers and data
     #possible copy set warning place
     df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]].copy()
-
+    #print(df_display)
     highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
     #possiple copy set warning place
     df_display[highlight_cols] = df_display[highlight_cols].astype(str)
@@ -359,17 +359,10 @@ def index():
     id_col_index=df_display.columns.get_loc(rec_id)
     #cast local_file back to json
     session['working_file']=local_file.to_json()
-    
-
-    #check if current cluster finished
-    num_in_cluster=len(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']])
-    list_decided=[set(ast.literal_eval(i)) for i in local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]['Match']]
-    uni_set_decided={x for l in list_decided for x in l}
-    num_decided=len(uni_set_decided)
-    if (num_in_cluster-num_decided)==0: 
-        cur_cluster_done=1
-    else:
-        cur_cluster_done=0
+    match_col_index=df_display.columns.get_loc('Match')
+        
+    #check if cluster done 
+    cur_cluster_done= hf.check_cluster_done(local_file)
 
     #set continuation message
     if (local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1) or cur_cluster_done==False:
@@ -381,7 +374,7 @@ def index():
     column_width = len(columns)+1
     button_left = int(column_width/2)
     button_right = button_left + 2*(column_width / 2 - int(column_width / 2))
-
+    
 
     return  render_template("cluster_version.html",
                             data = data,
@@ -391,7 +384,7 @@ def index():
                             done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
                             highlight_differences=session['highlight_differences'],\
                             font_choice = session['font_choice'],\
-                            match_error=match_error)
+                            match_error=match_error, match_col_index=match_col_index)
 
     
     
