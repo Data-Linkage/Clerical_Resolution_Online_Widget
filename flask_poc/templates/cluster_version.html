@@ -88,18 +88,21 @@
 <!--        <form action='#' method='POST' class = 'centered'>   -->
           <div class="centered">
               </label>
+            <div class="tooltip">
           <label style = {{font_choice}} for="Comment">Comment:</label>
         <input style = {{font_choice}} type="text" id="Comment" name="Comment" placeholder="">
+          <span class="tooltiptext">Comment only gets added to data afer match or non-match has been pressed</span>
+          </div>
           </div>   
         <br>
       <div class = 'centered'> 
         <div class = "submit-toolbar">
           <input type="submit" id="Match" name="Match" value="Match">
-          <label style = {{font_choice}} for="Match">Match</label>
+          <label style = {{font_choice}};background-color:#C1FFC1; for="Match">Match</label>
           <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
-          <label style = {{font_choice}} for="Non-Match">Non-Match</label>
-        </div>
+          <label style = {{font_choice}};background-color:#ffc5ad; for="Non-Match">Non-Match</label>
       </div>
+    </div>
       </form>           
     </main>
   </body>

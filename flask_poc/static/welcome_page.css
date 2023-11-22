@@ -59,7 +59,7 @@ body{
 .left{
     height: 100vh;
     width:35%;
-    background: white;
+    background: #f7f7f8;
     text-align: center;
     display: block;
     position: auto;
@@ -142,7 +142,7 @@ body{
 
 h1 {
 /*  color: #b3b0a2;*/
-  color: white;
+  color: #f7f7f8;
 /*  font-family: sans-serif, Arial;*/
   font-size: 50px;
   size: 15em;  
@@ -152,7 +152,7 @@ h1 {
 
 h2 {
 /*  color: #b3b0a2;*/
-  color: white;
+  color: #f7f7f8;
 /*  font-family: sans-serif, Arial;*/
   size: 15em; 
   font-size: 40px;
