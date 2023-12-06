@@ -3,22 +3,20 @@
 This is the main script to run the application.
 
 """
-import ast
+from multiprocessing import Process
+from datetime import datetime
 import os
 import shutil
 import logging
-import numpy as np
-import configparser
 import subprocess
 import re
-os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
-import helper_functions as hf
-from markupsafe import Markup
-from multiprocessing import Process
-from datetime import datetime
-from flask import Flask, render_template, request, redirect, session
-import pandas as pd
+import configparser
+from flask import Flask, render_template, request, session
 from flask_session import Session
+import helper_functions as hf
+import pandas as pd
+from markupsafe import Markup
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
 
 ###some testing
 
@@ -120,8 +118,8 @@ def index():
     if request.form.get('version')=="Cluster Version":
         session_keys=list(session)
         for i in session_keys: 
-           if i!= 'font_choice':
-               session.pop(i)
+            if i!= 'font_choice':
+                session.pop(i)
 
 
       
@@ -184,10 +182,10 @@ def index():
         hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],\
                                                                 session['full_path'].split('/'))
         #start the save thread to move in progress file back to hdfs. 
-        st=Process(target=save_thread, args= (local_in_prog_path,\
+        s_thread=Process(target=save_thread, args= (local_in_prog_path,\
                                               hdfs_in_prog_path,\
                                               local_file, local_filepath_done, hdfs_filepath_done))
-        st.start()
+        s_thread.start()
 
     else: 
         #print('running if 2')
@@ -198,7 +196,8 @@ def index():
         temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
         #get the local filepath in_prog and done paths rename locally to in_prog_path
-        local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,temp_local_path.split('/'))
+        local_in_prog_path, local_filepath_done=hf.get_save_paths(temp_local_path,\
+                                                                  temp_local_path.split('/'))
 
         #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
         hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],\
@@ -229,7 +228,8 @@ def index():
     
       ##############################Button Code###############################
       ##Code to control the actions on each button press.
-      #if match button pressed; add the record Id's of the selected records to the match column as an embedded list
+      #if match button pressed; add the record Id's of the 
+      #selected records to the match column as an embedded list
     
     match_error=''
     if request.form.get('Match')=="Match":
@@ -249,8 +249,10 @@ def index():
 
                 #save if at a backup_save checkpoint.
                 if session['index'] % int(config['custom_setting']['backup_save'])==0:
-                    st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
-                    st.start()
+                    s_thread=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path,\
+                                                          local_file, local_filepath_done,\
+                                                          hdfs_filepath_done))
+                    s_thread.start()
 
               
              
@@ -268,8 +270,10 @@ def index():
 
         ##save if at a backup_save checkpoint.
         if session['index'] % int(config['custom_setting']['backup_save'])==0:
-            st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
-            st.start()
+            s_thread=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path,\
+                                                  local_file, local_filepath_done, \
+                                                  hdfs_filepath_done))
+            s_thread.start()
 
               
     #if Clear-Cluster pressed; replace the match column for cluster with '[]'
@@ -287,8 +291,8 @@ def index():
 
     #if save pressed...save file to hdfs    
     if request.form.get('save')=="save":
-        st=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
-        st.start()
+        s_thread=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+        s_thread.start()
 
 
     if request.form.get('selectall')=="selectall":
@@ -309,11 +313,12 @@ def index():
       ####################Things to display code#########################
       
     #extract a df dor the current cluster
-    df=local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]
+    data_f=local_file.loc[local_file['Sequential_Cluster_Id']==session['index']]
 
     #select columns; split into column headers and data
     #possible copy set warning place
-    df_display=df[[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]].copy()
+    display_cols_list=[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]
+    df_display=data_f[display_cols_list].copy()
     #print(df_display)
     highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
     #possiple copy set warning place
@@ -365,9 +370,10 @@ def index():
     cur_cluster_done= hf.check_cluster_done(local_file)
 
     #set continuation message
-    if (local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1) or cur_cluster_done==False:
+    not_last_record=local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1
+    if (not_last_record is True) or cur_cluster_done is False:
         done_message='Keep Matching'
-    elif (local_file.Sequential_Cluster_Id.nunique()==int(session['index'])+1) and cur_cluster_done==True:
+    elif (not_last_record is False) and cur_cluster_done is True:
         done_message='Matching Finished- Press save and close the application'
     
 
@@ -381,7 +387,8 @@ def index():
                             columns=columns, cluster_number=str(int(session['index']+1)),\
                             button_left = button_left, button_right = button_right,\
                             num_clusters=num_clusters, display_message=display_message, \
-                            done_message=done_message, id_col_index=id_col_index, select_all=session['select_all'],\
+                            done_message=done_message, id_col_index=id_col_index,\
+                            select_all=session['select_all'],\
                             highlight_differences=session['highlight_differences'],\
                             font_choice = session['font_choice'],\
                             match_error=match_error, match_col_index=match_col_index)
@@ -461,11 +468,10 @@ if __name__=='__main__':
     nowtime=datetime.now()
     n=(nowtime-start_time).total_seconds()
     while n < 3600:
-         nowtime=datetime.now()
-         n=(nowtime-start_time).total_seconds()
-    else:
-         ra.terminate()
-         print('Session has timed out. Please re-start your session \n and re-run the script to continue')
+        nowtime=datetime.now()
+        n=(nowtime-start_time).total_seconds()
+    ra.terminate()
+    print('Session has timed out. Please re-start your session \n and re-run the script to continue')
 
 
 
