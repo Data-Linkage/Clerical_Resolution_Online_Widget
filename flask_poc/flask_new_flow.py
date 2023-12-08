@@ -3,11 +3,10 @@
 This is the main script to run the application.
 
 """
+import os
 os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
-
 from multiprocessing import Process
 from datetime import datetime
-import os
 import shutil
 import logging
 import subprocess
@@ -17,7 +16,7 @@ from flask import Flask, render_template, request, session
 from flask_session import Session
 import helper_functions as hf
 import pandas as pd
-from markupsafe import Markup
+
 
 start_time=datetime.now()
 
@@ -35,8 +34,8 @@ for filename in os.listdir(folder):
             os.unlink(file_path)
         elif os.path.isdir(file_path):
             shutil.rmtree(file_path)
-    except Exception as e:
-        print('Failed to delete %s. Reason: %s' % (file_path, e))
+    except FileNotFoundError:
+        print(f'temp folder does not exist or is emply')
 ######################
 
 app=Flask(__name__)
@@ -51,12 +50,11 @@ Session(app)
 def welcome_page():
     """
     This page acts as a menu for the user
-    
     """
     #session.clear()
     session['font_choice'] = f"font-family:{request.form.get('font_choice')}"
     session_keys=list(session)
-    for i in session_keys: 
+    for i in session_keys:
         if i!= 'font_choice':
             session.pop(i)
     return render_template("welcome_page.html", font_choice = session['font_choice'])
@@ -66,23 +64,21 @@ def new_session():
     Allows the user to select their data, and launch the session
     """
     #code to remove session variables except for font choice
-    #this is to ensure if the page is returned to in the same session- variables are cleared 
-    #to avoid conflicts/saving over wrong files. 
+    #this is to ensure if the page is returned to in the same session- variables are cleared
+    #to avoid conflicts/saving over wrong files.
     session_keys=list(session)
-    for i in session_keys: 
+    for i in session_keys:
         if i!= 'font_choice':
             session.pop(i)
     
-    #using hadoop commands- get list of files in folder from hdfs 
+    #using hadoop commands- get list of files in folder from hdfs
     process = subprocess.Popen(["hadoop", "fs","-ls","-C",\
                                 config['filespaces']['hdfs_folder'] ],\
                                 stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     std_out, std_error = process.communicate()
     std_out2=list(str(std_out).split('\\n'))
-    
     #fix for error where first file in the folder has b' due to hadoop commands
-    std_out2=[re.sub(r"^b'","",i) for i in std_out2 ]
-    
+    std_out2=[re.sub(r"^b'","",i) for i in std_out2]
     button = request.form.get("hdfs")
     config_status = request.form.get("config")
     version = request.form.get("version")
@@ -93,21 +89,18 @@ def new_session():
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
     """
-    This is the main page where clerical happens! 
+    This is the main page where clerical happens!
     """
     #When cluster version button pressed. Remove font_choice from session variables.
     if request.form.get('version')=="Cluster Version":
         session_keys=list(session)
-        for i in session_keys: 
+        for i in session_keys:
             if i!= 'font_choice':
                 session.pop(i)
 
-
-      
-      
     if 'full_path' not in session:
         #print('running if 1')
-        #actions for if this is the initial launch/path is not a session variable 
+        #actions for if this is the initial launch/path is not a session variable
         #get the hdfs file paths and file name
         session['full_path']=str(request.form.get("file_path"))
         session['filename']=session['full_path'].split('/')[-1]
@@ -123,7 +116,7 @@ def index():
         #validate pd columns/raise errors
         hf.validate_columns(local_file)
 
-        #if temp path is now a directory; remove directory 
+        #if temp path is now a directory; remove directory
         if os.path.isdir(temp_local_path):
             shutil.rmtree(temp_local_path)
             #this is a hack to resolve; to_parquet only works with single partition files.
@@ -134,21 +127,20 @@ def index():
         session['working_file']=local_file.to_json()
 
         #if there are not already; create a match column and sequential_id column
-        if 'Match' not in local_file.columns: 
+        if 'Match' not in local_file.columns:
             local_file['Match']='[]'
-        if 'Sequential_Cluster_Id' not in local_file.columns: 
+        if 'Sequential_Cluster_Id' not in local_file.columns:
             local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
             local_file=local_file.sort_values(by=['Sequential_Cluster_Id'])
 
-        if 'Comment' not in local_file.columns: 
+        if 'Comment' not in local_file.columns:
             local_file['Comment']=''
-       
-        if 'Sequential_Record_Id' not in local_file.columns: 
+
+        if 'Sequential_Record_Id' not in local_file.columns:
             local_file['Sequential_Record_Id'] = pd.factorize(local_file[rec_id])[0]
             local_file=local_file.sort_values(by=['Sequential_Record_Id'])
-            
-        
-        if 'Sequential_Cluster_Id' not in local_file.columns: 
+
+        if 'Sequential_Cluster_Id' not in local_file.columns:
             local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
             local_file=local_file.sort_values('Sequential_Cluster_Id').sort_values(by=['Sequential_Cluster_Id'])
 
@@ -162,18 +154,18 @@ def index():
         #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
         hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],\
                                                                 session['full_path'].split('/'))
-        #start the save thread to move in progress file back to hdfs. 
+        #start the save thread to move in progress file back to hdfs.
         s_thread=Process(target=save_thread, args= (local_in_prog_path,\
                                               hdfs_in_prog_path,\
                                               local_file, local_filepath_done, hdfs_filepath_done))
         s_thread.start()
 
-    else: 
+    else:
         #print('running if 2')
-        #actions for every time the page is re-loaded. 
+        #actions for every time the page is re-loaded.
         #read session variable json to pandas
         local_file=pd.read_json(session['working_file']).sort_values(by=['Sequential_Record_Id'])
-        #set temp loaction 
+        #set temp loaction
         temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
         #get the local filepath in_prog and done paths rename locally to in_prog_path
@@ -183,12 +175,12 @@ def index():
         #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
         hdfs_in_prog_path, hdfs_filepath_done=hf.get_save_paths(session['full_path'],\
                                                                 session['full_path'].split('/'))
-
+    
     #set the index variable. This is the iterator that controls the flow of the application as you move through clusters. 
     #it is a sequential integer created based on the cluster id.
-      
+
       ############ session variables and toggles#############
-      
+
     if 'index' not in session:
         session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
 
@@ -196,7 +188,7 @@ def index():
     if "select_all" not in session: 
         session['select_all']=0
 
-    #highlight differences toggle    
+    #highlight differences toggle
     if 'highlight_differences' not in session: 
         session['highlight_differences']=0
 
@@ -204,17 +196,16 @@ def index():
         local_file.to_parquet(local_filepath_done)
     else:
         local_file.to_parquet(local_in_prog_path)
-        
 
     
       ##############################Button Code###############################
       ##Code to control the actions on each button press.
-      #if match button pressed; add the record Id's of the 
+      #if match button pressed; add the record Id's of the
       #selected records to the match column as an embedded list
     
     match_error=''
     if request.form.get('Match')=="Match":
-    #if match button pressed. 
+    #if match button pressed.
             #get a list of cluster ids that are currently selected
         cluster = request.form.getlist("cluster")
         for i in cluster:
@@ -235,10 +226,10 @@ def index():
                                                           hdfs_filepath_done))
                     s_thread.start()
 
-              
+
              
     elif request.form.get('Non-Match')=="Non-Match":
-    #if non-match button pressed. 
+    #if non-match button pressed.
 
         cluster = request.form.getlist("cluster")
         for i in cluster:
@@ -256,11 +247,11 @@ def index():
                                                   hdfs_filepath_done))
             s_thread.start()
 
-              
+
     #if Clear-Cluster pressed; replace the match column for cluster with '[]'
     if request.form.get('Clear-Cluster')=="Clear-Cluster":
         cluster_ids=list(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']][rec_id].values)
-        for  i in cluster_ids:
+        for i in cluster_ids:
             local_file.loc[local_file[rec_id]==i,'Match']='[]'
             local_file.loc[local_file[rec_id]==i,'Comment']=''
 
@@ -282,7 +273,7 @@ def index():
             session['select_all']=0
         elif session['select_all']==0:
             session['select_all']=1
-       
+
     if request.form.get('highlight_differences') == 'highlight_differences':
         if session['highlight_differences']==1:
             session['highlight_differences']=0
@@ -300,30 +291,24 @@ def index():
     #possible copy set warning place
     display_cols_list=[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]
     df_display=data_f[display_cols_list].copy()
-    
     #extract a list of columns that are highlighted.
     #this is so that match, comment ect columns are not impacted by highlighter.
     highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
     df_display[highlight_cols] = df_display[highlight_cols].astype(str)
     highlight_cols.remove(rec_id)
-    
 
       
       ################HIGHLIGHTER###############
    
                   
-    hf.highlighter_func(highlight_cols, df_display)                
+    hf.highlighter_func(highlight_cols, df_display)             
     columns = df_display.columns
-    data = df_display.values       
-            
-              
-                    
+    data = df_display.values
 
-      
       #############OTHER THINGS TO DISPLAY#######
       
 
-    #get number of clusters and message to display. 
+    #get number of clusters and message to display.
     num_clusters=str(local_file.Sequential_Cluster_Id.nunique())
     display_message=config['message_for_matchers']['message_to_display']
     id_col_index=df_display.columns.get_loc(rec_id)
@@ -331,7 +316,7 @@ def index():
     session['working_file']=local_file.to_json()
     match_col_index=df_display.columns.get_loc('Match')
         
-    #check if cluster done 
+    #check if cluster done
     cur_cluster_done= hf.check_cluster_done(local_file)
     print(f'ccd={cur_cluster_done}')
     #set continuation message
@@ -342,7 +327,7 @@ def index():
     elif (not not_last_record) and (cur_cluster_done==1):
         done_message='Matching Finished- Press save and close the application'
     
-
+    
     column_width = len(columns)+1
     button_left = int(column_width/2)
     button_right = button_left + 2*(column_width / 2 - int(column_width / 2))
@@ -352,7 +337,7 @@ def index():
                             data = data,
                             columns=columns, cluster_number=str(int(session['index']+1)),\
                             button_left = button_left, button_right = button_right,\
-                            num_clusters=num_clusters, display_message=display_message, \
+                            num_clusters=num_clusters, display_message=display_message,\
                             done_message=done_message, id_col_index=id_col_index,\
                             select_all=session['select_all'],\
                             highlight_differences=session['highlight_differences'],\
@@ -368,7 +353,7 @@ def about():
 
 ########################
 
-if __name__=='__main__':  
+if __name__=='__main__':
     
     
     def save_thread(local_in_prog_path,hdfs_in_prog_path,\
@@ -384,16 +369,15 @@ if __name__=='__main__':
             print(f'{local_in_prog_path} deleted')
         else:
             print(f'{local_in_prog_path} NOT deleted')
-            
+
         if os.path.exists(local_filepath_done): 
             os.remove(local_filepath_done)
             print(f'{local_filepath_done} deleted')
         else:
             print(f'{local_filepath_done} NOT deleted')
-        
-        
-              
-    
+
+
+
         if hf.check_matching_done(local_file):
             local_file.to_parquet(local_filepath_done)
             hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
@@ -401,7 +385,6 @@ if __name__=='__main__':
         else:
             local_file.to_parquet(local_in_prog_path)
             hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
-            
         print('Saving Complete')
              
     def run_app():
