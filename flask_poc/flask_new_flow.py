@@ -3,6 +3,8 @@
 This is the main script to run the application.
 
 """
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
+
 from multiprocessing import Process
 from datetime import datetime
 import os
@@ -16,18 +18,8 @@ from flask_session import Session
 import helper_functions as hf
 import pandas as pd
 from markupsafe import Markup
-os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
-
-###some testing
-
-
 
 start_time=datetime.now()
-
-app=Flask(__name__)
-logging.getLogger('werkzeug').disabled=True
-
-
 
 config = configparser.ConfigParser()
 config.read('config_flow.ini')
@@ -35,8 +27,6 @@ rec_id=config['id_variables']['record_id']
 clust_id=config['id_variables']['cluster_id']
 user = os.environ['HADOOP_USER_NAME']
 
-
-#this clears the temporary folder
 folder = f"{config['filespaces']['local_space']}"
 for filename in os.listdir(folder):
     file_path = os.path.join(folder, filename)
@@ -47,19 +37,14 @@ for filename in os.listdir(folder):
             shutil.rmtree(file_path)
     except Exception as e:
         print('Failed to delete %s. Reason: %s' % (file_path, e))
+######################
 
-
-#######################
-
-
-
-
-app= Flask(__name__)
-#may need to be something more secretive/encryptable! 
-#app.config['SECRET_KEY']='abcd'
-#app.config['SESSION_TYPE']='filesystem'
+app=Flask(__name__)
+app.config['SECRET_KEY']='abcd'
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+logging.getLogger('werkzeug').disabled=True
+
 Session(app)
 
 @app.route('/', methods=['GET','POST'])
@@ -75,8 +60,6 @@ def welcome_page():
         if i!= 'font_choice':
             session.pop(i)
     return render_template("welcome_page.html", font_choice = session['font_choice'])
-
-
 @app.route('/new_session', methods=['GET','POST'])
 def new_session():
     """
@@ -107,8 +90,6 @@ def new_session():
                                               version=version,
                                               config_status=config_status, std_out=std_out2,
                                               font_choice = session['font_choice'])
-
-
 @app.route('/cluster_version', methods=['GET','POST'])
 def index():
     """
@@ -319,40 +300,24 @@ def index():
     #possible copy set warning place
     display_cols_list=[config['display_columns'][i] for i in config['display_columns']]+["Match","Comment"]
     df_display=data_f[display_cols_list].copy()
-    #print(df_display)
+    
+    #extract a list of columns that are highlighted.
+    #this is so that match, comment ect columns are not impacted by highlighter.
     highlight_cols=[config['display_columns'][i] for i in config['display_columns']]
-    #possiple copy set warning place
     df_display[highlight_cols] = df_display[highlight_cols].astype(str)
     highlight_cols.remove(rec_id)
     
 
       
       ################HIGHLIGHTER###############
-    
-
-    if session['highlight_differences']==1: 
-
-        for column in highlight_cols:
-            for i in df_display.index.values[1:]:
-                output = []
-                element = df_display.loc[i,column]
-                for count, letter in enumerate(element):
-                    if count<= len(df_display.loc[df_display.index.values[0],column])-1:
-                        if letter != df_display.loc[df_display.index.values[0],column][count] :
-                            output.append("<mark>"+ letter + "</mark>")
-                        else:  
-                            output.append(letter)
-                    #except:
-                    else:
-                        output.append("<mark>"+ letter + "</mark>")
-
-                    data_point = ''.join(output)
-
-                df_display.loc[i,column] = Markup(data_point)
-
-      
+   
+                  
+    hf.highlighter_func(highlight_cols, df_display)                
     columns = df_display.columns
-    data = df_display.values
+    data = df_display.values       
+            
+              
+                    
 
       
       #############OTHER THINGS TO DISPLAY#######
@@ -368,12 +333,13 @@ def index():
         
     #check if cluster done 
     cur_cluster_done= hf.check_cluster_done(local_file)
-
+    print(f'ccd={cur_cluster_done}')
     #set continuation message
     not_last_record=local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1
-    if (not_last_record is True) or cur_cluster_done is False:
+    print(f'nlr={not_last_record}')
+    if (not_last_record) or (cur_cluster_done==0):
         done_message='Keep Matching'
-    elif (not_last_record is False) and cur_cluster_done is True:
+    elif (not not_last_record) and (cur_cluster_done==1):
         done_message='Matching Finished- Press save and close the application'
     
 
@@ -392,25 +358,16 @@ def index():
                             highlight_differences=session['highlight_differences'],\
                             font_choice = session['font_choice'],\
                             match_error=match_error, match_col_index=match_col_index)
-
-    
-    
-
-    
-    
-
 @app.route('/about_page', methods=['GET','POST'])
 def about():
     """
     This page gives info and guidance about the app
     """
     return render_template("about_page.html")
-  
+########################
 
+########################
 
-
-#########################
-#########################
 if __name__=='__main__':  
     
     
@@ -472,9 +429,3 @@ if __name__=='__main__':
         n=(nowtime-start_time).total_seconds()
     ra.terminate()
     print('Session has timed out. Please re-start your session \n and re-run the script to continue')
-
-
-
-
-
-    

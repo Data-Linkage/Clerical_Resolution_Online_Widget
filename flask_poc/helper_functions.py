@@ -4,6 +4,7 @@ import os
 import subprocess
 import configparser
 from flask import  session
+from markupsafe import Markup
 user = os.environ['HADOOP_USER_NAME']
 config = configparser.ConfigParser()
 config.read('config_flow.ini')
@@ -223,3 +224,27 @@ def check_cluster_done(dataframe):
         return 1 
     else: 
         return 0
+      
+def highlighter_func(highlight_cols, df_display): 
+    """X"""
+    if not session['highlight_differences']==1: 
+        print('highlihter not on')
+        return
+    for column in highlight_cols: 
+        for i in df_display.index.values[1:]:
+            output=[]
+            element=df_display.loc[i,column]
+            for count, letter in enumerate(element):
+                #check if element has something to compare to
+                if not count<= len(df_display.loc[df_display.index.values[0],column])-1:
+                    output.append("<mark>"+ letter + "</mark>")
+                    break
+
+                if not letter != df_display.loc[df_display.index.values[0],column][count]:
+                    output.append(letter)
+                else:
+                    output.append("<mark>"+ letter + "</mark>")
+                data_point = ''.join(output)
+
+            df_display.loc[i,column] = Markup(data_point)
+
