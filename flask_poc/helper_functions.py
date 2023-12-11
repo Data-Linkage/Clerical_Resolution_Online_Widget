@@ -15,6 +15,7 @@ clust_id=config['id_variables']['cluster_id']
 #ile=spark.sql(f"SELECT * FROM {config['filepath']['file']}")
 user = os.environ['HADOOP_USER_NAME']
 import pandas as pd
+import shutil
 
 
 
@@ -292,9 +293,12 @@ def new_file_actions():
     #create json version of the local file (a flask hack)
     session['working_file']=local_file.to_json()
 
-    #if there are not already; create a match column and sequential_id column
+    #if there are not already; create the following columns: Match, 
+    #Comment, Sequential_Cluster_Id, Sequential_Record_Id 
+    
     if 'Match' not in local_file.columns:
         local_file['Match']='[]'
+        
     if 'Sequential_Cluster_Id' not in local_file.columns:
         local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
         local_file=local_file.sort_values(by=['Sequential_Cluster_Id'])
@@ -306,10 +310,6 @@ def new_file_actions():
         local_file['Sequential_Record_Id'] = pd.factorize(local_file[rec_id])[0]
         local_file=local_file.sort_values(by=['Sequential_Record_Id'])
 
-    if 'Sequential_Cluster_Id' not in local_file.columns:
-        local_file['Sequential_Cluster_Id'] = pd.factorize(local_file[clust_id])[0]
-        local_file=local_file.sort_values('Sequential_Cluster_Id').sort_values(by=['Sequential_Cluster_Id'])
-
 
 
     #get the local filepath in_prog and done paths rename locally to in_prog_path
@@ -320,6 +320,7 @@ def new_file_actions():
     #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
     hdfs_in_prog_path, hdfs_filepath_done=get_save_paths(session['full_path'],\
                                                             session['full_path'].split('/'))
+    #return filepaths
     return local_file, local_in_prog_path, local_filepath_done, hdfs_in_prog_path, hdfs_filepath_done
         
 def reload_page():
@@ -338,8 +339,9 @@ def reload_page():
              hdfs_filepath_done(string)
              
     """
+    #load in pd dataframe
     local_file=pd.read_json(session['working_file']).sort_values(by=['Sequential_Record_Id'])
-    #set temp loaction
+
     temp_local_path=f"{config['filespaces']['local_space']+session['filename']}"
 
     #get the local filepath in_prog and done paths rename locally to in_prog_path
@@ -349,13 +351,20 @@ def reload_page():
     #get the hdfs filepath in_prog and done paths and rename in hdfs to in_prog_path
     hdfs_in_prog_path, hdfs_filepath_done=get_save_paths(session['full_path'],\
                                                             session['full_path'].split('/'))
-
+    #return filepaths
     return local_file,local_in_prog_path, local_filepath_done, hdfs_in_prog_path, hdfs_filepath_done
   
   
 def set_session_variables(local_file):
     """
     A function to set the session variables required. 
+    Index (main iterable to control flow of the application, based on cluster id)
+    Select all toggle (initially set to off)
+    Highlighter toggle (initially set to off)
+    
+    Parameters: None
+    
+    Returns: None
     """
     if 'index' not in session:
         session['index']=int(local_file['Sequential_Cluster_Id'][(local_file.Match.values == '[]').argmax()])
@@ -370,18 +379,31 @@ def set_session_variables(local_file):
 
 def make_match(local_file,match_error): 
     """
-    X
+    A function to declare a a group of records as a match. This gets selected records, 
+    from checkboxes, and appends, 'No match for record ID' to the match column. 
+    A comment is also added.
+    
+    Parameters: local file (dataframe)
+                match_error (String)
+                
+    Returns:    match_error (String)
     
     """
+    #get record(s) selected
     cluster = request.form.getlist("cluster")
     for i in cluster:
+      
+        #if only 1 selected, display on-screen messgae
         if len(cluster)<=1:
             match_error='you have only selected one record'
+            
+        #if more than 1 selected; perform match and append comment
         elif len(cluster)>=2:
             local_file.loc[local_file[rec_id]==i,'Match']=str(cluster)
             local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
             match_error=''
-    #move on to next cluster if not at end of file
+            
+            #move on to next cluster if not at end of file
             if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
                 advance_cluster(local_file)
     return match_error
@@ -390,8 +412,19 @@ def make_match(local_file,match_error):
 
 
 def make_non_match(local_file):
-    """X"""
+    """
+    A function to declare a record as non-match. This gets selected records, 
+    from checkboxes, and appends, 'No match for record ID' to the match column. 
+    A comment is also added. 
+    
+    Parameters: None
+    
+    Returns: None
+    """
+    #get records selected
     cluster = request.form.getlist("cluster")
+    
+    #add result to match column
     for i in cluster:
         local_file.loc[local_file[rec_id]==i,'Match']=f"['No Match In Cluster For {i}']"
         local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
@@ -403,19 +436,33 @@ def make_non_match(local_file):
 
 
 
-
-
 def clear_cluster(local_file):
-    """X"""
+    """
+    A function to clear the comments and matche results in a given cluster
+    
+    Parameters: local_file (dataframe)
+    
+    Returns: None
+    """
+    
+    #get lisy of ids's in cluster
     cluster_ids=list(local_file.loc[local_file['Sequential_Cluster_Id']==session['index']][rec_id].values)
+    
+    #reset Match and Comment columns to their respective default. 
     for i in cluster_ids:
         local_file.loc[local_file[rec_id]==i,'Match']='[]'
         local_file.loc[local_file[rec_id]==i,'Comment']=''
 
         
-def set_continuation_message(local_file):
+def set_continuation_message(local_file, cur_cluster_done):
     """
-    X
+    A function to change the message displayed on screen, depending if 
+    all the matching decisions have been made in a given cluster. 
+    
+    Parameters: local_file (pandas dataframe)
+                cur_cluster_done (Boolean)
+                
+    Returns:    done_message (String)
     """
     not_last_record=local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1
     if (not_last_record) or (cur_cluster_done==0):
@@ -425,7 +472,12 @@ def set_continuation_message(local_file):
     return done_message
   
 def reset_toggles():
-    """X
+    """
+    A function to set the highlighter and select all toggles. 
+
+    Parameters: None
+    
+    Returns: None
     """
     if request.form.get('selectall')=="selectall":
         if session['select_all']==1:
@@ -442,7 +494,13 @@ def reset_toggles():
             
 def set_position_vars(columns):
     """
-    X
+    A function to set some variables, that specific position on the page, 
+    relative to the number of columns in the data
+    
+    Parameters: columns (list)
+    
+    Returns: button_left (Int), button_right (Int)
+    
     """
     column_width = len(columns)+1
     button_left = int(column_width/2)
@@ -450,13 +508,31 @@ def set_position_vars(columns):
     return button_left, button_right
   
 def backup_save(save_thread, local_in_prog_path,hdfs_in_prog_path,local_file, local_filepath_done,hdfs_filepath_done):
+    """
+    A function to save progress, at a given backup point.
+    
+    Parameters: None
+    
+    Returns: None
+    
+    """
     if session['index'] % int(config['custom_setting']['backup_save'])==0:
+      
+          #set s_thread 
           s_thread=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path,\
                                               local_file, local_filepath_done,\
                                               hdfs_filepath_done))
+          #intiate save process
           s_thread.start()
           
 def clear_session():
+    """
+    A function to remove all the session variables, except for font choice.
+    
+    Parameters: None
+    
+    Returns: None
+    """
     session_keys=list(session)
     for i in session_keys:
         if i!= 'font_choice':

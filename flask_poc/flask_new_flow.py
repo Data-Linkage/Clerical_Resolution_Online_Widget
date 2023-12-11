@@ -206,7 +206,7 @@ def index():
     cur_cluster_done= hf.check_cluster_done(local_file)
     
     #set continuation message
-    done_message=hf.set_continuation_message(local_file)
+    done_message=hf.set_continuation_message(local_file, cur_cluster_done)
     
     #some variables for html
     button_left, button_right = hf.set_position_vars(columns)
