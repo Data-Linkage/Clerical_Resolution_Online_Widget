@@ -159,7 +159,8 @@ def index():
 
     #if save pressed...save file to hdfs    
     if request.form.get('save')=="save":
-        s_thread=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path, local_file, local_filepath_done, hdfs_filepath_done))
+        s_thread=Process(target=save_thread, args= (local_in_prog_path,hdfs_in_prog_path,\
+                                                    local_file, local_filepath_done, hdfs_filepath_done))
         s_thread.start()
 
     
@@ -235,34 +236,34 @@ if __name__=='__main__':
   
     def save_thread(local_in_prog_path,hdfs_in_prog_path,\
                   local_file, local_filepath_done, hdfs_filepath_done):
-      """
-      A fumctiom to save to hdfs
-      """
-      hf.remove_hadoop(session['full_path'])
-      hf.remove_hadoop(hdfs_in_prog_path)
-      hf.remove_hadoop(hdfs_filepath_done)
-      if os.path.exists(local_in_prog_path):
-          os.remove(local_in_prog_path)
-          print(f'{local_in_prog_path} deleted')
-      else:
-          print(f'{local_in_prog_path} NOT deleted')
+        """
+        A fumctiom to save to hdfs
+        """
+        hf.remove_hadoop(session['full_path'])
+        hf.remove_hadoop(hdfs_in_prog_path)
+        hf.remove_hadoop(hdfs_filepath_done)
+        if os.path.exists(local_in_prog_path):
+            os.remove(local_in_prog_path)
+            print(f'{local_in_prog_path} deleted')
+        else:
+            print(f'{local_in_prog_path} NOT deleted')
 
-      if os.path.exists(local_filepath_done): 
-          os.remove(local_filepath_done)
-          print(f'{local_filepath_done} deleted')
-      else:
-          print(f'{local_filepath_done} NOT deleted')
+        if os.path.exists(local_filepath_done): 
+            os.remove(local_filepath_done)
+            print(f'{local_filepath_done} deleted')
+        else:
+            print(f'{local_filepath_done} NOT deleted')
 
 
 
-      if hf.check_matching_done(local_file):
-          local_file.to_parquet(local_filepath_done)
-          hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
+        if hf.check_matching_done(local_file):
+            local_file.to_parquet(local_filepath_done)
+            hf.save_hadoop(local_filepath_done,hdfs_filepath_done)
 
-      else:
-          local_file.to_parquet(local_in_prog_path)
-          hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
-      print('Saving Complete')    
+        else:
+            local_file.to_parquet(local_in_prog_path)
+            hf.save_hadoop(local_in_prog_path,hdfs_in_prog_path)
+        print('Saving Complete')    
 
     
     
