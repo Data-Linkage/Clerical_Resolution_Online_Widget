@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <h1 style="font-family:arial;"> Help and Guidance</h1>
-  <br>
+<p style="font-family:arial;" > To return to the application use the browser back button </p>
 
 <h2 style="font-family:arial;">About</h2>
   
-<p style="font-family:arial;"> Welcome to CROW, the Clerical Resolution Online Widget, an open-source project designed to help data linkers with their clerical matching needs once they have linked data together! 
+<p style="font-family:arial;"> Welcome to CROW, the Clerical Resolution Online Widget, an open-source project designed to help data linkers with their clerical matching needs once they have linked data together!
 <br>
   <br>
 The CROW reads record data from parquet files in HDFS/Hue, presents it in an easy to read and compare format and has tools that can help the clerical matcher with decisions. 
@@ -24,6 +23,45 @@ The aims of the CROW are to:
 </ul>  
 </p>  
 <br>
+
+<h2 style="font-family:arial;"> Functionality of the buttons</h2>
+<p style="font-family:arial;" > 
+  <b>Match and Non-Match:</b> Begin matching by first reviewing the presented record cluster by clicking either the ‘Match’ or ‘Non-Match’ buttons. When you want to match records, select them using the square boxes in the first column of the table. If you click Match or Non-Match an ID will be populated in the match column. When you decide, it will advance you to the next cluster. You can view the ID on the clusters you’ve just matched by pressing back. This is especially useful when reviewing clusters to help clearly see which records are still left to match/non-match.  
+  <br>
+  <br>
+  <b>Highlight:</b> Toggle ‘Highlight’ between record pairs/clusters using the button. This will highlight differences between the first row and subsequent dataset rows and text will be highlighted where there is a difference. <i>Note:</i> This highlights text characters in place. To turn this off, just press the button again.  
+  <br>
+  <br>
+  <b>Select all:</b>  Toggle ‘Select All’ to select all records. To unselect all, just press the button again. 
+  <br>
+  <br>
+  <b>Comment Box:</b> In the Comment box, you can add information that you feel is useful for that record pair or cluster. This comment will appear in a row adjacent to your records once you are finished matching/non-matching a selection of records.  
+  <br> 
+  <br> 
+  <b>Clear Cluster:</b> If you press the ‘Clear Cluster’ button it will clear any decisions in the cluster (i.e., results in the match column.). So, it will take you back to the start of a given cluster. It will also clear the comments.  
+  <br>
+  <br> 
+  <b>Save:</b> Save your current matches using the ‘Save’ button. At any time, you can click ‘Save’ and your progress will be saved. You can then come back to that file later and the filename will be marked as ‘_[your_userID]_inProgress.csv’. <b>Please ensure you save before exiting.</b>
+  <br>
+  <br> 
+  <b>Changing font size: </b> To adapt font size; use your browsers usual zoom functionality (or Ctrl z+/Ctrl z-)
+
+</p>
+<h2 style="font-family:arial;"> Errors and Warnings </h2>
+<p style="font-family:arial;" > 
+If you encounter an error while running the application; have a check in the CDSW kernel to see if there are any useful error messages; that may tell you what the issues is. 
+<br>
+Possible error messages: 
+<ul style="font-family:arial;">
+  <li><b>'Session has timed out'</b> Please re-start your session and re-run the script to continue’. You have been matching for more than an hour. Remember to take breaks! Re-start the session and re-run the script to resume matching. </li>
+  <li><b>‘Filesize error; file is bigger than 0.5GB’</b>The file you are trying to load in is too big. Contact your clerical co-ordinator for guidance.  </li>
+  <li><b>No cluster id column in data; contact your project leader for guidance'</b> or<b> ‘'record ids are not unique; contact your project leader for guidance '</b> or <b>'no cluster id column in data; contact your project leader for guidance'</b>  These all relate to issues with the input data. Please contact your clerical co-ordinator for guidance.  </li>
+</ul>  
+
+  
+</p>
+
+
 <h2 style="font-family:arial;">Github and Gitlab</h2>
 <p style="font-family:arial;"> CROW exists in the Data Linkage Repository in Gitlab (DAP) and Github. Please visit our Github page, please note you will need to copy this link or manually type into a browser to access: <b>https://github.com/Data-Linkage/Clerical_Resolution_Online_Widget</b>  
 </p>

@@ -161,7 +161,7 @@ def save_hadoop(local_path,hdfs_path):
 
 
 
-####NOTE remove hadoop function is broken!
+
 def remove_hadoop(hdfs_path):
 
     file_test = subprocess.run(f"hdfs dfs -test -f {hdfs_path}", shell=True, stdout=subprocess.PIPE, check=False)
@@ -203,6 +203,9 @@ def validate_columns(df):
 def validate_input_data(filepath):
     """
     Checks that the size of the file is smaller than 0.5GB and raises an error if not
+    
+    Parameters: None
+    Returns: None
     """
     if os.path.getsize(filepath) > 536871:
         raise Exception('Filesize error; file is bigger than 0.5GB')
@@ -210,7 +213,10 @@ def validate_input_data(filepath):
 
 def check_cluster_done(dataframe):
     """
-    XXX
+    A function to check if every record in a cluster has a decision against it.
+    
+    Parameters: dataframe
+    Returns: Boolean (True if every record in clustere has a decision against it, False otherwise)
 
     """
     num_in_cluster=len(dataframe.loc[dataframe['Sequential_Cluster_Id']==session['index']])
@@ -226,16 +232,29 @@ def check_cluster_done(dataframe):
         return 0
 
 def highlighter_func(highlight_cols, df_display):
-    """X"""
+    """
+    A function to add the highlighter when a string has in place differences as compared to
+    the first row in a given cluster. 
+    
+    Parameters: hightlight_cols - columns to which the highlighter applies (list)
+                df_display - dataframe to which highlighter applies (Pandas Dataframe)
+    Returns:    None
+                
+    """
+
     if not session['highlight_differences']==1:
-        print('highlihter not on')
+        #highligher is not on exit function
         return
+    
     for column in highlight_cols:
         for i in df_display.index.values[1:]:
+            #create container to append letters to
             output=[]
+            #identify characters to compare
             element=df_display.loc[i,column]
             for count, letter in enumerate(element):
                 #check if element has something to compare to
+                #make comparison and append <mark> where there is an inplace difference
                 if not count<= len(df_display.loc[df_display.index.values[0],column])-1:
                     output.append("<mark>"+ letter + "</mark>")
                     break
@@ -244,8 +263,9 @@ def highlighter_func(highlight_cols, df_display):
                     output.append(letter)
                 else:
                     output.append("<mark>"+ letter + "</mark>")
+                #turn output to string
                 data_point = ''.join(output)
-
+            #markup string and assign to display_df
             df_display.loc[i,column] = Markup(data_point)
 
 def new_file_actions():
