@@ -4,7 +4,7 @@ This is the main script to run the application.
 
 """
 import os
-os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/flask_poc')
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget1/flask_poc')
 from multiprocessing import Process
 from datetime import datetime
 import shutil
@@ -17,7 +17,6 @@ from flask_session import Session
 import pandas as pd
 import helper_functions as hf
 
-
 start_time=datetime.now()
 
 config = configparser.ConfigParser()
@@ -26,9 +25,22 @@ rec_id=config['id_variables']['record_id']
 clust_id=config['id_variables']['cluster_id']
 user = os.environ['HADOOP_USER_NAME']
 
-folder = f"{config['filespaces']['local_space']}"
-for filename in os.listdir(folder):
-    file_path = os.path.join(folder, filename)
+#Setting up some files if not already done.
+#creating a tmp file 
+temp_folder=f"{config['filespaces']['local_space']}"
+  
+if not os.path.exists(temp_folder):
+    os.mkdir(temp_folder)
+
+#creating a user specific temp file within tmp. 
+user_temp_folder  = f"{config['filespaces']['local_space']}{user}"
+
+if not os.path.exists(user_temp_folder):
+    os.mkdir(user_temp_folder)
+
+#clear temp/user folder
+for filename in os.listdir(user_temp_folder):
+    file_path = os.path.join(user_temp_folder, filename)
     try:
         if os.path.isfile(file_path) or os.path.islink(file_path):
             os.unlink(file_path)
@@ -39,9 +51,12 @@ for filename in os.listdir(folder):
 ######################
 
 app=Flask(__name__)
-app.config['SECRET_KEY']='abcd'
+#generate a random string for key.
+key2=str(os.urandom(24))
+app.config['SECRET_KEY']=key2
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = f"{config['filespaces']['local_space']}{user}"
 logging.getLogger('werkzeug').disabled=True
 
 Session(app)
@@ -51,7 +66,6 @@ def welcome_page():
     """
     This page acts as a menu for the user
     """
-    #session.clear()
     session['font_choice'] = f"font-family:{request.form.get('font_choice')}"
     session_keys=list(session)
     for i in session_keys:
@@ -288,8 +302,21 @@ if __name__=='__main__':
     
     nowtime=datetime.now()
     n=(nowtime-start_time).total_seconds()
-    while n < 3600:
+    while n < 30:
         nowtime=datetime.now()
         n=(nowtime-start_time).total_seconds()
+    
     ra.terminate()
+    
+    #clear the users temp folder.
+    for filename in os.listdir(user_temp_folder):
+        file_path = os.path.join(user_temp_folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except FileNotFoundError:
+            print(f'temp folder does not exist or is emply')
+    
     print('Session has timed out. Please re-start your session \n and re-run the script to continue')
