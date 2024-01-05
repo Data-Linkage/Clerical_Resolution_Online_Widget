@@ -302,7 +302,7 @@ if __name__=='__main__':
     
     nowtime=datetime.now()
     n=(nowtime-start_time).total_seconds()
-    while n < 30:
+    while n < 3600:
         nowtime=datetime.now()
         n=(nowtime-start_time).total_seconds()
     
