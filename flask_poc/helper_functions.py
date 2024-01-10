@@ -257,9 +257,8 @@ def highlighter_func(highlight_cols, df_display):
                 #make comparison and append <mark> where there is an inplace difference
                 if not count<= len(df_display.loc[df_display.index.values[0],column])-1:
                     output.append("<mark>"+ letter + "</mark>")
-                    break
 
-                if not letter != df_display.loc[df_display.index.values[0],column][count]:
+                elif not letter != df_display.loc[df_display.index.values[0],column][count]:
                     output.append(letter)
                 else:
                     output.append("<mark>"+ letter + "</mark>")
