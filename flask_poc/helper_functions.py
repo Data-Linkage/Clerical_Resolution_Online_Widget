@@ -114,7 +114,7 @@ def get_save_paths(origin_file_path,origin_file_path_fl):
             in_prog_path="/".join(origin_file_path_fl[:-1] +[in_prog_name])
 
             # create the filepath done
-            end_file_name=in_prog_path[:-11]+'_DONE'
+            end_file_name=in_prog_name[:-11]+'_DONE'
             filepath_done="/".join(origin_file_path_fl[:-1] +[end_file_name ])
 
 
