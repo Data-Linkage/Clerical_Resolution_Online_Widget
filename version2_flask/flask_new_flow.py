@@ -4,7 +4,7 @@ This is the main script to run the application.
 
 """
 import os
-os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget1/flask_poc')
+os.chdir('/home/cdsw/Clerical_Resolution_Online_Widget/version2_flask')
 from multiprocessing import Process
 from datetime import datetime
 import shutil
