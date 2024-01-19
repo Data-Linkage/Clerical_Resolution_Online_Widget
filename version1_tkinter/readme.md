@@ -1,4 +1,4 @@
-# Welcome to the Flask version of CROW.
+# Welcome to the Tkinter version of CROW.
 
 Here you will find everything you need to get started. 
 
