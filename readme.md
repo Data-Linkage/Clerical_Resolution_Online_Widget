@@ -14,8 +14,8 @@ The aims of the CROW are to:
 ## Installation and Use
 The CROW can be from CDSW inside and outside of DAP. CROW exists in the Data Linkage Repository in Gitlab (DAP) and Github. 
 
-## What is new?  
-The new version of CROW has been developed in Flask. The ‘old’ version of CROW was initially written as a python script using the package Tkinter.   
+## What is new?
+The new version of CROW has been developed in Flask. The ‘old’ version of CROW was initially written as a python script using the package Tkinter. For existing users the, previous version of CROW is still availiable; in the version1_tkinter folder. The new Flask version is availiable in teh version2_flask folder.    
 
 We have moved to Flask from Tkinter because of its design and functionality limitations - it only runs on Desktop using Anaconda or Spyder and only imports CSV files. Whereas Flask can use HTML functionality which has made it more accessible.   
 
@@ -24,7 +24,7 @@ The tool now has a ‘select all’ feature, a scroll bar, it can run in CDSW an
 Previously in the old version of CROW, users were able to launch two different versions of the tool – Pairwise and cluster - depending on whether they were working with pairs of records or clusters. The new version of CROW has been consolidated into a single tool. 
 
 ## Documentation
-The most up to date documentation can be found in the [instructions folder](http://gitlab-01-01/Data_Linkage/Clerical_Resolution_Online_Widget/-/tree/master/Instructions). Here you will be able to find instructions for setting the CROW up for your project and instructions you can give to your clerical matchers on how to run the CROW once it is set up. 
+The most up to date documentation can be found in the instructions folders for each version. Here you will be able to find instructions for setting the CROW up for your project and instructions you can give to your clerical matchers on how to run the CROW once it is set up. 
 
 ## Help and feedback   
 If you have any feedback, questions, require more information, need help or for anything else please contact the CROW team directly: 
