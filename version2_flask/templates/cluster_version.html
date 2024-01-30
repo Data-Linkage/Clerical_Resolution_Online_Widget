@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<!--  <img src="{{url_for('static', filename='logo.PNG')}}"align='right'width=240 height=100>-->
+  <head>
+    <link rel="stylesheet" href="{{url_for('static', filename='cluster_version.css')}}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CROW clerical tool</title>
+  </head>
+</html>
+<body>
+<style>
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+}
+
+li a {
+  display: block;
+  color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+li a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+li a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+</style>
+<ul>
+  <li><a href="/about_page">CROW Help</a></li>
+</ul>
+
+
+    <main>
+      
+      <div class = 'centered'>
+        <div class = 'box'>
+          <box style = {{font_choice}}>{{display_message}}</box>
+        </div>  
+      </div>
+        <h2 style = {{font_choice}}>Cluster count {{cluster_number}}/{{num_clusters}}  :{{done_message}}</h2>
+        <h2 style = {{font_choice}}>{{match_error}}</h2>
+        <form action='#' method="POST" class= centered>  
+          <table width = '90%' style = 'table-layout: fixed; border:none'>
+            <tr>
+              <td style = 'border:none'>
+                <table class = 'table' style = {{font_choice}} width = '100%' >
+                  <tr class = 'button tr1'> 
+                    <td class = "button submit-toolbar-left" colspan = '{{button_left}}' align = 'left'>
+                      <input type="submit" id = 'selectall' name="selectall" value="selectall" style="float:left;">
+                      <label style = {{font_choice}} for="selectall">Select All</label> 
+                      <input type="submit"  id="highlight_differences" name = 'highlight_differences' value= "highlight_differences" style="float:left;">
+                      <label style = {{font_choice}} for="highlight_differences">Highlight </label>                  
+                    </td>
+                    <td class = "button submit-toolbar-left" colspan = '{{button_right}}' align = 'right'>
+                      <input type="submit" id = 'back' name="back" value="back">
+                      <label style = {{font_choice}} for="back">Back</label> 
+                      <input type="submit" id = 'save' name="save" value="save">
+                        <div class="tooltip">
+                          <label style = {{font_choice}} for="save">Save</label>
+                          <span class="tooltiptext">Avoid pressing the save button in  quick succession, or immediately after loading the application </span>
+                        </div>
+                      <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster"> 
+                      <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style = 'border:none'>
+                <div style="overflow-x:auto;overflow-y:scroll;max-height: 400px">  
+
+                  <center><table class = 'table' style = {{font_choice}} cellspacing = '0' table-bordered >
+                    <tr class = 'table__header'>
+
+                    <th class = 'table__cell'></th>
+
+                    {% for i in columns %} 
+
+                    <th class = 'table__cell'>{{i}}</th> 
+                    {% endfor %} 
+                       
+                    </tr>
+
+                    {% for row in data %}
+
+                    <tr class = 'table__row'> 
+
+                    <td>
+                      <input type="checkbox" name="cluster" value= {{row[id_col_index]}}  {{'checked' if select_all else 'unchecked'}} 
+                      <label class="form-check-label"  for="inlineCheckbox1"> &nbsp;</label>
+                    </td>  
+                      {% for cell in row %}
+
+
+                        <td class = 'table__cell'>{{cell}} </td>
+
+                      {% endfor %}
+
+
+                    {% endfor %}
+                    </tr>    
+                  </table></center>
+                </div>                             
+              </td>
+            </tr>
+    </table>
+      <br>
+<!--        <form action='#' method='POST' class = 'centered'>   -->
+          <div class="centered">
+              </label>
+            <div class="tooltip">
+          <label style = {{font_choice}} for="Comment">Comment:</label>
+          <input style = {{font_choice}} type="text" id="Comment" name="Comment" placeholder="">
+          <span class="tooltiptext">Comment only gets added to data afer match or non-match has been pressed</span>
+          </div>
+          </div>   
+        <br>
+      <div class = 'centered'> 
+        <div class = "submit-toolbar">
+          <input type="submit" id="Match" name="Match" value="Match">
+          <label style = {{font_choice}};background-color:#C1FFC1; for="Match">Match</label>
+          <input type="submit" id="Non-Match" name="Non-Match" value="Non-Match">
+          <label style = {{font_choice}};background-color:#ffc5ad; for="Non-Match">Non-Match</label>
+      </div>
+    </div>
+      </form>           
+    </main>
+  </body>
