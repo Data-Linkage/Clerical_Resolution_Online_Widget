@@ -253,20 +253,19 @@ if __name__=='__main__':
         """
         A fumctiom to save to hdfs
         """
+        print('save initiated')
         hf.remove_hadoop(session['full_path'])
         hf.remove_hadoop(hdfs_in_prog_path)
         hf.remove_hadoop(hdfs_filepath_done)
         if os.path.exists(local_in_prog_path):
             os.remove(local_in_prog_path)
-            print(f'{local_in_prog_path} deleted')
         else:
-            print(f'{local_in_prog_path} NOT deleted')
+            pass
 
         if os.path.exists(local_filepath_done): 
             os.remove(local_filepath_done)
-            print(f'{local_filepath_done} deleted')
         else:
-            print(f'{local_filepath_done} NOT deleted')
+            pass
 
 
 

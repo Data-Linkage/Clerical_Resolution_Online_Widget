@@ -55,7 +55,6 @@ def check_matching_done(dataframe):
     if len(dataframe[dataframe.Match == '[]'])>0:
         return 0
     if len(dataframe[dataframe.Match == '[]'])==0:
-        print('matching_done')
         return 1
 
 
@@ -172,16 +171,14 @@ def remove_hadoop(hdfs_path):
     if file_test.returncode==0:
 
         command='-rm'
-        print('file')
         process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
         process.communicate()
     elif dir_test.returncode==0:
         command='-rmr'
-        print('directory')
         process = subprocess.Popen(["hadoop", "fs",command,hdfs_path ])
         process.communicate()
     else:
-        print(f'{hdfs_path} could not be deleted')
+        pass
         #build in some error handling
 
 

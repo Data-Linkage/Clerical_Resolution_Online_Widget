@@ -65,7 +65,10 @@ li a:hover:not(.active) {
                       <input type="submit" id = 'back' name="back" value="back">
                       <label style = {{font_choice}} for="back">Back</label> 
                       <input type="submit" id = 'save' name="save" value="save">
-                      <label style = {{font_choice}} for="save">Save</label>
+                        <div class="tooltip">
+                          <label style = {{font_choice}} for="save">Save</label>
+                          <span class="tooltiptext">Avoid pressing the save button in  quick succession, or immediately after loading the application </span>
+                        </div>
                       <input type="submit" id = 'Clear-Cluster' name="Clear-Cluster" value="Clear-Cluster"> 
                       <label style = {{font_choice}} for="Clear-Cluster">Clear-Cluster</label>
                     </td>
