@@ -250,6 +250,7 @@ def highlighter_func(highlight_cols, df_display):
         for i in df_display.index.values[1:]:
             #create container to append letters to
             output=[]
+            data_point=''
             #identify characters to compare
             element=df_display.loc[i,column]
             for count, letter in enumerate(element):
@@ -266,6 +267,9 @@ def highlighter_func(highlight_cols, df_display):
                 data_point = ''.join(output)
             #markup string and assign to display_df
             df_display.loc[i,column] = Markup(data_point)
+            
+            
+
 
 def new_file_actions():
     """
