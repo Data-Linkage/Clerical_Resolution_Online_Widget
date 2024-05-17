@@ -424,9 +424,10 @@ def make_match(local_file,match_error):
             local_file.loc[local_file[rec_id]==i,'Comment']=str(request.form.get("Comment"))
             match_error=''
 
-            #move on to next cluster if not at end of file
-            if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
-                advance_cluster(local_file)
+        #move on to next cluster if not at end of file
+    if local_file.Sequential_Cluster_Id.nunique()>int(session['index'])+1:
+        advance_cluster(local_file)
+        
     return match_error
 
 
