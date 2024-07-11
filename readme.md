@@ -31,8 +31,6 @@ The most up to date documentation can be found in the instructions folders for e
 If you have any feedback, questions, require more information, need help or for anything else please contact the CROW team directly:
 
 Linkage.Hub@ons.gov.uk
-Hannah.O’Dair@ons.gov.uk
-Ira.Ashia@ons.gov.uk
 
 ## Videos (demos)
 TBC
