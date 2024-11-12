@@ -290,7 +290,7 @@ if __name__=='__main__':
               if you cannot see it, look again in a few secounds')
 
         app.config["TEMPLATES_AUTO_RELOAD"] = True
-        app.run(host=os.getenv('CDSW_IP_ADDRESS'),port= int(os.getenv('CDSW_PUBLIC_PORT')))
+        app.run(host="127.0.0.1",port=int(os.environ['CDSW_APP_PORT'])) 
         
 
     ra=Process(target=run_app)
