@@ -39,7 +39,7 @@ def advance_cluster(dataframe):
     uni_set_decided={x for l in list_decided for x in l}
 
     num_decided=len(uni_set_decided)
-    if (num_in_cluster-num_decided)<=1:
+    if (num_in_cluster-num_decided)==0:
         for r_id in [x for x in dataframe.loc[dataframe['Sequential_Cluster_Id']==session['index']][rec_id] if x not in uni_set_decided]:
             dataframe.loc[dataframe[rec_id]==r_id,'Match']=f"['No Match In Cluster For {r_id}']"
         session['index'] = int(session['index'])+ 1

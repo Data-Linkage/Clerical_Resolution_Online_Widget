@@ -147,17 +147,17 @@ def index():
     if request.form.get('Match')=="Match":
         match_error=hf.make_match(local_file,match_error)
         #save if at a backup_save checkpoint.
-        hf.backup_save(save_thread,local_in_prog_path,hdfs_in_prog_path,\
-                                              local_file, local_filepath_done,\
-                                              hdfs_filepath_done)
+#        hf.backup_save(save_thread,local_in_prog_path,hdfs_in_prog_path,\
+#                                              local_file, local_filepath_done,\
+#                                              hdfs_filepath_done)
 
 
     elif request.form.get('Non-Match')=="Non-Match":
         hf.make_non_match(local_file)
         #save if at a backup_save checkpoint.
-        hf.backup_save(save_thread,local_in_prog_path,hdfs_in_prog_path,\
-                                              local_file, local_filepath_done,\
-                                              hdfs_filepath_done)
+#        hf.backup_save(save_thread,local_in_prog_path,hdfs_in_prog_path,\
+#                                              local_file, local_filepath_done,\
+#                                              hdfs_filepath_done)
 
  
 
@@ -301,7 +301,7 @@ if __name__=='__main__':
     
     nowtime=datetime.now()
     n=(nowtime-start_time).total_seconds()
-    while n < 3600:
+    while n < 14400:
         nowtime=datetime.now()
         n=(nowtime-start_time).total_seconds()
     

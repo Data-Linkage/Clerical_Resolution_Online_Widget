@@ -6,7 +6,7 @@ import pyspark.sql.functions
 from pyspark.sql.functions import *
 
 #!pip3 install dlh_utils --upgrade 
-!pip3 install pandas==1.1.5 
+#!pip3 install pandas==1.1.5 
 #!pip3 install markupsafe  
 #!pip3 install pyarrow 
 #!pip3 install flask 
@@ -313,6 +313,15 @@ def crow_samples1(spine, df_l, df_r, id_l, id_r, sample_size,
 
     return sample.repartition(1).write.parquet(f'{outdir}/{sample_name}')
 
+bucket = 's3a://onscdp-dev-data01-5320d6ca/user/hannah.goode'
+
+for x in ['b','c','d','e']:
+  crow_samples1(spine=df_spine, df_l=df_l, df_r=df_r, 
+              id_l='id_l', id_r='id_r',
+              sample_size=6, dedupe_df_l=True, 
+              outdir=bucket,
+              sample_name=f'crow_test_{x}') 
+  
 ###-----------------------------------------------------------------###
 
 def crow_analysis1(sample, total_clusters):
@@ -412,7 +421,7 @@ def crow_analysis1(sample, total_clusters):
       partial_match += 1
       match_type = 'partial_match'
     elif no_non_match == no_records:
-      non_match =+ 1
+      non_match += 1
       match_type = 'non_match'
     else:
       match_type = 'error'
@@ -431,3 +440,10 @@ def crow_analysis1(sample, total_clusters):
   matched_df = spark.createDataFrame(matched_df)
   
   return matched_df
+
+bucket = 's3a://onscdp-dev-data01-5320d6ca/user/hannah.goode'
+sample_c = spark.read.parquet(f'{bucket}/crow_test_c_hannah.goode_done')
+sample_c.show()
+analysis_c = crow_analysis1(sample = sample_c, 
+                            total_clusters = 6)
+analysis_c.show()
