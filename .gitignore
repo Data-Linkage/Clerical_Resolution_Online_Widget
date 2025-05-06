@@ -1,0 +1,6 @@
+# Temp directory created by CROW2.
+tmp/
+
+# Python development files/directories.
+__pycache__
+.venv
