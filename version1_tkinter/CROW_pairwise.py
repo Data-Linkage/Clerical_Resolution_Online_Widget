@@ -108,6 +108,11 @@ class ClericalApp:
         height = int(self.root.winfo_screenheight() * 0.5)
         self.root.geometry(f"{width}x{height}")
 
+        # Configure the grid layout to make sure the record frame can
+        # expand to fill the window.
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
+
         # Create the separate frames
         # 1 - Tool Frame
         self.toolFrame = ttk.LabelFrame(root, text="Tools:")
@@ -117,11 +122,11 @@ class ClericalApp:
 
         # 2 - Record Frame
         self.record_frame = ttk.LabelFrame(root, text="Current Record")
-        self.record_frame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+        self.record_frame.grid(row=1, column=0, columnspan=1, padx=10, pady=3)
 
         # 3 -Button Frame
-        self.button_frame = ttk.LabelFrame(root)
-        self.button_frame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
+        self.button_frame = ttk.Frame(root)
+        self.button_frame.grid(row=2, column=0, columnspan=1, padx=10, pady=10)
 
         # create protocol for if user presses the 'X' (top right)
         root.protocol("WM_DELETE_WINDOW", self.on_exit)
