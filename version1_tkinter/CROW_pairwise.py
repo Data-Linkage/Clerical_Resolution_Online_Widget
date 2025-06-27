@@ -1,16 +1,16 @@
 """
 Welcome to CROW, the Clerical Resolution Online Widget, an open source project
 designed to help researchers, analysts and statiticians with their clerical
-matching needs once they have linked data together. 
-This is the master CROW python script that can easily be adapted to your linkage 
-project using the Config.ini file. To make the CROW work please edit the Config 
-file, its easier to read and will save you time! 
+matching needs once they have linked data together.
+This is the master CROW python script that can easily be adapted to your linkage
+project using the Config.ini file. To make the CROW work please edit the Config
+file, its easier to read and will save you time!
 Once you have adapted the Config file and have tested it. Put this master CROW
-python script along with your adapted config file in a shared common area 
+python script along with your adapted config file in a shared common area
 so the rest of your clerical matchers can access it. DONT forget to save this
-file as read-only. And then you are done! 
-More detail on these steps can be found on the Data Integration Sharepoint, 
-including video documentation. 
+file as read-only. And then you are done!
+More detail on these steps can be found on the Data Integration Sharepoint,
+including video documentation.
 Script was orginally created on Wed May 26 2021
 Please get in contact using the below details if you have any questions:
 Craig Scott -- Craig.Scott@ons.gov.uk -- Creator and Lead Developer
@@ -18,11 +18,13 @@ Hannah O'Dair -- Hannah.O'Dair@ons.gov.uk -- Co-Lead Developer
 _________
 We would like to acknowledge and thank David Cobbledick and Andrew Sutton for reviewing this code.
 """
-import os
-import getpass
+
 import configparser
+import getpass
+import os
 import tkinter
-from tkinter import ttk, filedialog
+from tkinter import filedialog, ttk
+
 import pandas as pd
 
 ########## Intro GUI
@@ -36,7 +38,6 @@ class IntroWindow:
     """
 
     def __init__(self, root, init_dir, files_info):
-
         # Initialise the gui paramaters
         root.geometry("400x225")
         root.title("Clerical Matching")
@@ -92,9 +93,20 @@ class ClericalApp:
     """
 
     def __init__(self, root, working_file, filename_done, filename_old, config):
+        """Initialise the ClericalApp class."""
+        # Initialise some parameters.
+        self.root = root
+        self.filename_done = filename_done
+        self.filename_old = filename_old
 
-        # Create a title
+        # Set the window title.
         root.title("Clerical Matching")
+
+        # Set the window size to 90% of screen width and 50% of screen
+        # height.
+        width = int(self.root.winfo_screenwidth() * 0.9)
+        height = int(self.root.winfo_screenheight() * 0.5)
+        self.root.geometry(f"{width}x{height}")
 
         # Create the separate frames
         # 1 - Tool Frame
@@ -111,31 +123,22 @@ class ClericalApp:
         self.button_frame = ttk.LabelFrame(root)
         self.button_frame.grid(row=3, column=0, columnspan=1, padx=10, pady=3)
 
-        # initalise the file name variables
-        self.filename_done = filename_done
-
-        self.filename_old = filename_old
-
         # create protocol for if user presses the 'X' (top right)
         root.protocol("WM_DELETE_WINDOW", self.on_exit)
 
         # create a match column if one doesn't exist
         # replace any missing values (NA) with blank spaces
         if {"Match"}.issubset(working_file.columns):
-
             # convert all columns apart from Match and Comments (if specified) to string
             for col_header in working_file.columns:
-
-                if col_header in ('Match', 'Comments'):
+                if col_header in ("Match", "Comments"):
                     pass
                 else:
                     # convert to string
                     working_file[col_header] = working_file[col_header].astype(str)
                     # remove nan values
                     for i in range(len(working_file)):
-
                         if working_file[col_header][i] == "nan":
-
                             working_file.at[i, col_header] = ""
 
             working_file.fillna("", inplace=True)
@@ -150,17 +153,14 @@ class ClericalApp:
 
             # convert all columns apart from Match and Comments (if specified) to string
             for col_header in working_file.columns:
-
-                if col_header in ('Match', 'Comments'):
+                if col_header in ("Match", "Comments"):
                     pass
                 else:
                     # convert to string
                     working_file[col_header] = working_file[col_header].astype(str)
                     # remove nan values
                     for i in range(len(working_file)):
-
                         if working_file[col_header][i] == "nan":
-
                             working_file.at[i, col_header] = ""
 
             working_file.fillna("", inplace=True)
@@ -193,7 +193,7 @@ class ClericalApp:
         # Create the record_index matches
         self.counter_matches = ttk.Label(
             self.record_frame,
-            text=f"{self.record_index+1} / {self.num_records} Records",
+            text=f"{self.record_index + 1} / {self.num_records} Records",
             font="Helvetica 9",
         )
         self.counter_matches.grid(
@@ -220,7 +220,7 @@ class ClericalApp:
 
         self.counter_matches = ttk.Label(
             self.record_frame,
-            text=f"{self.record_index+1} / {self.num_records} Records",
+            text=f"{self.record_index + 1} / {self.num_records} Records",
             font="Helvetica 9",
         )
         self.counter_matches.grid(
@@ -232,7 +232,6 @@ class ClericalApp:
         )
 
         for iterator, name_of_dataset in enumerate(config.options("dataset_names")):
-
             exec(
                 f'self.{name_of_dataset} = ttk.Label(self.record_frame,text=config["dataset_names"]["{name_of_dataset}"]+":",font=f"Helvetica {self.text_size} bold")'
             )
@@ -259,13 +258,14 @@ class ClericalApp:
         # ---------------------
         # Create column header widgets
         self.datasource_label = ttk.Label(
-            self.record_frame, text="Datasource", font=f"Helvetica {self.text_size} bold"
+            self.record_frame,
+            text="Datasource",
+            font=f"Helvetica {self.text_size} bold",
         )
         self.datasource_label.grid(row=1, column=0, columnspan=1, padx=10, pady=3)
 
         # Create column header labels and place all them on row 1
         for column_title in config.options("column_headers_and_order"):
-
             # Remove spaces from the user input and split them into different components
 
             col_header = (
@@ -305,7 +305,6 @@ class ClericalApp:
         dataset_names_to_highlight = []
         # collect the dataset names entered
         for dataset_names in config.options("dataset_names"):
-
             dataset_names_to_highlight.append(config["dataset_names"][dataset_names])
 
         # remove the first dataset as this is the highlighted one.
@@ -319,7 +318,6 @@ class ClericalApp:
         i = 0
 
         for columnfile_title in config.options("columnfile_info_and_order"):
-
             # Remove spaces from the user input and split them into different components
             col_header = (
                 config["columnfile_info_and_order"][columnfile_title]
@@ -342,7 +340,6 @@ class ClericalApp:
 
             # cycle through each dataset name to know which row to put the label on
             for name in name_of_datasets:
-
                 if col_header[1] == name:
                     # Colheader has matched
 
@@ -353,19 +350,15 @@ class ClericalApp:
 
                     # check whether it is a dataset row to highlight or not
                     if col_header[1] in dataset_names_to_highlight:
-
                         if col_header[2] in self.datarows_to_highlight:
-
                             self.datarows_to_highlight[col_header[2]].append(
                                 col_header[0]
                             )
 
                         else:
-
                             self.datarows_to_highlight[col_header[2]] = [col_header[0]]
 
                     else:
-
                         self.datarow_to_compare[col_header[2]] = [col_header[0]]
                     # break the for loop if name has been resolved
                     break
@@ -395,7 +388,6 @@ class ClericalApp:
         # =====  record_frame
 
     def draw_button_frame(self):
-
         # Match/Non-Match buttons
         self.match_button = tkinter.Button(
             self.button_frame,
@@ -416,7 +408,6 @@ class ClericalApp:
 
         # Add in the comment widget based on config option
         if int(config["custom_settings"]["commentbox"]):
-
             # create comments column if one doesn't exist
             if "Comments" not in working_file:
                 working_file["Comments"] = ""
@@ -451,7 +442,6 @@ class ClericalApp:
         # =====  toolFrame
 
     def draw_tool_frame(self):
-
         # Create labels for tools bar
         self.separator_tf_1 = ttk.Separator(self.toolFrame, orient="vertical")
         self.separator_tf_1.grid(
@@ -463,7 +453,7 @@ class ClericalApp:
         )
 
         # Back button
-        back_symbol = "\u23CE"
+        back_symbol = "\u23ce"
         self.back_button = tkinter.Button(
             self.button_frame,
             text=f"Back {back_symbol}",
@@ -480,8 +470,8 @@ class ClericalApp:
         )
         self.showhidediff.grid(row=0, column=2, columnspan=1, padx=5, pady=5)
         # Change text size buttons
-        increase_text_size_symbol = "\U0001F5DA"
-        decrease_text_size_symbol = "\U0001F5DB"
+        increase_text_size_symbol = "\U0001f5da"
+        decrease_text_size_symbol = "\U0001f5db"
 
         self.text_smaller_button = tkinter.Button(
             self.toolFrame,
@@ -502,7 +492,7 @@ class ClericalApp:
         )
         self.text_bigger_button.grid(row=0, column=5, sticky="w", pady=5, padx=2)
         # Make text bld button
-        bold_symbol = "\U0001D5D5"
+        bold_symbol = "\U0001d5d5"
         self.bold_button = tkinter.Button(
             self.toolFrame,
             text=f"{bold_symbol}",
@@ -513,7 +503,7 @@ class ClericalApp:
         )
         self.bold_button.grid(row=0, column=6, sticky="w", pady=5)
         # Save and close button
-        save_symbol = "\U0001F4BE"
+        save_symbol = "\U0001f4be"
         self.save_button = tkinter.Button(
             self.toolFrame,
             text=f"Save and Close {save_symbol}",
@@ -523,7 +513,6 @@ class ClericalApp:
         self.save_button.grid(row=0, column=8, columnspan=1, sticky="e", padx=5, pady=5)
 
     def show_hide_differences(self):
-
         if not self.show_hide_diff:
             # make show show diff variable 1 so that next time this function is
             # called it will remove tags
@@ -534,10 +523,8 @@ class ClericalApp:
 
             # for key in datarows that need to be highlighted
             for key in self.datarows_to_highlight:
-
                 # For the values in datarows that need to be highlighted
                 for vals in self.datarows_to_highlight[key]:
-
                     # some empty variables to control the flow of the difference indicator
                     char_consistent = []
                     container = []
@@ -553,10 +540,8 @@ class ClericalApp:
                         ],
                         working_file[f"{vals}"][self.record_index],
                     ):
-
                         # if the comparison char is not the same as the highlighter char
                         if char_comparison != char_highlight:
-
                             # if this is the first diff then remove them
                             if string_start:
                                 # start the container values
@@ -574,13 +559,11 @@ class ClericalApp:
                                 - 1,
                                 len(working_file[f"{vals}"][self.record_index]) - 1,
                             ):
-
                                 container.append(count + 1)
                                 # pass this start and end values to the overall container
                                 char_consistent.append(container)
 
                         else:
-
                             # if string end == string start
                             if string_end == string_start:
                                 # add it to the container to complete the char number
@@ -601,7 +584,6 @@ class ClericalApp:
                     if len(
                         working_file[self.datarow_to_compare[key][0]][self.record_index]
                     ) < len(working_file[f"{vals}"][self.record_index]):
-
                         char_consistent.append(
                             [
                                 len(
@@ -617,15 +599,12 @@ class ClericalApp:
 
                     # for each tag number in char consistent create the tag and save the tag name information
                     for tag_adder in range(len(char_consistent)):
-
                         if vals in self.difference_col_label_names:
-
                             self.difference_col_label_names[vals].append(
                                 f"{vals}_diff{str(tag_adder)}"
                             )
 
                         else:
-
                             self.difference_col_label_names[vals] = [
                                 f"{vals}_diff{str(tag_adder)}"
                             ]
@@ -643,9 +622,7 @@ class ClericalApp:
             self.show_hide_diff = 0
             # for all variable labels with differences - remove the tag labels
             for key in self.difference_col_label_names:
-
                 for vals in self.difference_col_label_names[key]:
-
                     exec(f"self.{key}.tag_remove('{vals}','1.0','end')")
 
     def make_text_bold(self):
@@ -666,7 +643,6 @@ class ClericalApp:
         self.update_gui()
 
     def get_starting_index(self):
-
         """
         This function finds the first row in column index [-1] that has a value not equal to zero or 1
         and returns the index number
@@ -688,7 +664,6 @@ class ClericalApp:
 
         # Choose which one to cycle through
         if int(config["custom_settings"]["commentbox"]):
-
             for i in index_values:
                 if working_file.iloc[i, -2] != 1 and working_file.iloc[i, -2] != 0:
                     return i
@@ -698,7 +673,6 @@ class ClericalApp:
                     pass
 
         else:
-
             for i in index_values:
                 if working_file.iloc[i, -1] != 1 and working_file.iloc[i, -1] != 0:
                     return i
@@ -723,21 +697,17 @@ class ClericalApp:
         if self.check_matching_done() == 0:
             # configure the non-iterable labels
             for non_iter_columns in self.non_iterated_labels:
-
                 exec(
                     f'self.{non_iter_columns}.config(font=f"Helvetica {self.text_size} bold")'
                 )
 
             for widget in self.record_frame.winfo_children():
-
                 widget.destroy()
 
             for widget in self.toolFrame.winfo_children():
-
                 widget.destroy()
 
             for widget in self.button_frame.winfo_children():
-
                 widget.destroy()
             self.draw_record_frame()
             self.draw_button_frame()
@@ -832,7 +802,6 @@ class ClericalApp:
 
             return 1
         else:
-
             return 0
 
     def save_and_close(self):
@@ -923,7 +892,6 @@ class ClericalApp:
             if len(working_file) % self.records_per_checkpoint == 0:
                 os.rename(self.filename_done, self.filename_old)
         elif self.record_index > 0:  # If they are part way through matching
-
             # update the record_index
             self.record_index = self.record_index - 1
             # update the gui
@@ -962,8 +930,9 @@ class ClericalApp:
 
         """
         # if they click yes
-        if tkinter.messagebox.askyesno("Exit", "Are you sure you want to exit WITHOUT saving?"):
-
+        if tkinter.messagebox.askyesno(
+            "Exit", "Are you sure you want to exit WITHOUT saving?"
+        ):
             # check if this is the first time they are accessing it
             if not self.matching_previously_began & self.checkpointcounter != 0:
                 # then rename the file removing their intial and 'inProgress' tag
@@ -977,7 +946,6 @@ class ClericalApp:
 
 
 if __name__ == "__main__":
-
     # ------
     # Step 1:
     # Load config file and get the file directory
@@ -1016,10 +984,8 @@ if __name__ == "__main__":
 
     # Check if the user running it has selected this file before (this means they have done some of the matching already and are coming back to it)
     if "inProgress" in intro.fileselect.split("/")[-1]:
-
         # If it is the same user
         if user in intro.fileselect.split("/")[-1]:
-
             # Dont rename the file
             renamed_file = intro.fileselect
 
@@ -1027,7 +993,6 @@ if __name__ == "__main__":
             filepath_done = f"{'/'.join(renamed_file.split('/')[:-1])}/{renamed_file.split('/')[-1][0:-15]}_DONE.{renamed_file.split('/')[-1].split('.')[-1]}"
 
         else:
-
             # Rename the file to contain the additional user
             renamed_file = f"{'/'.join(intro.fileselect.split('/')[:-1])}/{intro.fileselect.split('/')[-1].split('.')[0][0:-11]}_{user}_inProgress.{intro.fileselect.split('/')[-1].split('.')[-1]}"
             os.rename(rf"{intro.fileselect}", rf"{renamed_file}")
@@ -1037,7 +1002,6 @@ if __name__ == "__main__":
 
     # If a user is picking this file again and its done
     elif "DONE" in intro.fileselect.split("/")[-1]:
-
         # If it is the same user
         if user in intro.fileselect.split("/")[-1]:
             # dont change filepath done - keep it as it is
