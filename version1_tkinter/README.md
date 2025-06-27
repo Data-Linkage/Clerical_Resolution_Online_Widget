@@ -3,7 +3,7 @@
 Here you will find everything you need to get started with the tkinter version
 of CROW.
 
-The docs folder contains guidance on the setup and use of CROW1.
+The `docs` folder contains guidance on the setup and use of CROW1.
 
 ## Utils
 
