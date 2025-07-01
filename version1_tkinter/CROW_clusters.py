@@ -126,6 +126,11 @@ class ClericalApp:
         height = int(self.root.winfo_screenheight() * 0.5)
         self.root.geometry(f"{width}x{height}")
 
+        # Configure the grid layout to make sure the record frame can
+        # expand to fill the window.
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
+
         # Create the separate frames
         # 1 - Tool Frame
         self.tool_frame = ttk.LabelFrame(root, text="Tools:")
@@ -133,13 +138,55 @@ class ClericalApp:
             row=0, column=0, columnspan=1, sticky="ew", padx=10, pady=10
         )
 
-        # 2 - Record Frame
-        self.record_frame = ttk.LabelFrame(root, text="Current Record")
-        self.record_frame.grid(row=1, column=0, columnspan=1, padx=10, pady=3)
+        # 2 - Record Frame: Create a container to hold the scrollable
+        # canvas that will contain the record frame.
+        container = ttk.Labelframe(root, text="Records")
+        container.grid(row=1, column=0, padx=10, sticky="nsew")
+
+        # Create the canvas and scrollbars. Attach the scrollbar
+        # functionality to the canvas.
+        canvas = tkinter.Canvas(container)
+        vertical_scrollbar = ttk.Scrollbar(
+            container, orient="vertical", command=canvas.yview
+        )
+        horizontal_scrollbar = ttk.Scrollbar(
+            container, orient="horizontal", command=canvas.xview
+        )
+        canvas.configure(
+            yscrollcommand=vertical_scrollbar.set,
+            xscrollcommand=horizontal_scrollbar.set,
+        )
+
+        # Bind the mousewheel to the scrolling.
+        self.root.bind_all(
+            "<MouseWheel>",
+            lambda e: canvas.yview_scroll(-1 * int(e.delta / 120), "units"),
+        )
+        self.root.bind_all(
+            "<Shift-MouseWheel>",
+            lambda e: canvas.xview_scroll(-1 * int(e.delta / 120), "units"),
+        )
+
+        # Add the scrollbars and canvas to the window.
+        vertical_scrollbar.pack(side="right", fill="y")
+        horizontal_scrollbar.pack(side="bottom", fill="x")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        # Create the record frame.
+        self.record_frame = ttk.Frame(canvas)
+
+        # Place the record frame in the canvas.
+        canvas.create_window((0, 0), window=self.record_frame, anchor="nw")
+
+        # Make sure the scrollbars update whenever the record frame
+        # grows beyond the viewport.
+        self.record_frame.bind(
+            "<Configure>", lambda _: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
 
         # 2 - Button Frame
-        self.button_frame = ttk.LabelFrame(root)
-        self.button_frame.grid(row=2, column=0, columnspan=1, padx=10, pady=3)
+        self.button_frame = ttk.Frame(root)
+        self.button_frame.grid(row=2, column=0, columnspan=1, padx=10, pady=10)
 
         # list of record IDs that have not been matched yet
         self.not_matched_yet = []
