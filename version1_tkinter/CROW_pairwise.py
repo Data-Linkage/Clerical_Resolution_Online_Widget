@@ -237,20 +237,6 @@ class ClericalApp:
         self.show_hide_diff = 0
         self.difference_col_label_names = {}
 
-        # Create the record_index matches
-        self.counter_matches = ttk.Label(
-            self.record_frame,
-            text=f"{self.record_index + 1} / {self.num_records} Records",
-            font="Helvetica 9",
-        )
-        self.counter_matches.grid(
-            row=0,
-            column=len(config.options("column_headers_and_order")),
-            columnspan=1,
-            padx=10,
-            sticky="e",
-        )
-
         # Create empty lists of labels
         self.non_iterated_labels = []
         self.iterated_labels = []
@@ -264,19 +250,6 @@ class ClericalApp:
     def draw_record_frame(self):
         row_adder = 0
         separator_adder = 2
-
-        self.counter_matches = ttk.Label(
-            self.record_frame,
-            text=f"{self.record_index + 1} / {self.num_records} Records",
-            font="Helvetica 9",
-        )
-        self.counter_matches.grid(
-            row=0,
-            column=len(config.options("column_headers_and_order")),
-            columnspan=1,
-            padx=10,
-            sticky="e",
-        )
 
         for iterator, name_of_dataset in enumerate(config.options("dataset_names")):
             exec(
@@ -489,6 +462,10 @@ class ClericalApp:
         # =====  toolFrame
 
     def draw_tool_frame(self):
+        # Configure the grid so the record counter can move to the right
+        # of the tool frame.
+        self.toolFrame.grid_columnconfigure(9, weight=1)
+
         # Create labels for tools bar
         self.separator_tf_1 = ttk.Separator(self.toolFrame, orient="vertical")
         self.separator_tf_1.grid(
@@ -558,6 +535,13 @@ class ClericalApp:
             command=lambda: self.save_and_close(),
         )
         self.save_button.grid(row=0, column=8, columnspan=1, sticky="e", padx=5, pady=5)
+
+        # Current record pair counter.
+        count_msg = f"Record pair: {self.record_index + 1} / {self.num_records}"
+        self.counter_matches = ttk.Label(
+            self.toolFrame, text=count_msg, font=f"Helvetica {self.text_size}"
+        )
+        self.counter_matches.grid(row=0, column=9, padx=10, sticky="e")
 
     def show_hide_differences(self):
         if not self.show_hide_diff:
