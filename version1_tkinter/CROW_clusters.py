@@ -302,9 +302,7 @@ class ClericalApp:
             command=lambda: self.update_index(1),
             bg="DarkSeaGreen1",
         )
-        self.match_button.grid(
-            row=self.len_current_cluster, column=1, columnspan=1, padx=10, pady=10
-        )
+        self.match_button.grid(row=0, column=0, columnspan=1, padx=15, pady=10)
         self.non_match_button = tkinter.Button(
             self.button_frame,
             text="No more matches",
@@ -312,18 +310,15 @@ class ClericalApp:
             command=lambda: self.update_index(0),
             bg="light salmon",
         )
-        self.non_match_button.grid(
-            row=self.len_current_cluster, column=2, columnspan=1, padx=10, pady=10
-        )
+        self.non_match_button.grid(row=0, column=1, columnspan=1, padx=15, pady=10)
+
         self.back_button = tkinter.Button(
             self.button_frame,
             text="Back",
             font=f"Helvetica {self.text_size}",
             command=lambda: self.go_back(),
         )
-        self.back_button.grid(
-            row=self.len_current_cluster, column=3, columnspan=1, padx=10, pady=10
-        )
+        self.back_button.grid(row=0, column=2, columnspan=1, padx=15, pady=10)
 
         # disable back button if no previous clusters exist
         if self.cluster_index == 0 and self.current_num_cluster_decisions() == 0:
@@ -363,7 +358,30 @@ class ClericalApp:
                 ).split(",")
 
     def draw_tool_frame(self):
-        # =====  tool_frame
+        # Configure the grid so the record counter can move to the right
+        # of the tool frame.
+        self.tool_frame.grid_columnconfigure(9, weight=1)
+
+        # Create separators for tool frame buttons.
+        self.separator_tf_1 = ttk.Separator(self.tool_frame, orient="vertical")
+        self.separator_tf_1.grid(
+            row=0, column=3, rowspan=1, sticky="ns", padx=10, pady=5
+        )
+        self.separator_tf_2 = ttk.Separator(self.tool_frame, orient="vertical")
+        self.separator_tf_2.grid(
+            row=0, column=7, rowspan=1, sticky="ns", padx=10, pady=5
+        )
+
+        # Highlighter.
+        self.highlighter_button = tkinter.Checkbutton(
+            self.tool_frame,
+            indicatoron=False,
+            selectcolor="white",
+            text="show/hide differences",
+            font=f"Helvetica {self.text_size}",
+            command=lambda: self.show_hide_differences(self.show_hide_diff),
+        )
+        self.highlighter_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.text_smaller_button = tkinter.Button(
             self.tool_frame,
@@ -373,7 +391,7 @@ class ClericalApp:
             width=3,
             command=lambda: self.change_text_size(0),
         )
-        self.text_smaller_button.pack(side=tkinter.LEFT, padx=5)
+        self.text_smaller_button.grid(row=0, column=4, sticky="e", pady=5)
 
         self.text_bigger_button = tkinter.Button(
             self.tool_frame,
@@ -383,9 +401,9 @@ class ClericalApp:
             width=3,
             command=lambda: self.change_text_size(1),
         )
-        self.text_bigger_button.pack(side=tkinter.LEFT, padx=5)
+        self.text_bigger_button.grid(row=0, column=5, sticky="w", pady=5, padx=2)
 
-        # Make text bld button
+        # Make text bold button.
         self.bold_button = tkinter.Button(
             self.tool_frame,
             text="B",
@@ -394,53 +412,38 @@ class ClericalApp:
             width=3,
             command=lambda: self.make_text_bold(config, working_file),
         )
-        self.bold_button.pack(side=tkinter.LEFT, padx=5)
+        self.bold_button.grid(row=0, column=6, sticky="w", pady=5)
 
-        # Save and close button
+        # Save and close button.
         self.save_button = tkinter.Button(
             self.tool_frame,
             text="Save and Close",
             font=f"Helvetica {self.text_size}",
             command=lambda: self.save_and_close(),
         )
-        self.save_button.pack(side=tkinter.RIGHT, padx=5)
+        self.save_button.grid(row=0, column=8, sticky="e", padx=5, pady=5)
 
-        # highlighter
-        self.highlighter_button = tkinter.Checkbutton(
-            self.tool_frame,
-            indicatoron=0,
-            selectcolor="white",
-            text="show/hide differences",
-            font=f"Helvetica {self.text_size}",
-            command=lambda: self.show_hide_differences(self.show_hide_diff),
-        )
-        self.highlighter_button.pack(side=tkinter.LEFT, padx=5)
-
-    def draw_recordframe(self, config, working_file):
-        # try to calculate and display remaining # clusters for matching
+        # Current cluster counter.
+        count_msg = f"Cluster: {self.cluster_index + 1} / {self.num_clusters}"
+        # Try to calculate and display remaining # clusters for
+        # matching.
         try:
             self.counter_matches = ttk.Label(
-                self.record_frame,
-                text=f"{self.cluster_index + 1} / {self.num_clusters} Clusters",
-                font=f"Helvetica {self.text_size}",
+                self.tool_frame, text=count_msg, font=f"Helvetica {self.text_size}"
             )
-            self.counter_matches.grid(
-                row=0,
-                column=len(config.options("column_headers_and_order")),
-                columnspan=1,
-                padx=10,
-                sticky="e",
-            )
+            self.counter_matches.grid(row=0, column=9, padx=10, sticky="e")
 
-        # except when matching is completed
+        # Except when matching is completed.
         except TypeError:
             tkinter.messagebox.showinfo(
                 title="Matching completed",
                 message="Please select a different file to clerically match",
             )
 
-            # close down the application
+            # Close down the application.
             root.destroy()
+
+    def draw_recordframe(self, config, working_file):
         num_match_cols = 0
         # Create column header labels and place all them on row 1, column n+1
         for n, column_title in enumerate(config.options("column_headers_and_order")):
