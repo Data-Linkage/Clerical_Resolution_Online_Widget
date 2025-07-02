@@ -122,48 +122,45 @@ class ClericalApp:
 
         # 2 - Record Frame: Create a container to hold the scrollable
         # canvas that will contain the record frame.
-        container = ttk.Labelframe(root, text="Records")
-        container.grid(row=1, column=0, padx=10, sticky="nsew")
+        self.record_container = ttk.Labelframe(root, text="Records")
+        self.record_container.grid(row=1, column=0, padx=10, sticky="nsew")
 
         # Create the canvas and scrollbars. Attach the scrollbar
         # functionality to the canvas.
-        canvas = tkinter.Canvas(container)
-        vertical_scrollbar = ttk.Scrollbar(
-            container, orient="vertical", command=canvas.yview
+        self.canvas = tkinter.Canvas(self.record_container)
+        self.vertical_scrollbar = ttk.Scrollbar(
+            self.record_container, orient="vertical", command=self.canvas.yview
         )
-        horizontal_scrollbar = ttk.Scrollbar(
-            container, orient="horizontal", command=canvas.xview
+        self.horizontal_scrollbar = ttk.Scrollbar(
+            self.record_container, orient="horizontal", command=self.canvas.xview
         )
-        canvas.configure(
-            yscrollcommand=vertical_scrollbar.set,
-            xscrollcommand=horizontal_scrollbar.set,
-        )
-
-        # Bind the mousewheel to the scrolling.
-        self.root.bind_all(
-            "<MouseWheel>",
-            lambda e: canvas.yview_scroll(-1 * int(e.delta / 120), "units"),
-        )
-        self.root.bind_all(
-            "<Shift-MouseWheel>",
-            lambda e: canvas.xview_scroll(-1 * int(e.delta / 120), "units"),
+        self.canvas.configure(
+            yscrollcommand=self.vertical_scrollbar.set,
+            xscrollcommand=self.horizontal_scrollbar.set,
         )
 
         # Add the scrollbars and canvas to the window.
-        vertical_scrollbar.pack(side="right", fill="y")
-        horizontal_scrollbar.pack(side="bottom", fill="x")
-        canvas.pack(side="left", fill="both", expand=True)
+        self.vertical_scrollbar.pack(side="right", fill="y")
+        self.horizontal_scrollbar.pack(side="bottom", fill="x")
+        self.canvas.pack(side="left", fill="both", expand=True)
 
-        # Create the record frame.
-        self.record_frame = ttk.Frame(canvas)
-
-        # Place the record frame in the canvas.
-        canvas.create_window((0, 0), window=self.record_frame, anchor="nw")
+        # Create the record frame.Place the record frame in the canvas.
+        self.record_frame = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.record_frame, anchor="nw")
 
         # Make sure the scrollbars update whenever the record frame
         # grows beyond the viewport.
-        self.record_frame.bind(
-            "<Configure>", lambda _: canvas.configure(scrollregion=canvas.bbox("all"))
+        self.record_frame.bind("<Configure>", self._on_record_frame_configure)
+
+        # Bind the mousewheel events for vertical and horizontal
+        # scrolling.
+        self.canvas.bind_all(
+            "<MouseWheel>",
+            lambda e: self.canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"),
+        )
+        self.canvas.bind_all(
+            "<Shift-MouseWheel>",
+            lambda e: self.canvas.xview_scroll(int(-1 * (e.delta / 120)), "units"),
         )
 
         # 3 -Button Frame
@@ -246,6 +243,13 @@ class ClericalApp:
         self.draw_tool_frame()
         # ---------------------
         # Create dataset name widgets and separators between
+
+    def _on_record_frame_configure(self, event: tkinter.Event) -> None:
+        """Ensure scrollregion is as tall as the canvas."""
+        x1, y1, x2, y2 = self.canvas.bbox("all")
+        canvas_height = self.canvas.winfo_height()
+        bottom = max(y2, canvas_height)
+        self.canvas.configure(scrollregion=(x1, y1, x2, bottom))
 
     def draw_record_frame(self):
         row_adder = 0
