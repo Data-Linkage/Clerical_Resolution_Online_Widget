@@ -82,7 +82,7 @@ Before you begin, you will need to choose between the clusters and pairwise
 versions of CROW1. Your choice will depend on the format of the data that you
 will be clerically reviewing.
 
-> [!WARNING]
+> [!IMPORTANT]
 >
 > Make sure your chosen script and its corresponding configuration file are in
 > the same directory as one another. Otherwise the script will not be able to
