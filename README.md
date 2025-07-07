@@ -1,13 +1,13 @@
 # Clerical Resolution Online Widget (CROW)
 
-The Clerical Resolution Online Widget (CROW), is an open-source project designed
+The Clerical Resolution Online Widget (CROW) is an open-source project designed
 to facilitate the clerical review of linked data.
 
 - [Getting Started](#getting-started)
   - [Documentation](#documentation)
 - [Version Differences](#version-differences)
 - [Contributing](#contributing)
-- [Help and Feedback](#help-and-feedback)
+- [Contact Us](#contact-us)
 - [Acknowledgments](#acknowledgments)
 - [License](#license)
 
@@ -25,30 +25,32 @@ There are currently two types of CROW:
    cd Clerical_Resolution_Online_Widget
    ```
 
-2. Decide which version to run (see [Version
-   Differences](#version-differences)):
+2. Decide which version to run (see [Version Differences](#version-differences))
+   and consult the corresponding documentation:
 
    - For desktop or external users, see [CROW1][crow1].
-   - For internal ONS use, see CROW1 or [CROW2][crow2].
+   - For internal ONS use, see [CROW1][crow1] (desktop) or [CROW2][crow2] (CDP).
 
 ### Documentation
 
-The most up-to-date documentation can be found in the corresponding version
-folders for each version. There you will be able to find instructions for
-setting CROW up for your project as well as instructions you can give to your
-clerical matchers on how to run CROW once it is set up.
+The most up-to-date documentation can be found in the folders corresponding to
+each version. There you will find instructions for setting CROW up for your
+project as well as instructions you can give to your clerical matchers on how to
+run CROW once it is set up.
 
 ## Version Differences
 
 The following should help you decide which version of CROW to use:
 
 - CROW1 is a desktop application, whereas CROW2 is integrated with the Cloudera
-  Data Platform and can access files stored in S3.
+  Data Platform (CDP) and can access files stored in S3 buckets.
 - CROW1 can only read CSV files, whereas CROW2 can only read parquet files.
 - CROW1 consists of two separate scripts - `CROW_pairwise.py` and
   `CROW_clusters.py` - for if your data contains pairs or clusters of records.
   CROW2 is a single script (`flask_new_flow.py`) that treats all data as
-  clustered.
+  clustered. If you want to review pairwise data with CROW2 your data should be
+  in wide-file format and should still contain a cluster ID column (with only a
+  pair of records in each cluster).
 - CROW2 has various accessibility (based on [Web Content Accessibility
   Guidelines (WCAG) 2.0][accessibility-guidelines]) and feature improvements
   over CROW1, including:
@@ -62,11 +64,12 @@ The following should help you decide which version of CROW to use:
 Contributions are welcome but please read [CONTRIBUTING.md][crow-contributing]
 before submitting any changes.
 
-## Help and Feedback
+## Contact Us
 
 If you have additional questions or problems, please [check the
 issues][crow-issues] or [open a new issue][crow-new-issue] according to the
-[contributing guidelines][crow-contributing], or [contact us directly][email].
+[contributing guidelines][crow-contributing], or [contact us directly via
+email][email].
 
 ## Acknowledgments
 
