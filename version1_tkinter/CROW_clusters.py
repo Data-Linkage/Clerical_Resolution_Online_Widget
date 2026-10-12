@@ -193,8 +193,8 @@ class ClericalApp:
             self.matching_previously_began = 0
 
         # Convert all columns to strings and replace missing values with blanks.
-        # # This also allows saved in-progress files to be reopened when Match or
-        # # Comments contains blank values.
+        # This also allows saved in-progress files to be reopened when Match or
+        # Comments contains blank values.
         for col_header in working_file.columns:
             working_file[col_header] = (
                 working_file[col_header].astype("string").fillna("")
